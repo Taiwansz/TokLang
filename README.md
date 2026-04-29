@@ -1,178 +1,296 @@
 <p align="center">
-  <strong>Tok</strong>Lang
-</p>
-
-<h3 align="center">Comprima. Comunique. Economize.</h3>
-
-<p align="center">
-  Middleware inteligente de compressão de prompts para IA.<br>
-  Escreva naturalmente, economize até <strong>85% em tokens</strong>.
+  <img src="assets/banner.svg" alt="TokLang Banner" width="100%"/>
 </p>
 
 <p align="center">
-  <a href="#-sobre">Sobre</a> •
-  <a href="#-demo">Demo</a> •
-  <a href="#-como-executar">Executar</a> •
-  <a href="#-estrutura">Estrutura</a> •
-  <a href="#-tecnologias">Tecnologias</a> •
-  <a href="#-roadmap">Roadmap</a> •
-  <a href="#-licença">Licença</a>
+  <img src="https://img.shields.io/badge/status-beta-00ff88?style=flat-square&labelColor=0d1117" alt="Status"/>
+  <img src="https://img.shields.io/badge/tokens_saved-85%25-00ff88?style=flat-square&labelColor=0d1117" alt="Savings"/>
+  <img src="https://img.shields.io/badge/dependencies-zero-00ff88?style=flat-square&labelColor=0d1117" alt="Dependencies"/>
+  <img src="https://img.shields.io/badge/license-MIT-666?style=flat-square&labelColor=0d1117" alt="License"/>
 </p>
 
----
+<p align="center">
+  <code>prompt natural → motor TokLang → até 85% menos tokens → mesma qualidade</code>
+</p>
 
-## 💡 Sobre
-
-**TokLang** é um motor de compressão semântica que atua como intermediário invisível entre o usuário e qualquer modelo de linguagem (GPT, Claude, Gemini). Ele converte prompts em linguagem natural para uma notação comprimida proprietária, reduzindo drasticamente o consumo de tokens — sem alterar o comportamento ou qualidade da resposta.
-
-### Como funciona
-
-```
-PROMPT NATURAL                          TOKLANG COMPRIMIDO
-─────────────────────────────────────   ───────────────────────────────
-"Bom dia! Por favor faça um código      cr $py @streamlit;
-python que use streamlit como            calc velocidade;
-interface para calcular a velocidade     in[dist,t,a]; ui+
-de um objeto quando eu colocar as
-grandezas"
-                                        34 tokens → 8 tokens (−76%)
-```
-
-O pipeline completo:
-
-```
-1. INPUT    → prompt natural do usuário
-2. COMPRESS → motor TokLang → notação comprimida
-3. EXPAND   → expansor → linguagem natural limpa
-4. OUTPUT   → enviado ao modelo de destino
-```
-
-> O usuário nunca vê ou toca na notação TokLang. Ela opera completamente em segundo plano.
+<br>
 
 ---
 
-## 🎬 Demo
+<br>
 
-A aplicação inclui um compressor funcional com interface completa:
+## O que é TokLang?
 
-| Página | Rota | Descrição |
-|--------|------|-----------|
-| **Home** | `#home` | Landing page com hero, estatísticas e FAQ |
-| **App** | `#app` | Compressor de prompts com pipeline visual |
-| **Docs** | `#docs` | Documentação completa da gramática TokLang |
-| **Preços** | `#pricing` | Planos, comparação e FAQ de preços |
-| **Login** | `#login` | Autenticação (modo demo) |
-| **Signup** | `#signup` | Criação de conta (modo demo) |
-| **Dashboard** | `#dashboard` | Painel com métricas, histórico e API keys |
+TokLang é um **middleware de compressão semântica** que atua como intermediário invisível entre o usuário e qualquer modelo de linguagem — GPT, Claude, Gemini. Você escreve naturalmente; ele comprime automaticamente.
 
-> As rotas de autenticação e dashboard operam em **modo demonstração** (localStorage). Prontas para integração com backend real.
+> O usuário nunca vê ou toca na notação comprimida. Ela opera completamente em segundo plano.
+
+<br>
+
+<p align="center">
+  <img src="assets/preview.png" alt="TokLang Preview" width="90%" style="border-radius: 12px;"/>
+</p>
+
+<br>
 
 ---
 
-## 🚀 Como Executar
+<br>
 
-### Pré-requisito
+## Como funciona
 
-- **Python 3.x** (para o servidor HTTP local)
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                                                                     │
+│   ANTES (34 tokens)                                                 │
+│   "Bom dia! Por favor faça um código python que use streamlit       │
+│    como interface para calcular a velocidade de um objeto"          │
+│                                                                     │
+│                          ┌──────────┐                               │
+│                          │ TokLang  │                               │
+│                          │  Engine  │                               │
+│                          └────┬─────┘                               │
+│                               │                                     │
+│                               ▼                                     │
+│                                                                     │
+│   DEPOIS (8 tokens)                                                 │
+│   cr $py @streamlit; calc velocidade; in[dist,t,a]; ui+             │
+│                                                                     │
+│   ─────────────────────────────────────────────────────             │
+│   economia: 76% │ $0.00008 economizado por chamada                  │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+### Pipeline completo
+
+```
+  ① INPUT          ② COMPRESS         ③ EXPAND           ④ OUTPUT
+╭──────────╮    ╭──────────────╮    ╭──────────────╮    ╭──────────╮
+│  Prompt  │ ─→ │   Motor      │ ─→ │  Expansor    │ ─→ │  Modelo  │
+│  natural │    │   TokLang    │    │  → NL limpo  │    │  de IA   │
+╰──────────╯    ╰──────────────╯    ╰──────────────╯    ╰──────────╯
+```
+
+<br>
+
+---
+
+<br>
+
+## Gramática TokLang
+
+```
+AÇÃO  $LANG  @FRAMEWORK  #ESTRUTURA;  tarefa;  in[params];  modificadores
+```
+
+<table>
+  <tr>
+    <td>
+
+**Ações**
+| Token | Significado |
+|-------|------------|
+| `cr` | Criar |
+| `fix` | Corrigir bug |
+| `ex` | Explicar |
+| `rf` | Refatorar |
+| `op` | Otimizar |
+| `tst` | Testes |
+| `doc` | Documentar |
+| `cv` | Converter |
+
+</td>
+<td>
+
+**Linguagens** `$`
+| Token | Linguagem |
+|-------|-----------|
+| `$py` | Python |
+| `$js` | JavaScript |
+| `$ts` | TypeScript |
+| `$go` | Go |
+| `$rs` | Rust |
+| `$sql` | SQL |
+| `$sh` | Shell |
+| `$java` | Java |
+
+</td>
+<td>
+
+**Frameworks** `@`
+| Token | Framework |
+|-------|-----------|
+| `@streamlit` | Streamlit |
+| `@fastapi` | FastAPI |
+| `@react` | React |
+| `@next` | Next.js |
+| `@express` | Express |
+| `@prisma` | Prisma |
+| `@pandas` | Pandas |
+| `@jest` | Jest |
+
+</td>
+  </tr>
+</table>
+
+**Modificadores:** `ui+` visual bonito · `prd` produção · `cm` comentários · `typ` tipagem · `async` assíncrono · `*` máxima qualidade
+
+<br>
+
+---
+
+<br>
+
+## Exemplos reais
+
+```diff
+# Exemplo 1 — App Python com UI
+- "Bom dia! Por favor faça um código python que use streamlit como interface
+-  para ficar bonitinho podendo calcular a velocidade de um objeto"
++ cr $py @streamlit; calc velocidade; in[dist,t,a]; ui+
+# 34 tokens → 8 tokens (−76%)
+
+# Exemplo 2 — API REST completa
+- "Preciso de uma API REST completa em Node.js com Express para gerenciar
+-  usuários, com operações CRUD. Os campos são nome, email e role.
+-  Trate os erros 404 e 422. Código pronto para produção."
++ cr $js @express; #api CRUD users; in[name,email,role]; err[404,422]; prd
+# 47 tokens → 14 tokens (−71%)
+
+# Exemplo 3 — Explicação didática
+- "Você pode me explicar o conceito de closures em JavaScript de forma
+-  bem didática? Seria ótimo ter exemplos práticos também"
++ ex $js; closures; dk cm
+# 28 tokens → 5 tokens (−82%)
+```
+
+<br>
+
+---
+
+<br>
+
+## Executar localmente
 
 ```bash
-python --version   # Verificar se está instalado
-```
-
-### Execução
-
-```bash
-# 1. Clone o repositório
+# Clonar
 git clone https://github.com/Taiwansz/TokLang.git
 cd TokLang
 
-# 2. Inicie o servidor local
+# Iniciar servidor local
 python -m http.server 5500
 
-# 3. Acesse no navegador
-# http://localhost:5500
+# Abrir no navegador → http://localhost:5500
 ```
 
-Para encerrar o servidor: `Ctrl + C`
+> **Por que um servidor?** O projeto usa `fetch()` para carregar páginas como partials. Navegadores bloqueiam `fetch()` em `file://` por CORS.
 
-### Porta alternativa
-
-```bash
-python -m http.server 8080    # Qualquer porta disponível
-```
-
-### Por que preciso de um servidor?
-
-O projeto usa `fetch()` para carregar páginas HTML como partials. Navegadores bloqueiam requisições `fetch()` em `file://` por política de segurança (CORS). O servidor HTTP local resolve isso sem dependências externas.
+<br>
 
 ---
 
-## 📁 Estrutura
+<br>
+
+## Estrutura do projeto
 
 ```
 TokLang/
-├── index.html              ← Shell SPA (carrega partials via fetch)
-├── toklang.html            ← Versão monolítica original (backup)
 │
-├── css/                    ← Estilos organizados por responsabilidade
-│   ├── variables.css       ← Design tokens (cores, fontes, espaçamentos)
-│   ├── animations.css      ← Keyframes e animações de scroll reveal
-│   ├── layout.css          ← Nav, footer, page system, backgrounds
-│   ├── components.css      ← Badges, pills, buttons, toasts
-│   ├── responsive.css      ← Media queries (mobile / tablet)
-│   └── pages/
-│       ├── home.css        ← Hero, stats, how-it-works, FAQ
-│       ├── app.css         ← Compressor, pipeline, sidebar
-│       ├── docs.css        ← Documentação, code blocks, tabelas
-│       ├── pricing.css     ← Planos e tabela comparativa
-│       ├── auth.css        ← Login, signup, forgot password
-│       └── dashboard.css   ← Métricas, charts, settings
+├── index.html                  ← Shell SPA (carrega partials via fetch)
 │
-├── js/                     ← Lógica separada por domínio
-│   ├── auth.js             ← Estado de autenticação, login/signup/logout
-│   ├── router.js           ← SPA router, scroll reveal, cursor glow
-│   ├── compressor.js       ← Motor de compressão, API, pipeline UI
-│   ├── dashboard.js        ← Dashboard, mini-charts, API keys
-│   └── init.js             ← Bootstrap e inicialização
+├── css/
+│   ├── variables.css           ← Design tokens
+│   ├── animations.css          ← Keyframes e scroll reveal
+│   ├── layout.css              ← Nav, footer, page system
+│   ├── components.css          ← Badges, buttons, toasts
+│   ├── responsive.css          ← Media queries
+│   └── pages/                  ← Estilos por página
+│       ├── home.css
+│       ├── app.css
+│       ├── docs.css
+│       ├── pricing.css
+│       ├── auth.css
+│       └── dashboard.css
 │
-└── pages/                  ← HTML partials (injetados no index.html)
-    ├── home.html           ← Landing page
-    ├── app.html            ← Compressor interativo
-    ├── docs.html           ← Documentação da gramática
-    ├── pricing.html        ← Planos e preços
-    ├── login.html          ← Autenticação
-    ├── signup.html         ← Criação de conta
-    ├── forgot.html         ← Recuperação de senha
-    └── dashboard.html      ← Painel do usuário
+├── js/
+│   ├── router.js               ← SPA router + scroll reveal
+│   ├── auth.js                 ← Autenticação (demo)
+│   ├── compressor.js           ← Motor de compressão + API
+│   ├── dashboard.js            ← Métricas + charts
+│   └── init.js                 ← Bootstrap
+│
+└── pages/                      ← HTML partials
+    ├── home.html               ← Landing
+    ├── app.html                ← Compressor
+    ├── docs.html               ← Documentação
+    ├── pricing.html            ← Planos
+    ├── login.html              ← Login
+    ├── signup.html             ← Cadastro
+    ├── forgot.html             ← Recuperar senha
+    └── dashboard.html          ← Painel
 ```
 
----
-
-## 🛠️ Tecnologias
-
-| Tecnologia | Uso |
-|------------|-----|
-| **HTML5** | Estrutura semântica |
-| **CSS3** | Custom Properties, Grid, Flexbox, animações |
-| **JavaScript ES6+** | Fetch API, async/await, módulos |
-| **Google Fonts** | JetBrains Mono · Syne |
-
-> **Zero dependências.** Nenhum framework. Nenhum build step. Nenhum `node_modules`.
+<br>
 
 ---
 
-## 🗺️ Roadmap
+<br>
 
-- [ ] **Backend API** — Proxy server para proteger chaves de API (Express/Fastify)
-- [ ] **Autenticação real** — JWT + bcrypt + verificação de e-mail
-- [ ] **Banco de dados** — Prisma + PostgreSQL para persistência de dados
-- [ ] **SDK npm** — `npm install toklang` para integração programática
-- [ ] **Extensão de navegador** — Compressão automática em qualquer chat de IA
-- [ ] **Bundler** — Migração para Vite caso a complexidade aumente
-- [ ] **Testes** — E2E com Playwright, unitários com Vitest
+## Stack
+
+<table>
+  <tr>
+    <td align="center" width="140">
+      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" width="40"/><br>
+      <sub><b>HTML5</b></sub><br>
+      <sub>Semântico</sub>
+    </td>
+    <td align="center" width="140">
+      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" width="40"/><br>
+      <sub><b>CSS3</b></sub><br>
+      <sub>Custom Props · Grid</sub>
+    </td>
+    <td align="center" width="140">
+      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" width="40"/><br>
+      <sub><b>JavaScript</b></sub><br>
+      <sub>ES6+ · Fetch API</sub>
+    </td>
+    <td align="center" width="140">
+      <strong>0</strong><br>
+      <sub><b>Dependências</b></sub><br>
+      <sub>Zero frameworks</sub>
+    </td>
+  </tr>
+</table>
+
+<br>
 
 ---
 
-## 📄 Licença
+<br>
 
-MIT © TokLang
+## Roadmap
+
+| Status | Feature | Descrição |
+|--------|---------|-----------|
+| 🟢 | Compressor | Motor de compressão funcional via API |
+| 🟢 | SPA Router | Navegação hash-based sem reload |
+| 🟢 | Dashboard | Métricas, histórico, API keys (demo) |
+| 🟡 | Backend API | Proxy server para proteger chaves |
+| 🟡 | Auth real | JWT + bcrypt + verificação de e-mail |
+| 🟡 | Banco de dados | Prisma + PostgreSQL |
+| ⚪ | SDK npm | `npm install toklang` |
+| ⚪ | Extensão browser | Compressão automática em chats de IA |
+| ⚪ | Bundler | Migração para Vite |
+
+<br>
+
+---
+
+<br>
+
+<p align="center">
+  <sub>Feito com obsessão por tokens</sub><br>
+  <sub>MIT © 2026 TokLang</sub>
+</p>

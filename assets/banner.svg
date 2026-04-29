@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="50%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#0a0f0a"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ff88;stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#00ff88;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#00ff88;stop-opacity:0"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#e0e0e0"/>
+    </linearGradient>
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  
+  <!-- Grid pattern -->
+  <g opacity="0.04" stroke="#ffffff" stroke-width="0.5">
+    <line x1="0" y1="60" x2="1200" y2="60"/>
+    <line x1="0" y1="120" x2="1200" y2="120"/>
+    <line x1="0" y1="180" x2="1200" y2="180"/>
+    <line x1="0" y1="240" x2="1200" y2="240"/>
+    <line x1="200" y1="0" x2="200" y2="300"/>
+    <line x1="400" y1="0" x2="400" y2="300"/>
+    <line x1="600" y1="0" x2="600" y2="300"/>
+    <line x1="800" y1="0" x2="800" y2="300"/>
+    <line x1="1000" y1="0" x2="1000" y2="300"/>
+  </g>
+  
+  <!-- Glow orbs -->
+  <circle cx="900" cy="250" r="120" fill="#00ff88" opacity="0.06" filter="url(#blur)"/>
+  <circle cx="300" cy="50" r="80" fill="#3b82f6" opacity="0.04" filter="url(#blur)"/>
+  
+  <!-- Green accent line -->
+  <rect x="0" y="296" width="1200" height="4" fill="url(#glow)"/>
+  
+  <!-- Logo -->
+  <text x="600" y="120" text-anchor="middle" font-family="'Segoe UI', system-ui, sans-serif" font-size="72" font-weight="800" letter-spacing="-3">
+    <tspan fill="#00ff88">Tok</tspan><tspan fill="url(#textGrad)">Lang</tspan>
+  </text>
+  
+  <!-- Tagline -->
+  <text x="600" y="165" text-anchor="middle" font-family="'Courier New', monospace" font-size="16" fill="#666" letter-spacing="4">
+    COMPRIMA · COMUNIQUE · ECONOMIZE
+  </text>
+  
+  <!-- Compression demo -->
+  <rect x="310" y="195" width="580" height="60" rx="8" fill="#161b22" stroke="#00ff8822" stroke-width="1"/>
+  <text x="340" y="222" font-family="'Courier New', monospace" font-size="12" fill="#666">prompt natural</text>
+  <text x="340" y="242" font-family="'Courier New', monospace" font-size="13" fill="#888">"Faça um código python com streamlit..."</text>
+  <text x="620" y="230" font-family="'Courier New', monospace" font-size="18" fill="#00ff88">→</text>
+  <text x="650" y="222" font-family="'Courier New', monospace" font-size="12" fill="#00ff88">toklang</text>
+  <text x="650" y="242" font-family="'Courier New', monospace" font-size="13" fill="#00ff88" font-weight="bold">cr $py @streamlit; ui+</text>
+  
+  <!-- Savings badge -->
+  <rect x="840" y="211" width="40" height="24" rx="12" fill="#00ff8820" stroke="#00ff8844" stroke-width="1"/>
+  <text x="860" y="228" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#00ff88" font-weight="bold">−76%</text>
+</svg>
