@@ -57,7 +57,8 @@ TokLang é um **middleware de compressão semântica** que atua como intermediá
 │   cr $py @streamlit; calc velocidade; in[dist,t,a]; ui+             │
 │                                                                     │
 │   ─────────────────────────────────────────────────────             │
-│   economia: 76% │ $0.00008 economizado por chamada                  │
+│   ▸ economia: 76%  ▸  26 tokens eliminados por chamada              │
+│   ▸ em 10K chamadas/dia = ~260K tokens/dia economizados             │
 │                                                                     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -215,7 +216,7 @@ TokLang/
 │
 ├── js/
 │   ├── router.js               ← SPA router + scroll reveal
-│   ├── auth.js                 ← Autenticação (demo)
+│   ├── auth.js                 ← Autenticação e sessão
 │   ├── compressor.js           ← Motor de compressão + API
 │   ├── dashboard.js            ← Métricas + charts
 │   └── init.js                 ← Bootstrap
@@ -274,15 +275,15 @@ TokLang/
 
 | Status | Feature | Descrição |
 |--------|---------|-----------|
-| 🟢 | Compressor | Motor de compressão funcional via API |
-| 🟢 | SPA Router | Navegação hash-based sem reload |
-| 🟢 | Dashboard | Métricas, histórico, API keys (demo) |
-| 🟡 | Backend API | Proxy server para proteger chaves |
-| 🟡 | Auth real | JWT + bcrypt + verificação de e-mail |
-| 🟡 | Banco de dados | Prisma + PostgreSQL |
-| ⚪ | SDK npm | `npm install toklang` |
-| ⚪ | Extensão browser | Compressão automática em chats de IA |
-| ⚪ | Bundler | Migração para Vite |
+| ✅ | Motor de compressão | Compressão semântica via NLP com economia de 65–85% |
+| ✅ | Interface web | SPA completa com compressor, docs, pricing e dashboard |
+| ✅ | Dashboard analytics | Métricas de uso, histórico e gerenciamento de API keys |
+| 🔧 | Backend API | Servidor proxy para chamadas seguras ao modelo |
+| 🔧 | Autenticação | JWT + bcrypt + verificação de e-mail |
+| 🔧 | Persistência | Prisma + PostgreSQL para dados de usuário |
+| 📋 | SDK npm | `npm install toklang` — integração programática |
+| 📋 | Extensão de navegador | Compressão automática em ChatGPT, Claude, etc. |
+| 📋 | CI/CD | Pipeline de deploy com Vite + testes automatizados |
 
 <br>
 
