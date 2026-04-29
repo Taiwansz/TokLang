@@ -1,0 +1,5530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="TokLang — Comprima prompts de IA automaticamente. Escreva naturalmente, economize até 85% em tokens. Compatível com GPT, Claude, Gemini.">
+  <meta property="og:title" content="TokLang — Comprima. Comunique. Economize.">
+  <meta property="og:description"
+    content="Middleware inteligente que comprime seus prompts automaticamente. Escreva normalmente, pague menos.">
+  <title>TokLang — Comprima. Comunique. Economize.</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Syne:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ===== RESET & ROOT ===== */
+    :root {
+      --bg: #07090d;
+      --bg2: #0c1018;
+      --bg3: #101620;
+      --bg4: #141d28;
+      --border: rgba(255, 255, 255, 0.06);
+      --border2: rgba(255, 255, 255, 0.12);
+      --border3: rgba(255, 255, 255, 0.20);
+      --green: #00ff88;
+      --green2: #00d970;
+      --green3: #00b559;
+      --gdim: rgba(0, 255, 136, 0.08);
+      --gglow: rgba(0, 255, 136, 0.18);
+      --amber: #f5a623;
+      --amber2: #e8940f;
+      --blue: #4d9fff;
+      --red: #ff5e5e;
+      --text: #dde3ec;
+      --muted: #6b7685;
+      --muted2: #8fa0b5;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Syne', sans-serif;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --radius-lg: 16px;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html {
+      scroll-behavior: smooth;
+      -webkit-font-smoothing: antialiased
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font-family: inherit
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none
+    }
+
+    img {
+      display: block;
+      max-width: 100%
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg)
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border2);
+      border-radius: 3px
+    }
+
+    /* ===== GLOBAL TEXTURES ===== */
+    #grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 255, 136, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 255, 136, 0.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #noise-bg {
+      position: fixed;
+      inset: 0;
+      opacity: 0.022;
+      pointer-events: none;
+      z-index: 1;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    #cursor-glow {
+      position: fixed;
+      pointer-events: none;
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0, 255, 136, 0.05) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      transition: left .12s ease, top .12s ease;
+    }
+
+    /* ===== NAV ===== */
+    #nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      height: 62px;
+      background: rgba(7, 9, 13, 0.82);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      transition: background .3s;
+    }
+
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--green);
+      letter-spacing: -0.02em;
+      cursor: pointer;
+    }
+
+    .nav-logo span {
+      color: var(--muted);
+      font-weight: 300
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none
+    }
+
+    .nav-links a {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color .2s;
+      padding: 4px 0;
+      border-bottom: 1px solid transparent;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--text);
+      border-color: var(--green)
+    }
+
+    .nav-cta {
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--bg);
+      background: var(--green);
+      padding: 8px 22px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .2s;
+      border: none;
+      letter-spacing: 0.03em;
+    }
+
+    .nav-cta:hover {
+      background: var(--green2);
+      transform: translateY(-1px)
+    }
+
+    .nav-mobile-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 20px
+    }
+
+    /* ===== PAGE SYSTEM ===== */
+    .page {
+      display: none;
+      position: relative;
+      z-index: 10;
+      animation: pgIn .35s ease both
+    }
+
+    .page.active {
+      display: block
+    }
+
+    @keyframes pgIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    /* ===== SHARED COMPONENTS ===== */
+    .section-tag {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 14px;
+    }
+
+    .section-tag::before {
+      content: '// '
+    }
+
+    h2.section-title {
+      font-size: clamp(30px, 4vw, 50px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 14px;
+    }
+
+    h2.section-title em {
+      font-style: normal;
+      color: var(--green)
+    }
+
+    .section-sub {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted);
+      max-width: 500px;
+      line-height: 1.8;
+      margin-bottom: 56px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--green);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(0, 255, 136, 0.22);
+      background: var(--gdim);
+      padding: 5px 13px;
+      border-radius: 20px;
+    }
+
+    .badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: pulse 2s ease infinite
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      50% {
+        opacity: .4;
+        transform: scale(.75)
+      }
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius)
+    }
+
+    .card-dark {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius)
+    }
+
+    .panel-header {
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .panel-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    .pill {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 2px 9px;
+      border-radius: 12px;
+      letter-spacing: .04em;
+    }
+
+    .pill-green {
+      background: rgba(0, 255, 136, .12);
+      color: var(--green);
+      border: 1px solid rgba(0, 255, 136, .2)
+    }
+
+    .pill-amber {
+      background: rgba(245, 166, 35, .1);
+      color: var(--amber);
+      border: 1px solid rgba(245, 166, 35, .2)
+    }
+
+    .pill-blue {
+      background: rgba(77, 159, 255, .1);
+      color: var(--blue);
+      border: 1px solid rgba(77, 159, 255, .2)
+    }
+
+    .pill-gray {
+      background: var(--bg3);
+      color: var(--muted);
+      border: 1px solid var(--border2)
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .2s;
+      border: none;
+    }
+
+    .btn-primary {
+      color: var(--bg);
+      background: var(--green)
+    }
+
+    .btn-primary:hover {
+      background: var(--green2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 255, 136, .22)
+    }
+
+    .btn-ghost {
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--border2)
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--border3)
+    }
+
+    .btn-lg {
+      padding: 15px 32px;
+      font-size: 14px;
+      font-weight: 700
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 0
+    }
+
+    /* ===== REVEAL ANIMATIONS ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity .55s ease, transform .55s ease
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: none
+    }
+
+    .reveal-d1 {
+      transition-delay: .08s
+    }
+
+    .reveal-d2 {
+      transition-delay: .16s
+    }
+
+    .reveal-d3 {
+      transition-delay: .24s
+    }
+
+    /* ============================= */
+    /* ======= PAGE: HOME ========== */
+    /* ============================= */
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 24px 80px;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-badge {
+      margin-bottom: 30px;
+      animation: fadeUp .6s ease both
+    }
+
+    h1.hero-title {
+      font-size: clamp(50px, 8.5vw, 100px);
+      font-weight: 800;
+      line-height: .93;
+      letter-spacing: -.04em;
+      margin-bottom: 22px;
+      animation: fadeUp .7s .1s ease both;
+    }
+
+    h1.hero-title em {
+      font-style: normal;
+      color: var(--green);
+      position: relative
+    }
+
+    h1.hero-title em::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--green);
+      opacity: .35;
+      border-radius: 2px;
+    }
+
+    .hero-sub {
+      font-family: var(--mono);
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 540px;
+      margin: 0 auto 44px;
+      line-height: 1.85;
+      animation: fadeUp .7s .2s ease both;
+    }
+
+    .hero-sub strong {
+      color: var(--text);
+      font-weight: 500
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    /* TERMINAL */
+    .terminal {
+      width: 100%;
+      max-width: 660px;
+      margin: 0 auto 44px;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      text-align: left;
+      animation: fadeUp .7s .3s ease both;
+      box-shadow: 0 0 80px rgba(0, 255, 136, 0.04), 0 20px 60px rgba(0, 0, 0, .4);
+    }
+
+    .term-bar {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 11px 16px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .term-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%
+    }
+
+    .td-r {
+      background: #ff5f57
+    }
+
+    .td-y {
+      background: #ffbd2e
+    }
+
+    .td-g {
+      background: #28c840
+    }
+
+    .term-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin: 0 auto;
+      letter-spacing: .05em
+    }
+
+    .term-body {
+      padding: 18px 22px
+    }
+
+    .tl {
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.95;
+      display: flex;
+      gap: 10px
+    }
+
+    .tp {
+      color: var(--green);
+      user-select: none
+    }
+
+    .tc {
+      color: var(--text)
+    }
+
+    .to {
+      color: #7bb3e0;
+      padding-left: 18px
+    }
+
+    .ts-amber {
+      color: var(--amber);
+      padding-left: 18px
+    }
+
+    .tsp {
+      height: 6px
+    }
+
+    /* HERO CTAS */
+    .hero-ctas {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp .7s .4s ease both
+    }
+
+    /* STATS BAR */
+    .stats-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg2);
+      flex-wrap: wrap;
+    }
+
+    .stat-block {
+      flex: 1;
+      min-width: 140px;
+      padding: 26px 28px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-block:last-child {
+      border-right: none
+    }
+
+    .stat-num {
+      font-family: var(--mono);
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+
+    .stat-lbl {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    /* HOW IT WORKS */
+    .hiw-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 96px 24px
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden
+    }
+
+    .step {
+      background: var(--bg2);
+      padding: 34px 28px;
+      transition: background .2s
+    }
+
+    .step:hover {
+      background: var(--bg3)
+    }
+
+    .step-num {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--green);
+      letter-spacing: .1em;
+      margin-bottom: 18px;
+      opacity: .5
+    }
+
+    .step-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 9px;
+      letter-spacing: -.02em
+    }
+
+    .step-desc {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.8
+    }
+
+    .step-code {
+      margin-top: 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px 13px;
+      font-family: var(--mono);
+      font-size: 11px
+    }
+
+    .sc-in {
+      color: var(--muted)
+    }
+
+    .sc-out {
+      color: var(--green);
+      margin-top: 5px
+    }
+
+    /* COMPARE */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-top: 48px
+    }
+
+    .compare-col {
+      background: var(--bg2);
+      padding: 28px
+    }
+
+    .compare-col.good {
+      background: rgba(0, 255, 136, 0.04)
+    }
+
+    .compare-head {
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .compare-col.bad .compare-head {
+      color: var(--muted)
+    }
+
+    .compare-col.good .compare-head {
+      color: var(--green)
+    }
+
+    .ci {
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.65;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 9px;
+      align-items: flex-start
+    }
+
+    .ci:last-child {
+      border-bottom: none
+    }
+
+    .ci-icon {
+      flex-shrink: 0;
+      font-size: 13px
+    }
+
+    .compare-col.bad .ci-icon {
+      color: #ff6b6b
+    }
+
+    .compare-col.good .ci-icon {
+      color: var(--green)
+    }
+
+    .compare-col.bad .ci-text {
+      color: var(--muted)
+    }
+
+    .compare-col.good .ci-text {
+      color: var(--text)
+    }
+
+    /* SOCIAL PROOF */
+    .social-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 96px
+    }
+
+    .quotes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 12px;
+      margin-top: 0
+    }
+
+    .quote-card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: border-color .2s
+    }
+
+    .quote-card:hover {
+      border-color: var(--border3)
+    }
+
+    .quote-text {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted2);
+      line-height: 1.75;
+      margin-bottom: 18px
+    }
+
+    .quote-author {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .qa-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gdim);
+      border: 1px solid rgba(0, 255, 136, .2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--green);
+      font-weight: 700
+    }
+
+    .qa-name {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text);
+      font-weight: 500
+    }
+
+    .qa-role {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted)
+    }
+
+    /* PRICING SECTION */
+    .pricing-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 96px
+    }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden
+    }
+
+    .plan {
+      background: var(--bg2);
+      padding: 32px 26px;
+      position: relative;
+      transition: background .2s
+    }
+
+    .plan:hover {
+      background: var(--bg3)
+    }
+
+    .plan.featured {
+      background: rgba(0, 255, 136, 0.05)
+    }
+
+    .plan-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--bg);
+      background: var(--green);
+      padding: 3px 9px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    .plan-name {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 14px
+    }
+
+    .plan-price {
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: -.04em;
+      line-height: 1;
+      margin-bottom: 4px
+    }
+
+    .plan-price span {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--muted)
+    }
+
+    .plan-desc {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      margin: 10px 0 24px;
+      line-height: 1.65
+    }
+
+    .plan-features {
+      list-style: none;
+      margin-bottom: 24px
+    }
+
+    .plan-features li {
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      color: var(--muted)
+    }
+
+    .plan-features li:last-child {
+      border-bottom: none
+    }
+
+    .plan-features li::before {
+      content: '→';
+      color: var(--green);
+      flex-shrink: 0
+    }
+
+    .plan.featured .plan-features li {
+      color: var(--text)
+    }
+
+    .plan-btn {
+      display: block;
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 11px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .2s;
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      background: transparent
+    }
+
+    .plan-btn:hover {
+      color: var(--text);
+      border-color: var(--border3)
+    }
+
+    .plan.featured .plan-btn {
+      background: var(--green);
+      color: var(--bg);
+      border-color: var(--green);
+      font-weight: 700
+    }
+
+    .plan.featured .plan-btn:hover {
+      background: var(--green2);
+      box-shadow: 0 6px 20px rgba(0, 255, 136, .28);
+      transform: translateY(-1px)
+    }
+
+    /* CTA FINAL */
+    .cta-final {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 80px
+    }
+
+    .cta-box {
+      background: var(--gdim);
+      border: 1px solid rgba(0, 255, 136, .15);
+      border-radius: var(--radius-lg);
+      padding: 60px 48px;
+      text-align: center
+    }
+
+    .cta-box h2 {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin-bottom: 16px
+    }
+
+    .cta-box p {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 32px;
+      max-width: 440px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.8
+    }
+
+    /* FAQ */
+    .faq-section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 80px
+    }
+
+    .faq-list {
+      max-width: 680px
+    }
+
+    .faq-item {
+      border-bottom: 1px solid var(--border)
+    }
+
+    .faq-q {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: -.01em;
+      user-select: none;
+      transition: color .2s
+    }
+
+    .faq-q:hover {
+      color: var(--green)
+    }
+
+    .faq-icon {
+      font-family: var(--mono);
+      color: var(--green);
+      font-size: 18px;
+      transition: transform .22s;
+      flex-shrink: 0
+    }
+
+    .faq-a {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.85;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height .32s ease, padding .32s
+    }
+
+    .faq-item.open .faq-a {
+      max-height: 220px;
+      padding-bottom: 18px
+    }
+
+    .faq-item.open .faq-icon {
+      transform: rotate(45deg)
+    }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 10;
+      border-top: 1px solid var(--border);
+      padding: 44px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px
+    }
+
+    .footer-logo {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--green)
+    }
+
+    .footer-logo span {
+      color: var(--muted);
+      font-weight: 300
+    }
+
+    .footer-copy {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 20px;
+      list-style: none
+    }
+
+    .footer-links a {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      transition: color .2s;
+      cursor: pointer
+    }
+
+    .footer-links a:hover {
+      color: var(--green)
+    }
+
+    /* ============================= */
+    /* ======= PAGE: APP =========== */
+    /* ============================= */
+    .app-page {
+      min-height: 100vh;
+      padding: 82px 0 60px
+    }
+
+    .app-layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 24px;
+      align-items: start
+    }
+
+    .app-main {}
+
+    .app-sidebar {}
+
+    .app-header {
+      margin-bottom: 24px;
+      padding-top: 24px
+    }
+
+    .app-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin-bottom: 6px
+    }
+
+    .app-sub {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .app-panel {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 16px
+    }
+
+    .panel-body {
+      padding: 0
+    }
+
+    textarea.prompt-input {
+      width: 100%;
+      min-height: 140px;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: vertical;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      padding: 18px 20px;
+      line-height: 1.75;
+    }
+
+    textarea.prompt-input::placeholder {
+      color: var(--muted)
+    }
+
+    .compress-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--green);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      transition: all .2s;
+      margin-bottom: 14px;
+      letter-spacing: .02em;
+    }
+
+    .compress-btn:hover {
+      background: var(--green2);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 22px rgba(0, 255, 136, .22)
+    }
+
+    .compress-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none
+    }
+
+    .output-body {
+      padding: 18px 20px;
+      min-height: 72px
+    }
+
+    .output-text {
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--green);
+      line-height: 1.65;
+      letter-spacing: .015em
+    }
+
+    .output-placeholder {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .output-loading {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--amber)
+    }
+
+    .stats-strip {
+      display: flex;
+      border-top: 1px solid var(--border)
+    }
+
+    .ss-item {
+      flex: 1;
+      padding: 12px 16px;
+      text-align: center;
+      border-right: 1px solid var(--border)
+    }
+
+    .ss-item:last-child {
+      border-right: none
+    }
+
+    .ss-num {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--green);
+      line-height: 1;
+      margin-bottom: 3px
+    }
+
+    .ss-num.neutral {
+      color: var(--text)
+    }
+
+    .ss-lbl {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em
+    }
+
+    .error-banner {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: #ff6b6b;
+      margin-top: 8px;
+      padding: 10px 14px;
+      background: rgba(255, 107, 107, .07);
+      border: 1px solid rgba(255, 107, 107, .18);
+      border-radius: var(--radius-sm)
+    }
+
+    /* PIPELINE VIEW */
+    .pipeline {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 16px
+    }
+
+    .pipeline-header {
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .pipeline-steps {
+      padding: 16px 20px
+    }
+
+    .pipe-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .pipe-step:last-child {
+      border-bottom: none
+    }
+
+    .pipe-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border2);
+      flex-shrink: 0;
+      transition: background .4s
+    }
+
+    .pipe-dot.done {
+      background: var(--green)
+    }
+
+    .pipe-dot.active {
+      background: var(--amber);
+      animation: pulse 1s ease infinite
+    }
+
+    .pipe-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      flex: 1
+    }
+
+    .pipe-label.done {
+      color: var(--text)
+    }
+
+    .pipe-value {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--green)
+    }
+
+    /* SIDEBAR */
+    .sidebar-section {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 14px
+    }
+
+    .sidebar-header {
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      padding: 9px 14px
+    }
+
+    .sidebar-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    .sidebar-body {
+      padding: 14px
+    }
+
+    .examples-list {
+      list-style: none
+    }
+
+    .example-item {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .15s;
+      margin-bottom: 4px;
+      border: 1px solid transparent;
+      line-height: 1.5
+    }
+
+    .example-item:hover {
+      color: var(--text);
+      background: var(--bg3);
+      border-color: var(--border)
+    }
+
+    .history-item {
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      margin-bottom: 6px
+    }
+
+    .history-item:last-child {
+      margin-bottom: 0
+    }
+
+    .hi-compressed {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--green);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px
+    }
+
+    .hi-meta {
+      display: flex;
+      justify-content: space-between
+    }
+
+    .hi-saving {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--amber)
+    }
+
+    .hi-time {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted)
+    }
+
+    @keyframes cursor-blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0
+      }
+    }
+
+    .blink-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 13px;
+      background: var(--amber);
+      vertical-align: middle;
+      animation: cursor-blink .8s step-end infinite
+    }
+
+    /* QUICK REF */
+    .qref-group {
+      margin-bottom: 12px
+    }
+
+    .qref-label {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 6px
+    }
+
+    .qref-tokens {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px
+    }
+
+    .qref-token {
+      font-family: var(--mono);
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 4px;
+      cursor: default
+    }
+
+    .qt-green {
+      background: rgba(0, 255, 136, .1);
+      color: var(--green);
+      border: 1px solid rgba(0, 255, 136, .15)
+    }
+
+    .qt-blue {
+      background: rgba(77, 159, 255, .1);
+      color: var(--blue);
+      border: 1px solid rgba(77, 159, 255, .15)
+    }
+
+    .qt-amber {
+      background: rgba(245, 166, 35, .1);
+      color: var(--amber);
+      border: 1px solid rgba(245, 166, 35, .15)
+    }
+
+    .qt-gray {
+      background: var(--bg3);
+      color: var(--muted2);
+      border: 1px solid var(--border)
+    }
+
+    /* ============================= */
+    /* ======= PAGE: DOCS ========== */
+    /* ============================= */
+    .docs-page {
+      min-height: 100vh;
+      padding: 82px 0 80px
+    }
+
+    .docs-layout {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 40px;
+      align-items: start
+    }
+
+    .docs-nav {
+      position: sticky;
+      top: 82px
+    }
+
+    .docs-nav-section {
+      margin-bottom: 24px
+    }
+
+    .dns-title {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .dns-link {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      display: block;
+      padding: 5px 0;
+      cursor: pointer;
+      transition: color .2s;
+      border-left: 2px solid transparent;
+      padding-left: 10px
+    }
+
+    .dns-link:hover,
+    .dns-link.active {
+      color: var(--green);
+      border-color: var(--green)
+    }
+
+    .docs-content {
+      padding-top: 24px
+    }
+
+    .docs-content h1 {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      margin-bottom: 10px
+    }
+
+    .docs-content h2 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      margin: 48px 0 14px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border)
+    }
+
+    .docs-content h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 24px 0 10px;
+      color: var(--muted2)
+    }
+
+    .docs-content p {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.85;
+      margin-bottom: 14px
+    }
+
+    .docs-content p strong {
+      color: var(--text);
+      font-weight: 500
+    }
+
+    .code-block {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-family: var(--mono);
+      font-size: 12px;
+      margin: 12px 0 18px;
+      overflow-x: auto;
+      line-height: 1.8
+    }
+
+    .code-block .c-green {
+      color: var(--green)
+    }
+
+    .code-block .c-amber {
+      color: var(--amber)
+    }
+
+    .code-block .c-blue {
+      color: var(--blue)
+    }
+
+    .code-block .c-muted {
+      color: var(--muted)
+    }
+
+    .token-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 24px;
+      font-family: var(--mono);
+      font-size: 12px
+    }
+
+    .token-table th {
+      text-align: left;
+      padding: 8px 12px;
+      background: var(--bg3);
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      border-bottom: 1px solid var(--border2)
+    }
+
+    .token-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted)
+    }
+
+    .token-table tr:last-child td {
+      border-bottom: none
+    }
+
+    .token-table tr:hover td {
+      background: var(--bg2)
+    }
+
+    .token-table .tok {
+      color: var(--green);
+      font-weight: 500
+    }
+
+    .token-table .tok-blue {
+      color: var(--blue)
+    }
+
+    .token-table .tok-amber {
+      color: var(--amber)
+    }
+
+    .callout {
+      border-left: 3px solid var(--green);
+      background: var(--gdim);
+      padding: 12px 16px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 16px 0;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted2);
+      line-height: 1.75
+    }
+
+    .callout strong {
+      color: var(--green)
+    }
+
+    .example-block {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin: 16px 0
+    }
+
+    .eb-head {
+      background: var(--bg3);
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center
+    }
+
+    .eb-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em
+    }
+
+    .eb-body {
+      padding: 14px 18px
+    }
+
+    .eb-compressed {
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--green);
+      margin-bottom: 8px;
+      font-weight: 500
+    }
+
+    .eb-arrow {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 6px
+    }
+
+    .eb-expanded {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.7
+    }
+
+    .eb-saving {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--amber);
+      margin-top: 8px
+    }
+
+    /* ============================= */
+    /* ====== PAGE: PRICING ======== */
+    /* ============================= */
+    .pricing-page {
+      min-height: 100vh;
+      padding: 82px 0 80px
+    }
+
+    .pricing-hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 60px 24px 48px;
+      text-align: center
+    }
+
+    .compare-table {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 80px
+    }
+
+    .ct-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 12px
+    }
+
+    .ct-table th {
+      text-align: left;
+      padding: 10px 16px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border2)
+    }
+
+    .ct-table th:first-child {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .07em
+    }
+
+    .ct-table th:not(:first-child) {
+      text-align: center;
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--text)
+    }
+
+    .ct-table th.featured-col {
+      color: var(--green)
+    }
+
+    .ct-table td {
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted)
+    }
+
+    .ct-table td:not(:first-child) {
+      text-align: center
+    }
+
+    .ct-table td:first-child {
+      color: var(--text);
+      font-size: 12px
+    }
+
+    .ct-table td .check {
+      color: var(--green);
+      font-size: 14px
+    }
+
+    .ct-table td .cross {
+      color: var(--muted);
+      font-size: 14px
+    }
+
+    .ct-table .section-row td {
+      background: var(--bg3);
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      padding: 8px 16px
+    }
+
+    .ct-wrap {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-top: 40px
+    }
+
+    .faq-pricing {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 80px
+    }
+
+    /* ============================= */
+    /* ====== AUTH PAGES =========== */
+    /* ============================= */
+    .auth-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 100px 24px 60px;
+      position: relative;
+      z-index: 10
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 440px;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 40px 80px rgba(0, 0, 0, .4)
+    }
+
+    .auth-card-header {
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      padding: 22px 32px
+    }
+
+    .auth-logo {
+      font-family: var(--mono);
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 6px
+    }
+
+    .auth-logo span {
+      color: var(--muted);
+      font-weight: 300
+    }
+
+    .auth-title {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: 2px
+    }
+
+    .auth-sub {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .auth-body {
+      padding: 28px 32px
+    }
+
+    .auth-footer {
+      padding: 16px 32px;
+      border-top: 1px solid var(--border);
+      background: var(--bg3);
+      text-align: center;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted)
+    }
+
+    .auth-footer a {
+      color: var(--green);
+      cursor: pointer;
+      transition: opacity .15s
+    }
+
+    .auth-footer a:hover {
+      opacity: .75
+    }
+
+    .form-group {
+      margin-bottom: 18px
+    }
+
+    .form-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted2);
+      display: block;
+      margin-bottom: 7px;
+      letter-spacing: .03em
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s
+    }
+
+    .form-input:focus {
+      border-color: rgba(0, 255, 136, .4);
+      background: var(--bg)
+    }
+
+    .form-input::placeholder {
+      color: var(--muted)
+    }
+
+    .form-input.error {
+      border-color: rgba(255, 94, 94, .5)
+    }
+
+    .form-error {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--red);
+      margin-top: 5px
+    }
+
+    .form-hint {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 5px
+    }
+
+    .form-btn {
+      width: 100%;
+      padding: 13px;
+      background: var(--green);
+      color: var(--bg);
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .02em
+    }
+
+    .form-btn:hover {
+      background: var(--green2);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(0, 255, 136, .25)
+    }
+
+    .form-btn:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none
+    }
+
+    .form-btn-ghost {
+      width: 100%;
+      padding: 11px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all .2s;
+      margin-top: 10px
+    }
+
+    .form-btn-ghost:hover {
+      color: var(--text);
+      border-color: var(--border3)
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border)
+    }
+
+    .oauth-btn {
+      width: 100%;
+      padding: 11px;
+      background: var(--bg3);
+      color: var(--text);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      font-family: var(--mono);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      margin-bottom: 10px
+    }
+
+    .oauth-btn:hover {
+      border-color: var(--border3);
+      background: var(--bg)
+    }
+
+    .plan-picker {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 20px
+    }
+
+    .plan-option {
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 12px 10px;
+      cursor: pointer;
+      transition: all .2s;
+      text-align: center
+    }
+
+    .plan-option:hover {
+      border-color: var(--border3)
+    }
+
+    .plan-option.selected {
+      border-color: var(--green);
+      background: var(--gdim)
+    }
+
+    .plan-option-name {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 4px
+    }
+
+    .plan-option-price {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -.02em
+    }
+
+    .plan-option.selected .plan-option-price {
+      color: var(--green)
+    }
+
+    .pw-strength {
+      height: 3px;
+      border-radius: 2px;
+      background: var(--border);
+      margin-top: 7px;
+      overflow: hidden
+    }
+
+    .pw-bar {
+      height: 100%;
+      border-radius: 2px;
+      transition: width .3s, background .3s;
+      width: 0%
+    }
+
+    .check-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 14px;
+      cursor: pointer
+    }
+
+    .check-box {
+      width: 16px;
+      height: 16px;
+      border: 1px solid var(--border2);
+      border-radius: 3px;
+      background: var(--bg3);
+      flex-shrink: 0;
+      margin-top: 1px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .2s;
+      font-size: 10px
+    }
+
+    .check-group input[type=checkbox] {
+      display: none
+    }
+
+    .check-group input:checked+.check-box {
+      background: var(--green);
+      border-color: var(--green);
+      color: var(--bg)
+    }
+
+    .check-label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.6
+    }
+
+    .check-label a {
+      color: var(--green);
+      cursor: pointer
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      font-family: var(--mono);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, .4);
+      transform: translateY(80px);
+      opacity: 0;
+      transition: all .3s ease;
+      pointer-events: none;
+      max-width: 360px
+    }
+
+    .toast.show {
+      transform: translateY(0);
+      opacity: 1
+    }
+
+    .toast-icon {
+      font-size: 16px
+    }
+
+    .toast-msg {
+      color: var(--text)
+    }
+
+    /* ============================= */
+    /* ====== DASHBOARD ============ */
+    /* ============================= */
+    .dashboard-page {
+      min-height: 100vh;
+      padding: 62px 0 0
+    }
+
+    .dash-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: calc(100vh - 62px)
+    }
+
+    .dash-sidebar {
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      position: sticky;
+      top: 62px;
+      height: calc(100vh - 62px);
+      overflow-y: auto
+    }
+
+    .dash-user {
+      padding: 16px 20px 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px
+    }
+
+    .dash-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--gdim);
+      border: 1px solid rgba(0, 255, 136, .25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--green);
+      margin-bottom: 10px
+    }
+
+    .dash-user-name {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      margin-bottom: 2px
+    }
+
+    .dash-user-plan {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .dash-nav {
+      list-style: none
+    }
+
+    .dash-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      border-left: 2px solid transparent
+    }
+
+    .dash-nav-item:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, .02)
+    }
+
+    .dash-nav-item.active {
+      color: var(--green);
+      border-left-color: var(--green);
+      background: var(--gdim)
+    }
+
+    .dash-nav-icon {
+      font-size: 14px;
+      width: 16px;
+      text-align: center;
+      flex-shrink: 0
+    }
+
+    .dash-nav-section {
+      font-family: var(--mono);
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      padding: 16px 20px 6px;
+      margin-top: 8px
+    }
+
+    .dash-main {
+      padding: 32px 36px;
+      overflow-y: auto
+    }
+
+    .dash-section {
+      display: none
+    }
+
+    .dash-section.active {
+      display: block
+    }
+
+    .dash-section-title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      margin-bottom: 4px
+    }
+
+    .dash-section-sub {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 28px
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px
+    }
+
+    .metric-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px
+    }
+
+    .metric-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 8px
+    }
+
+    .metric-val {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1;
+      margin-bottom: 4px
+    }
+
+    .metric-val.green {
+      color: var(--green)
+    }
+
+    .metric-val.amber {
+      color: var(--amber)
+    }
+
+    .metric-delta {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted)
+    }
+
+    .metric-delta.up {
+      color: var(--green)
+    }
+
+    .usage-bar-wrap {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 22px;
+      margin-bottom: 20px
+    }
+
+    .usage-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--mono);
+      font-size: 11px;
+      margin-bottom: 10px
+    }
+
+    .usage-bar-label span:first-child {
+      color: var(--muted)
+    }
+
+    .usage-bar-label span:last-child {
+      color: var(--text)
+    }
+
+    .usage-bar-track {
+      height: 6px;
+      background: var(--border2);
+      border-radius: 3px;
+      overflow: hidden
+    }
+
+    .usage-bar-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 3px;
+      transition: width .8s ease
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 12px
+    }
+
+    .history-table th {
+      text-align: left;
+      padding: 9px 14px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      font-weight: 500
+    }
+
+    .history-table td {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      vertical-align: middle
+    }
+
+    .history-table tr:last-child td {
+      border-bottom: none
+    }
+
+    .history-table tr:hover td {
+      background: rgba(255, 255, 255, .015)
+    }
+
+    .history-table .tok {
+      color: var(--green);
+      font-weight: 500
+    }
+
+    .history-table .saving {
+      color: var(--amber)
+    }
+
+    .table-wrap {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 20px
+    }
+
+    .api-key-box {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 14px 18px;
+      font-family: var(--mono);
+      font-size: 13px;
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      letter-spacing: .03em
+    }
+
+    .api-key-actions {
+      display: flex;
+      gap: 8px
+    }
+
+    .api-key-btn {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .api-key-btn:hover {
+      color: var(--text);
+      border-color: var(--border3)
+    }
+
+    .settings-group {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 16px
+    }
+
+    .settings-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .settings-row:last-child {
+      border-bottom: none
+    }
+
+    .settings-row-label {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px
+    }
+
+    .settings-row-sub {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 40px;
+      height: 22px;
+      flex-shrink: 0
+    }
+
+    .toggle-switch input {
+      display: none
+    }
+
+    .toggle-track {
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: var(--border2);
+      border-radius: 11px;
+      cursor: pointer;
+      transition: background .2s;
+      position: relative
+    }
+
+    .toggle-switch input:checked+.toggle-track {
+      background: var(--green)
+    }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform .2s;
+      pointer-events: none
+    }
+
+    .toggle-switch input:checked~.toggle-thumb {
+      transform: translateX(18px)
+    }
+
+    .danger-zone {
+      background: rgba(255, 94, 94, .05);
+      border: 1px solid rgba(255, 94, 94, .15);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-top: 20px
+    }
+
+    .danger-zone-title {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--red);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 12px
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid rgba(255, 94, 94, .3);
+      color: var(--red);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 9px 18px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .btn-danger:hover {
+      background: rgba(255, 94, 94, .1);
+      border-color: var(--red)
+    }
+
+    .mini-chart {
+      height: 80px;
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      margin-top: 16px
+    }
+
+    .mc-bar {
+      flex: 1;
+      background: rgba(0, 255, 136, .15);
+      border-radius: 2px 2px 0 0;
+      border: 1px solid rgba(0, 255, 136, .2);
+      border-bottom: none;
+      transition: background .2s;
+      cursor: default;
+      min-height: 4px
+    }
+
+    .mc-bar:hover {
+      background: rgba(0, 255, 136, .28)
+    }
+
+    .chart-wrap {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 20px
+    }
+
+    .chart-title {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 2px
+    }
+
+    .chart-val {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -.02em;
+      color: var(--green);
+      margin-bottom: 12px
+    }
+
+    /* ============================= */
+    /* ====== NAV AUTH STATE ======= */
+    /* ============================= */
+    .nav-auth-logged-out {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .nav-auth-logged-in {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .nav-user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--gdim);
+      border: 1px solid rgba(0, 255, 136, .25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--green);
+      cursor: pointer;
+      transition: border-color .2s
+    }
+
+    .nav-user-avatar:hover {
+      border-color: rgba(0, 255, 136, .5)
+    }
+
+    .nav-link-login {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color .15s;
+      border: none;
+      background: none;
+      padding: 4px 0
+    }
+
+    .nav-link-login:hover {
+      color: var(--text)
+    }
+
+    /* ===== FOCUS VISIBLE (a11y) ===== */
+    *:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 3px;
+    }
+
+    /* ===== COPY BUTTON ===== */
+    .output-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .copy-output-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .copy-output-btn:hover {
+      color: var(--green);
+      border-color: rgba(0, 255, 136, .3);
+    }
+
+    .copy-output-btn.copied {
+      color: var(--green);
+      border-color: rgba(0, 255, 136, .3);
+    }
+
+    /* ===== CHAR LIMIT BAR ===== */
+    .char-limit-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 20px 10px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    .char-limit-bar {
+      flex: 1;
+      height: 2px;
+      background: var(--border2);
+      border-radius: 1px;
+      overflow: hidden;
+      margin: 0 12px;
+    }
+
+    .char-limit-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 1px;
+      transition: width .3s, background .3s;
+    }
+
+    .char-limit-fill.warn {
+      background: var(--amber);
+    }
+
+    .char-limit-fill.over {
+      background: var(--red);
+    }
+
+    /* ===== USAGE COUNTER ===== */
+    .usage-counter-bar {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .uc-label {
+      color: var(--muted);
+    }
+
+    .uc-value {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .uc-bar {
+      flex: 1;
+      height: 3px;
+      background: var(--border2);
+      border-radius: 2px;
+      overflow: hidden;
+      margin: 0 14px;
+    }
+
+    .uc-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 2px;
+      transition: width .5s;
+    }
+
+    .uc-fill.warn {
+      background: var(--amber);
+    }
+
+    .uc-fill.full {
+      background: var(--red);
+    }
+
+    .uc-upgrade {
+      color: var(--green);
+      cursor: pointer;
+      transition: opacity .15s;
+    }
+
+    .uc-upgrade:hover {
+      opacity: .7;
+    }
+
+    /* ===== DEMO BADGE ===== */
+    .demo-notice {
+      background: rgba(245, 166, 35, .08);
+      border: 1px solid rgba(245, 166, 35, .2);
+      border-radius: var(--radius-sm);
+      padding: 9px 14px;
+      margin-bottom: 16px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--amber);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .demo-notice-icon {
+      flex-shrink: 0;
+    }
+
+    /* ===== MOBILE DASH NAV ===== */
+    .dash-mobile-header {
+      display: none;
+      position: sticky;
+      top: 62px;
+      z-index: 50;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .dash-mobile-title {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .dash-mobile-menu-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      font-size: 16px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+    }
+
+    .dash-mobile-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      background: rgba(0, 0, 0, .6);
+      backdrop-filter: blur(4px);
+    }
+
+    .dash-mobile-drawer {
+      position: fixed;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 90;
+      width: 260px;
+      background: var(--bg2);
+      border-right: 1px solid var(--border2);
+      padding: 20px 0;
+      transform: translateX(-100%);
+      transition: transform .25s ease;
+      overflow-y: auto;
+    }
+
+    .dash-mobile-drawer.open {
+      transform: translateX(0);
+    }
+
+    .dash-mobile-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    /* ===== CLEAR INPUT BUTTON ===== */
+    .input-actions-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 0 20px 12px;
+    }
+
+    .input-clear-btn {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      background: none;
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .input-clear-btn:hover {
+      color: var(--red);
+      border-color: rgba(255, 94, 94, .3);
+    }
+
+    /* ===== LIMIT WARNING TOAST ===== */
+    .limit-banner {
+      background: rgba(245, 166, 35, .07);
+      border: 1px solid rgba(245, 166, 35, .2);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--amber);
+      display: none;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media(max-width:900px) {
+      .app-layout {
+        grid-template-columns: 1fr
+      }
+
+      .app-sidebar {
+        display: none
+      }
+
+      .docs-layout {
+        grid-template-columns: 1fr
+      }
+
+      .docs-nav {
+        display: none
+      }
+
+      .pricing-grid {
+        grid-template-columns: 1fr
+      }
+
+      .compare-grid {
+        grid-template-columns: 1fr
+      }
+
+      .dash-sidebar {
+        display: none
+      }
+
+      .dash-mobile-header {
+        display: flex
+      }
+
+      .metrics-grid {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+    @media(max-width:768px) {
+      #nav {
+        padding: 0 20px
+      }
+
+      .nav-links {
+        display: none
+      }
+
+      .nav-mobile-btn {
+        display: block
+      }
+
+      footer {
+        padding: 32px 20px;
+        flex-direction: column;
+        gap: 20px
+      }
+
+      .stats-bar {
+        flex-wrap: wrap
+      }
+
+      .stat-block {
+        min-width: 50%
+      }
+
+      .cta-box {
+        padding: 36px 24px
+      }
+
+      .metrics-grid {
+        grid-template-columns: 1fr
+      }
+
+      .dash-main {
+        padding: 20px
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- GLOBAL BG -->
+  <div id="grid-bg"></div>
+  <div id="noise-bg"></div>
+  <div id="cursor-glow"></div>
+
+  <!-- ===== NAV ===== -->
+  <nav id="nav">
+    <div class="nav-logo" onclick="navigate('home')">Tok<span>Lang</span></div>
+    <ul class="nav-links">
+      <li><a onclick="navigate('home')" data-page="home">Início</a></li>
+      <li><a onclick="navigate('app')" data-page="app">App</a></li>
+      <li><a onclick="navigate('docs')" data-page="docs">Docs</a></li>
+      <li><a onclick="navigate('pricing')" data-page="pricing">Preços</a></li>
+    </ul>
+    <div class="nav-auth-logged-out" id="nav-logged-out">
+      <button class="nav-link-login" onclick="navigate('login')">Entrar</button>
+      <button class="nav-cta" onclick="navigate('signup')">Criar conta</button>
+    </div>
+    <div class="nav-auth-logged-in" id="nav-logged-in" style="display:none">
+      <button class="btn btn-ghost" onclick="navigate('dashboard')"
+        style="padding:7px 16px;font-size:11px">Dashboard</button>
+      <div class="nav-user-avatar" id="nav-avatar" onclick="navigate('dashboard')" title="Minha conta">TW</div>
+    </div>
+    <button class="nav-mobile-btn" onclick="navigate('app')">≡</button>
+  </nav>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: HOME -->
+  <!-- ============================================================ -->
+  <div id="page-home" class="page">
+
+    <!-- HERO -->
+    <div class="hero">
+      <div class="badge hero-badge">
+        <div class="badge-dot"></div>Acesso antecipado — beta aberto
+      </div>
+      <h1 class="hero-title">Fale mais.<br>Gaste <em>menos</em>.</h1>
+      <p class="hero-sub">
+        TokLang é um <strong>middleware invisível</strong> entre você e qualquer IA.<br>
+        Você escreve naturalmente. Ele comprime automaticamente.<br>
+        Até 85% menos tokens. Zero mudança de comportamento.
+      </p>
+
+      <div class="terminal">
+        <div class="term-bar">
+          <div class="term-dot td-r"></div>
+          <div class="term-dot td-y"></div>
+          <div class="term-dot td-g"></div>
+          <span class="term-title">toklang · compression engine v1.0</span>
+        </div>
+        <div class="term-body">
+          <div class="tl"><span class="tp">input</span><span class="tc" style="color:var(--muted)">"Bom dia! Por favor
+              faça um código python que use streamlit como interface para calcular a velocidade de um objeto"</span>
+          </div>
+          <div class="tsp"></div>
+          <div class="tl"><span class="to">→ removendo saudações e cortesias...</span></div>
+          <div class="tl"><span class="to">→ identificando linguagem: Python · framework: Streamlit...</span></div>
+          <div class="tl"><span class="to">→ extraindo tarefa e parâmetros...</span></div>
+          <div class="tsp"></div>
+          <div class="tl"><span class="tp">✓</span><span class="tc" style="color:var(--green);font-weight:700">cr $py
+              @streamlit; calc velocidade; ui+</span></div>
+          <div class="tsp"></div>
+          <div class="tl"><span class="ts-amber">💾 34 tokens → 8 tokens · economia de 76%</span></div>
+        </div>
+      </div>
+
+      <div class="hero-ctas">
+        <button class="btn btn-primary btn-lg" onclick="navigate('app')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="4 14 10 14 10 20" />
+            <polyline points="20 10 14 10 14 4" />
+            <line x1="14" y1="10" x2="21" y2="3" />
+            <line x1="3" y1="21" x2="10" y2="14" />
+          </svg>
+          Testar agora — grátis
+        </button>
+        <button class="btn btn-ghost btn-lg" onclick="navigate('docs')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          Ver documentação
+        </button>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-bar">
+      <div class="stat-block reveal">
+        <div class="stat-num" id="stat-1">85%</div>
+        <div class="stat-lbl">menos tokens</div>
+      </div>
+      <div class="stat-block reveal reveal-d1">
+        <div class="stat-num" id="stat-2">3×</div>
+        <div class="stat-lbl">mais rápido</div>
+      </div>
+      <div class="stat-block reveal reveal-d2">
+        <div class="stat-num" style="font-size:14px;padding-top:6px">GPT · Claude · Gemini</div>
+        <div class="stat-lbl">compatível com</div>
+      </div>
+      <div class="stat-block reveal reveal-d3">
+        <div class="stat-num">&lt;10ms</div>
+        <div class="stat-lbl">latência adicionada</div>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <section class="hiw-section">
+      <div class="reveal">
+        <div class="section-tag">como funciona</div>
+        <h2 class="section-title">Três passos.<br><em>Zero fricção.</em></h2>
+        <p class="section-sub">Sem treinamento. Sem configuração. Funciona com a IA que você já usa hoje.</p>
+      </div>
+      <div class="steps-grid reveal">
+        <div class="step">
+          <div class="step-num">01 ///</div>
+          <div class="step-title">Você escreve normalmente</div>
+          <div class="step-desc">Escreva como sempre escreveu. Com saudações, "por favor", redundâncias — tudo normal.
+          </div>
+          <div class="step-code">
+            <div class="sc-in">→ input do usuário:</div>
+            <div class="sc-out" style="color:var(--muted);font-size:11px">"Bom dia! Pode me fazer uma API em Node com
+              autenticação JWT?"</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">02 ///</div>
+          <div class="step-title">TokLang comprime</div>
+          <div class="step-desc">O motor analisa, remove redundâncias e comprime para notação densa em milissegundos.
+          </div>
+          <div class="step-code">
+            <div class="sc-in">→ TokLang comprimido:</div>
+            <div class="sc-out">cr $js @express; #api auth jwt; prd</div>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">03 ///</div>
+          <div class="step-title">IA responde normalmente</div>
+          <div class="step-desc">O prompt expandido chega limpo ao modelo. Resposta normal. Seu custo reduzido
+            drasticamente.</div>
+          <div class="step-code">
+            <div class="sc-in">→ economia real:</div>
+            <div class="sc-out">input −72% · custo −72%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="compare-grid reveal">
+        <div class="compare-col bad">
+          <div class="compare-head">✗ — sem TokLang</div>
+          <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Prompts longos consomem contexto
+              valioso</span></div>
+          <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Custo de API cresce com volume</span>
+          </div>
+          <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Saudações e cortesias pagam token</span>
+          </div>
+          <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Difícil auditar e otimizar em prod</span>
+          </div>
+        </div>
+        <div class="compare-col good">
+          <div class="compare-head">✓ — com TokLang</div>
+          <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Prompts até 85% menores, mesmo
+              resultado</span></div>
+          <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Custo previsível e drasticamente
+              menor</span></div>
+          <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Zero mudança no fluxo de trabalho</span>
+          </div>
+          <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Dashboard de analytics em tempo
+              real</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOCIAL PROOF -->
+    <section class="social-section">
+      <div class="reveal">
+        <div class="section-tag">quem usa</div>
+        <h2 class="section-title">Devs que <em>pagam menos</em>.</h2>
+      </div>
+      <div class="quotes-grid reveal">
+        <div class="quote-card">
+          <p class="quote-text">"Integrei o TokLang na nossa pipeline em 20 minutos. Primeiro mês economizamos R$1.400
+            em créditos de API sem alterar nenhum prompt."</p>
+          <div class="quote-author">
+            <div class="qa-avatar">RB</div>
+            <div>
+              <div class="qa-name">Rafael Borges</div>
+              <div class="qa-role">Senior Engineer · Fintech</div>
+            </div>
+          </div>
+        </div>
+        <div class="quote-card">
+          <p class="quote-text">"Antes eu revisava cada prompt manualmente pra cortar tokens. Agora o TokLang faz isso
+            automaticamente e eu nem percebo que está lá."</p>
+          <div class="quote-author">
+            <div class="qa-avatar">AM</div>
+            <div>
+              <div class="qa-name">Ana Martins</div>
+              <div class="qa-role">Product Manager · SaaS</div>
+            </div>
+          </div>
+        </div>
+        <div class="quote-card">
+          <p class="quote-text">"Com 50k chamadas por dia o custo de tokens era absurdo. TokLang cortou 68% disso. ROI
+            no primeiro dia de uso."</p>
+          <div class="quote-author">
+            <div class="qa-avatar">LP</div>
+            <div>
+              <div class="qa-name">Lucas Prado</div>
+              <div class="qa-role">CTO · AI Startup</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRICING PREVIEW -->
+    <section class="pricing-section">
+      <div class="reveal">
+        <div class="section-tag">preços</div>
+        <h2 class="section-title">Simples.<br><em>Previsível.</em></h2>
+        <p class="section-sub">Comece grátis. Escale quando precisar.</p>
+      </div>
+      <div class="pricing-grid reveal">
+        <div class="plan">
+          <div class="plan-name">Starter</div>
+          <div class="plan-price">$0<span>/mês</span></div>
+          <div class="plan-desc">Para explorar e aprender TokLang.</div>
+          <ul class="plan-features">
+            <li>500 compressões/mês</li>
+            <li>Vocabulário base</li>
+            <li>Dashboard básico</li>
+            <li>Suporte via comunidade</li>
+          </ul>
+          <button class="plan-btn" onclick="navigate('app')">Criar conta grátis</button>
+        </div>
+        <div class="plan featured">
+          <div class="plan-badge">Popular</div>
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">$19<span>/mês</span></div>
+          <div class="plan-desc">Para devs que querem máxima economia.</div>
+          <ul class="plan-features">
+            <li>Ilimitado</li>
+            <li>API access + SDK</li>
+            <li>Vocabulário expandido</li>
+            <li>Analytics de economia</li>
+            <li>Vocabulário customizado</li>
+            <li>Suporte prioritário</li>
+          </ul>
+          <button class="plan-btn" onclick="navigate('pricing')">Começar — 14 dias grátis</button>
+        </div>
+        <div class="plan">
+          <div class="plan-name">Team</div>
+          <div class="plan-price">$79<span>/mês</span></div>
+          <div class="plan-desc">Para equipes em produção em escala.</div>
+          <ul class="plan-features">
+            <li>Até 10 membros</li>
+            <li>Vocabulário compartilhado</li>
+            <li>Dashboard de equipe</li>
+            <li>Slack + Notion</li>
+            <li>SSO / SAML</li>
+          </ul>
+          <button class="plan-btn" onclick="navigate('pricing')">Falar com vendas</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA FINAL -->
+    <section class="cta-final">
+      <div class="cta-box reveal">
+        <div class="section-tag" style="justify-content:center;display:flex;margin-bottom:14px">comece agora</div>
+        <h2>Pronto para <em>parar</em><br>de desperdiçar tokens?</h2>
+        <p>Configure em menos de 5 minutos. Sem cartão de crédito.</p>
+        <button class="btn btn-primary btn-lg" onclick="navigate('app')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="4 14 10 14 10 20" />
+            <polyline points="20 10 14 10 14 4" />
+            <line x1="14" y1="10" x2="21" y2="3" />
+            <line x1="3" y1="21" x2="10" y2="14" />
+          </svg>
+          Comprimir agora — grátis
+        </button>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq-section">
+      <div class="reveal">
+        <div class="section-tag">dúvidas</div>
+        <h2 class="section-title">Perguntas<br><em>frequentes.</em></h2>
+      </div>
+      <div class="faq-list reveal">
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Preciso mudar como escrevo meus prompts? <span
+              class="faq-icon">+</span></div>
+          <div class="faq-a">Não. Esse é o ponto central do TokLang — você escreve exatamente como sempre escreveu. O
+            motor de compressão opera em segundo plano e é completamente invisível.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Funciona com qualquer modelo de IA? <span
+              class="faq-icon">+</span></div>
+          <div class="faq-a">Sim. TokLang é agnóstico ao modelo. Funciona com OpenAI, Anthropic Claude, Google Gemini,
+            Mistral, ou qualquer modelo via API. A compressão acontece antes da chamada.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">A qualidade das respostas cai? <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">Não. O TokLang comprime sem perder intenção semântica. O modelo recebe um prompt limpo e
+            completo — apenas sem verbosidade desnecessária. Em muitos casos a resposta melhora por ser mais precisa.
+          </div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Como é calculada a economia de tokens? <span
+              class="faq-icon">+</span></div>
+          <div class="faq-a">Comparamos o token count do prompt original com o prompt comprimido antes de enviar ao
+            modelo. O dashboard mostra em tempo real quanto você economizou em tokens e em dólares.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Meus prompts ficam armazenados? <span class="faq-icon">+</span>
+          </div>
+          <div class="faq-a">No plano Starter, os prompts são processados e descartados. Nos planos Pro e Team você pode
+            ativar analytics histórico, sempre com opt-in explícito e dados criptografados em repouso.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-logo">Tok<span>Lang</span></div>
+      <div class="footer-copy">© 2025 TokLang · Feito com obsessão por tokens</div>
+      <ul class="footer-links">
+        <li><a onclick="navigate('docs')">Docs</a></li>
+        <li><a onclick="navigate('pricing')">API</a></li>
+        <li><a>Privacidade</a></li>
+        <li><a>Status</a></li>
+        <li><a>GitHub</a></li>
+      </ul>
+    </footer>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: APP -->
+  <!-- ============================================================ -->
+  <div id="page-app" class="page">
+    <div class="app-page">
+      <div class="app-layout">
+
+        <!-- MAIN -->
+        <div class="app-main">
+          <div class="app-header">
+            <h1 class="app-title">Compressor</h1>
+            <p class="app-sub">// escreva normalmente → TokLang comprime automaticamente</p>
+          </div>
+
+          <!-- INPUT -->
+          <div class="app-panel">
+            <div class="panel-header">
+              <span class="panel-label">→ prompt natural</span>
+              <span class="panel-label" id="input-tok-count" style="color:var(--muted)">0 tokens</span>
+            </div>
+            <div class="panel-body">
+              <textarea class="prompt-input" id="app-input" maxlength="16000"
+                placeholder="Escreva seu prompt normalmente aqui...&#10;&#10;Ex: Bom dia! Por favor faça um código python que use streamlit como interface para ficar bonitinho podendo calcular a velocidade de um objeto quando eu colocar as grandezas"
+                oninput="onInputChange()" aria-label="Prompt de entrada em linguagem natural"></textarea>
+            </div>
+            <div class="input-actions-row">
+              <button class="input-clear-btn" onclick="clearInput()" aria-label="Limpar campo de entrada">✕
+                Limpar</button>
+            </div>
+            <div class="char-limit-row">
+              <span id="char-count">0</span>
+              <div class="char-limit-bar">
+                <div class="char-limit-fill" id="char-bar" style="width:0%"></div>
+              </div>
+              <span>16.000 chars</span>
+            </div>
+          </div>
+
+          <div class="limit-banner" id="limit-banner">
+            ⚠ Você atingiu 80% do limite mensal (400/500 compressões). <span class="uc-upgrade"
+              onclick="navigate('pricing')">Faça upgrade para Pro →</span>
+          </div>
+
+          <div class="usage-counter-bar" id="usage-counter-bar">
+            <span class="uc-label">Uso mensal (Starter):</span>
+            <div class="uc-bar">
+              <div class="uc-fill" id="uc-fill" style="width:0%"></div>
+            </div>
+            <span class="uc-value"><span id="uc-used">0</span>/500</span>
+            <span class="uc-upgrade" onclick="navigate('pricing')" title="Upgrade para ilimitado">↑ Pro</span>
+          </div>
+
+          <button class="compress-btn" id="compress-btn" onclick="doCompress()" aria-label="Comprimir prompt">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="4 14 10 14 10 20" />
+              <polyline points="20 10 14 10 14 4" />
+              <line x1="14" y1="10" x2="21" y2="3" />
+              <line x1="3" y1="21" x2="10" y2="14" />
+            </svg>
+            Comprimir <span style="font-weight:300;opacity:.6;font-size:10px">Ctrl+Enter</span>
+          </button>
+
+          <div id="app-error"></div>
+
+          <!-- OUTPUT -->
+          <div class="app-panel">
+            <div class="panel-header">
+              <div class="output-header-row">
+                <span class="panel-label">✓ toklang comprimido</span>
+                <div style="display:flex;align-items:center;gap:8px">
+                  <span class="panel-label" id="output-tok-count" style="color:var(--muted)"></span>
+                  <button class="copy-output-btn" id="copy-output-btn" onclick="copyOutput()"
+                    aria-label="Copiar resultado" style="display:none">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    Copiar
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="output-body" id="app-output">
+                <span class="output-placeholder">resultado aparecerá aqui...</span>
+              </div>
+            </div>
+            <div class="stats-strip" id="app-stats" style="display:none">
+              <div class="ss-item">
+                <div class="ss-num neutral" id="stat-before">—</div>
+                <div class="ss-lbl">tokens antes</div>
+              </div>
+              <div class="ss-item">
+                <div class="ss-num neutral" id="stat-after">—</div>
+                <div class="ss-lbl">tokens depois</div>
+              </div>
+              <div class="ss-item">
+                <div class="ss-num" id="stat-pct">—</div>
+                <div class="ss-lbl">economia</div>
+              </div>
+              <div class="ss-item">
+                <div class="ss-num" id="stat-usd" style="color:var(--amber)">—</div>
+                <div class="ss-lbl">$ economizado*</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PIPELINE -->
+          <div class="pipeline">
+            <div class="pipeline-header">
+              <span class="panel-label">pipeline completo</span>
+              <span class="pill pill-gray" id="pipe-status">aguardando</span>
+            </div>
+            <div class="pipeline-steps">
+              <div class="pipe-step" id="pipe1">
+                <div class="pipe-dot" id="pipe-dot-1"></div>
+                <div class="pipe-label" id="pipe-lbl-1">1. Receber prompt natural</div>
+                <div class="pipe-value" id="pipe-val-1"></div>
+              </div>
+              <div class="pipe-step" id="pipe2">
+                <div class="pipe-dot" id="pipe-dot-2"></div>
+                <div class="pipe-label" id="pipe-lbl-2">2. Análise semântica</div>
+                <div class="pipe-value" id="pipe-val-2"></div>
+              </div>
+              <div class="pipe-step" id="pipe3">
+                <div class="pipe-dot" id="pipe-dot-3"></div>
+                <div class="pipe-label" id="pipe-lbl-3">3. Compressão TokLang</div>
+                <div class="pipe-value" id="pipe-val-3"></div>
+              </div>
+              <div class="pipe-step" id="pipe4">
+                <div class="pipe-dot" id="pipe-dot-4"></div>
+                <div class="pipe-label" id="pipe-lbl-4">4. Pronto para envio ao modelo</div>
+                <div class="pipe-value" id="pipe-val-4"></div>
+              </div>
+            </div>
+          </div>
+
+          <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px">*Estimativa baseada em
+            $0.003/1K tokens (GPT-4o). Valor real varia por modelo.</p>
+        </div>
+
+        <!-- SIDEBAR -->
+        <div class="app-sidebar">
+
+          <!-- QUICK REF -->
+          <div class="sidebar-section">
+            <div class="sidebar-header">
+              <div class="sidebar-title">// referência rápida</div>
+            </div>
+            <div class="sidebar-body">
+              <div class="qref-group">
+                <div class="qref-label">ações</div>
+                <div class="qref-tokens">
+                  <span class="qref-token qt-green">cr</span><span class="qref-token qt-green">fix</span><span
+                    class="qref-token qt-green">ex</span><span class="qref-token qt-green">rf</span><span
+                    class="qref-token qt-green">op</span><span class="qref-token qt-green">tst</span><span
+                    class="qref-token qt-green">doc</span><span class="qref-token qt-green">cv</span>
+                </div>
+              </div>
+              <div class="qref-group">
+                <div class="qref-label">linguagem <span style="color:var(--blue)">$prefix</span></div>
+                <div class="qref-tokens">
+                  <span class="qref-token qt-blue">$py</span><span class="qref-token qt-blue">$js</span><span
+                    class="qref-token qt-blue">$ts</span><span class="qref-token qt-blue">$sql</span><span
+                    class="qref-token qt-blue">$go</span><span class="qref-token qt-blue">$rs</span><span
+                    class="qref-token qt-blue">$sh</span>
+                </div>
+              </div>
+              <div class="qref-group">
+                <div class="qref-label">framework <span style="color:var(--amber)">@prefix</span></div>
+                <div class="qref-tokens">
+                  <span class="qref-token qt-amber">@streamlit</span><span
+                    class="qref-token qt-amber">@fastapi</span><span class="qref-token qt-amber">@react</span><span
+                    class="qref-token qt-amber">@next</span><span class="qref-token qt-amber">@express</span><span
+                    class="qref-token qt-amber">@pandas</span>
+                </div>
+              </div>
+              <div class="qref-group">
+                <div class="qref-label">modificadores</div>
+                <div class="qref-tokens">
+                  <span class="qref-token qt-gray">ui+</span><span class="qref-token qt-gray">prd</span><span
+                    class="qref-token qt-gray">cm</span><span class="qref-token qt-gray">dk</span><span
+                    class="qref-token qt-gray">typ</span><span class="qref-token qt-gray">async</span><span
+                    class="qref-token qt-gray">*</span>
+                </div>
+              </div>
+              <button class="btn btn-ghost"
+                style="width:100%;justify-content:center;font-size:11px;padding:8px;margin-top:8px"
+                onclick="navigate('docs')">Ver documentação completa →</button>
+            </div>
+          </div>
+
+          <!-- EXAMPLES -->
+          <div class="sidebar-section">
+            <div class="sidebar-header">
+              <div class="sidebar-title">// exemplos rápidos</div>
+            </div>
+            <div class="sidebar-body">
+              <ul class="examples-list">
+                <li class="example-item" onclick="fillPrompt(0)">Calcular velocidade com Streamlit</li>
+                <li class="example-item" onclick="fillPrompt(1)">API REST com autenticação JWT</li>
+                <li class="example-item" onclick="fillPrompt(2)">Explicar closures em JS</li>
+                <li class="example-item" onclick="fillPrompt(3)">Refatorar função bagunçada</li>
+                <li class="example-item" onclick="fillPrompt(4)">Dashboard interativo com Plotly</li>
+                <li class="example-item" onclick="fillPrompt(5)">Script de web scraping</li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="sidebar-section" id="history-section" style="display:none">
+            <div class="sidebar-header">
+              <div class="sidebar-title">// histórico da sessão</div>
+            </div>
+            <div class="sidebar-body" id="history-body"></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: DOCS -->
+  <!-- ============================================================ -->
+  <div id="page-docs" class="page">
+    <div class="docs-page">
+      <div class="docs-layout">
+
+        <!-- SIDEBAR NAV -->
+        <nav class="docs-nav">
+          <div class="docs-nav-section">
+            <div class="dns-title">Introdução</div>
+            <a class="dns-link active" href="#doc-intro" onclick="scrollToDoc('doc-intro',this)">O que é TokLang</a>
+            <a class="dns-link" href="#doc-quickstart" onclick="scrollToDoc('doc-quickstart',this)">Quickstart</a>
+            <a class="dns-link" href="#doc-how" onclick="scrollToDoc('doc-how',this)">Como funciona</a>
+          </div>
+          <div class="docs-nav-section">
+            <div class="dns-title">Gramática</div>
+            <a class="dns-link" href="#doc-syntax" onclick="scrollToDoc('doc-syntax',this)">Sintaxe</a>
+            <a class="dns-link" href="#doc-actions" onclick="scrollToDoc('doc-actions',this)">Ações</a>
+            <a class="dns-link" href="#doc-langs" onclick="scrollToDoc('doc-langs',this)">Linguagens</a>
+            <a class="dns-link" href="#doc-frameworks" onclick="scrollToDoc('doc-frameworks',this)">Frameworks</a>
+            <a class="dns-link" href="#doc-modifiers" onclick="scrollToDoc('doc-modifiers',this)">Modificadores</a>
+          </div>
+          <div class="docs-nav-section">
+            <div class="dns-title">Exemplos</div>
+            <a class="dns-link" href="#doc-examples" onclick="scrollToDoc('doc-examples',this)">Exemplos reais</a>
+            <a class="dns-link" href="#doc-api" onclick="scrollToDoc('doc-api',this)">API Reference</a>
+          </div>
+        </nav>
+
+        <!-- CONTENT -->
+        <div class="docs-content">
+          <div id="doc-intro">
+            <div class="section-tag" style="margin-bottom:8px">documentação</div>
+            <h1>TokLang</h1>
+            <p>TokLang é um <strong>middleware de compressão de prompts</strong> que atua como intermediário invisível
+              entre o usuário e qualquer modelo de linguagem. Você escreve normalmente; ele comprime automaticamente.
+            </p>
+            <p>A economia típica é de <strong>65–85% em tokens</strong>, sem nenhuma mudança na qualidade da resposta do
+              modelo.</p>
+            <div class="callout"><strong>Princípio central:</strong> O usuário nunca vê ou toca na notação TokLang. Ela
+              opera completamente em segundo plano.</div>
+          </div>
+
+          <div id="doc-quickstart">
+            <h2>Quickstart</h2>
+            <p>Instale o SDK e faça sua primeira compressão em menos de 5 minutos:</p>
+            <div class="code-block"><span class="c-muted"># instalar</span><br>npm install toklang<br><br><span
+                class="c-muted"># uso básico</span><br><span class="c-blue">import</span> { compress } <span
+                class="c-blue">from</span> <span class="c-green">'toklang'</span><br><br><span
+                class="c-blue">const</span> result = <span class="c-blue">await</span> compress(<span
+                class="c-green">"Bom dia! Pode fazer uma API em Node?"</span>)<br><span class="c-muted">// → "cr $js
+                #api"</span><br><br>console.log(result.compressed) <span class="c-muted">// cr $js
+                #api</span><br>console.log(result.savings) <span class="c-muted">// 0.71 (71%)</span></div>
+            <p>Para integrar como middleware transparente no seu pipeline:</p>
+            <div class="code-block"><span class="c-blue">import</span> { TokLangMiddleware } <span
+                class="c-blue">from</span> <span class="c-green">'toklang'</span><br><br><span
+                class="c-blue">const</span> client = <span class="c-blue">new</span> TokLangMiddleware({<br>
+              &nbsp;&nbsp;target: <span class="c-green">'openai'</span>, <span class="c-muted">// ou 'anthropic' |
+                'gemini'</span><br> &nbsp;&nbsp;apiKey: process.env.OPENAI_KEY,<br> &nbsp;&nbsp;tokLangKey:
+              process.env.TOKLANG_KEY<br>})<br><br><span class="c-muted">// use exatamente como o SDK
+                original</span><br><span class="c-blue">const</span> response = <span class="c-blue">await</span>
+              client.chat.completions.create({<br> &nbsp;&nbsp;model: <span class="c-green">'gpt-4o'</span>,<br>
+              &nbsp;&nbsp;messages: [{ role: <span class="c-green">'user'</span>, content: userMessage }]<br>})</div>
+          </div>
+
+          <div id="doc-how">
+            <h2>Como funciona</h2>
+            <p>O pipeline completo tem quatro etapas:</p>
+            <div class="code-block"><span class="c-muted">1.</span> <span class="c-green">INPUT</span> → prompt natural
+              do usuário<br><span class="c-muted">2.</span> <span class="c-amber">COMPRESS</span> → motor TokLang →
+              notação comprimida<br><span class="c-muted">3.</span> <span class="c-blue">EXPAND</span> → expansor →
+              linguagem natural limpa<br><span class="c-muted">4.</span> <span class="c-green">OUTPUT</span> → enviado
+              ao modelo de destino</div>
+            <p>A etapa 3 garante que o modelo nunca receba a notação TokLang — apenas um prompt limpo e preciso em
+              linguagem natural.</p>
+          </div>
+
+          <div id="doc-syntax">
+            <h2>Sintaxe</h2>
+            <p>A gramática TokLang segue um formato posicional com separadores por ponto-e-vírgula:</p>
+            <div class="code-block"><span class="c-green">AÇÃO</span> <span class="c-blue">$LANG</span> <span
+                class="c-amber">@FRAMEWORK</span> <span class="c-muted">#ESTRUTURA</span>; tarefa; <span
+                class="c-muted">in[params]</span>; <span class="c-muted">modificadores</span></div>
+            <p>Apenas a <strong>AÇÃO</strong> é obrigatória. Todos os demais campos são opcionais e posicionais.</p>
+            <div class="callout"><strong>Separador ;</strong> divide os blocos lógicos do prompt. A ordem importa:
+              ação+contexto técnico → tarefa → parâmetros → modificadores.</div>
+          </div>
+
+          <div id="doc-actions">
+            <h2>Ações</h2>
+            <p>O primeiro token do prompt define a ação. Sempre em letras minúsculas.</p>
+            <table class="token-table">
+              <tr>
+                <th>Token</th>
+                <th>Expande para</th>
+                <th>Uso</th>
+              </tr>
+              <tr>
+                <td class="tok">cr</td>
+                <td>Crie / Faça</td>
+                <td>Criar código, componentes, arquivos</td>
+              </tr>
+              <tr>
+                <td class="tok">fix</td>
+                <td>Corrija / Resolva o bug em</td>
+                <td>Debug e correção de erros</td>
+              </tr>
+              <tr>
+                <td class="tok">ex</td>
+                <td>Explique / Ensine</td>
+                <td>Explicações e tutoriais</td>
+              </tr>
+              <tr>
+                <td class="tok">rf</td>
+                <td>Refatore</td>
+                <td>Melhorar código existente</td>
+              </tr>
+              <tr>
+                <td class="tok">op</td>
+                <td>Otimize</td>
+                <td>Performance e eficiência</td>
+              </tr>
+              <tr>
+                <td class="tok">tst</td>
+                <td>Escreva testes para</td>
+                <td>Unit tests, integration tests</td>
+              </tr>
+              <tr>
+                <td class="tok">doc</td>
+                <td>Documente</td>
+                <td>JSDoc, docstrings, README</td>
+              </tr>
+              <tr>
+                <td class="tok">cv</td>
+                <td>Converta / Porte</td>
+                <td>Migração entre linguagens ou formatos</td>
+              </tr>
+              <tr>
+                <td class="tok">rev</td>
+                <td>Revise / Faça code review de</td>
+                <td>Review de código</td>
+              </tr>
+              <tr>
+                <td class="tok">sum</td>
+                <td>Resuma</td>
+                <td>Resumir texto ou código</td>
+              </tr>
+            </table>
+          </div>
+
+          <div id="doc-langs">
+            <h2>Linguagens</h2>
+            <p>Prefixo <strong style="color:var(--blue)">$</strong> identifica a linguagem de programação.</p>
+            <table class="token-table">
+              <tr>
+                <th>Token</th>
+                <th>Linguagem</th>
+                <th>Token</th>
+                <th>Linguagem</th>
+              </tr>
+              <tr>
+                <td class="tok-blue">$py</td>
+                <td>Python</td>
+                <td class="tok-blue">$go</td>
+                <td>Go</td>
+              </tr>
+              <tr>
+                <td class="tok-blue">$js</td>
+                <td>JavaScript</td>
+                <td class="tok-blue">$rs</td>
+                <td>Rust</td>
+              </tr>
+              <tr>
+                <td class="tok-blue">$ts</td>
+                <td>TypeScript</td>
+                <td class="tok-blue">$sh</td>
+                <td>Shell / Bash</td>
+              </tr>
+              <tr>
+                <td class="tok-blue">$sql</td>
+                <td>SQL</td>
+                <td class="tok-blue">$css</td>
+                <td>CSS</td>
+              </tr>
+              <tr>
+                <td class="tok-blue">$java</td>
+                <td>Java</td>
+                <td class="tok-blue">$rb</td>
+                <td>Ruby</td>
+              </tr>
+              <tr>
+                <td class="tok-blue">$cs</td>
+                <td>C#</td>
+                <td class="tok-blue">$cpp</td>
+                <td>C++</td>
+              </tr>
+            </table>
+          </div>
+
+          <div id="doc-frameworks">
+            <h2>Frameworks & Libs</h2>
+            <p>Prefixo <strong style="color:var(--amber)">@</strong> identifica o framework ou biblioteca.</p>
+            <table class="token-table">
+              <tr>
+                <th>Token</th>
+                <th>Framework</th>
+              </tr>
+              <tr>
+                <td class="tok-amber">@streamlit</td>
+                <td>Streamlit (Python UI)</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@fastapi</td>
+                <td>FastAPI (Python API)</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@flask</td>
+                <td>Flask (Python web)</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@pandas</td>
+                <td>Pandas (data analysis)</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@plt</td>
+                <td>Matplotlib / Plotly</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@react</td>
+                <td>React</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@next</td>
+                <td>Next.js</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@express</td>
+                <td>Express.js</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@prisma</td>
+                <td>Prisma ORM</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@pg</td>
+                <td>PostgreSQL</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@mongo</td>
+                <td>MongoDB</td>
+              </tr>
+              <tr>
+                <td class="tok-amber">@jest</td>
+                <td>Jest (testing)</td>
+              </tr>
+            </table>
+          </div>
+
+          <div id="doc-modifiers">
+            <h2>Modificadores</h2>
+            <p>Ajustam a qualidade, estilo ou requisitos da resposta.</p>
+            <table class="token-table">
+              <tr>
+                <th>Token</th>
+                <th>Significado</th>
+              </tr>
+              <tr>
+                <td class="tok">ui+</td>
+                <td>Interface visualmente agradável / estilizada</td>
+              </tr>
+              <tr>
+                <td class="tok">prd</td>
+                <td>Production-ready, boas práticas, robusto</td>
+              </tr>
+              <tr>
+                <td class="tok">cm</td>
+                <td>Incluir comentários explicativos no código</td>
+              </tr>
+              <tr>
+                <td class="tok">dk</td>
+                <td>Dar exemplos de uso práticos</td>
+              </tr>
+              <tr>
+                <td class="tok">typ</td>
+                <td>Incluir tipagem / type hints / annotations</td>
+              </tr>
+              <tr>
+                <td class="tok">async</td>
+                <td>Implementação assíncrona</td>
+              </tr>
+              <tr>
+                <td class="tok">min</td>
+                <td>Versão mínima / simples / sem dependências extras</td>
+              </tr>
+              <tr>
+                <td class="tok">*</td>
+                <td>Máxima qualidade — não economize esforço</td>
+              </tr>
+              <tr>
+                <td class="tok">in[a,b]</td>
+                <td>Parâmetros de entrada / campos</td>
+              </tr>
+              <tr>
+                <td class="tok">out[x,y]</td>
+                <td>Valores de saída esperados</td>
+              </tr>
+              <tr>
+                <td class="tok">err[404,500]</td>
+                <td>Tratar esses códigos de erro especificamente</td>
+              </tr>
+            </table>
+          </div>
+
+          <div id="doc-examples">
+            <h2>Exemplos reais</h2>
+
+            <div class="example-block">
+              <div class="eb-head"><span class="eb-label">código · python · streamlit</span><span
+                  class="pill pill-green">−76%</span></div>
+              <div class="eb-body">
+                <div class="eb-compressed">cr $py @streamlit; calc velocidade; in[dist,t,a]; ui+</div>
+                <div class="eb-arrow">↑ comprimido de ↓</div>
+                <div class="eb-expanded">"Bom dia! Por favor faça um código python que use streamlit como interface para
+                  ficar bonitinho podendo calcular a velocidade de um objeto quando eu colocar as grandezas"</div>
+                <div class="eb-saving">34 tokens → 8 tokens</div>
+              </div>
+            </div>
+
+            <div class="example-block">
+              <div class="eb-head"><span class="eb-label">api · node · express</span><span
+                  class="pill pill-green">−71%</span></div>
+              <div class="eb-body">
+                <div class="eb-compressed">cr $js @express; #api CRUD users; in[name,email,role]; err[404,422]; prd
+                </div>
+                <div class="eb-arrow">↑ comprimido de ↓</div>
+                <div class="eb-expanded">"Preciso de uma API REST completa em Node.js com Express para gerenciar
+                  usuários, com operações de criar, listar, atualizar e deletar. Os campos são nome, email e role. Trate
+                  os erros 404 e 422. Código pronto para produção."</div>
+                <div class="eb-saving">47 tokens → 14 tokens</div>
+              </div>
+            </div>
+
+            <div class="example-block">
+              <div class="eb-head"><span class="eb-label">explicação · javascript</span><span
+                  class="pill pill-green">−68%</span></div>
+              <div class="eb-body">
+                <div class="eb-compressed">ex $js @react; #hook fetch; dk cm</div>
+                <div class="eb-arrow">↑ comprimido de ↓</div>
+                <div class="eb-expanded">"Você pode me explicar como criar um React hook customizado para busca de
+                  dados? Seria ótimo ter exemplos práticos e comentários no código."</div>
+                <div class="eb-saving">28 tokens → 9 tokens</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="doc-api">
+            <h2>API Reference</h2>
+            <h3>POST /v1/compress</h3>
+            <div class="code-block"><span class="c-muted">// Request</span><br>{<br> &nbsp;&nbsp;<span
+                class="c-green">"prompt"</span>: <span class="c-green">"seu prompt natural aqui"</span>,<br>
+              &nbsp;&nbsp;<span class="c-green">"model"</span>: <span class="c-green">"haiku"</span> <span
+                class="c-muted">// haiku | sonnet | flash</span><br>}<br><br><span class="c-muted">//
+                Response</span><br>{<br> &nbsp;&nbsp;<span class="c-green">"compressed"</span>: <span
+                class="c-green">"cr $py @streamlit; calc velocidade; ui+"</span>,<br> &nbsp;&nbsp;<span
+                class="c-green">"tokens_before"</span>: 34,<br> &nbsp;&nbsp;<span class="c-green">"tokens_after"</span>:
+              8,<br> &nbsp;&nbsp;<span class="c-green">"savings"</span>: 0.76,<br> &nbsp;&nbsp;<span
+                class="c-green">"latency_ms"</span>: 7<br>}</div>
+            <h3>Autenticação</h3>
+            <div class="code-block">Authorization: Bearer <span class="c-amber">tl_live_xxxxxxxxxxxxxxxx</span></div>
+            <div class="callout"><strong>Rate limits:</strong> Starter 500/mês · Pro ilimitado · Team ilimitado com SLA
+              garantido.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: PRICING -->
+  <!-- ============================================================ -->
+  <div id="page-pricing" class="page">
+    <div class="pricing-page">
+      <div class="pricing-hero">
+        <div class="badge" style="display:inline-flex;margin-bottom:24px">
+          <div class="badge-dot"></div>Preços simples e previsíveis
+        </div>
+        <h1 style="font-size:clamp(38px,6vw,72px);font-weight:800;letter-spacing:-.04em;margin-bottom:16px">Pague pelo
+          que <em style="font-style:normal;color:var(--green)">economiza</em>.</h1>
+        <p
+          style="font-family:var(--mono);font-size:14px;color:var(--muted);max-width:480px;margin:0 auto 48px;line-height:1.8">
+          Sem surpresas. Cancele a qualquer hora. Downgrade gratuito para Starter.</p>
+
+        <div class="pricing-grid" style="text-align:left;max-width:900px;margin:0 auto">
+          <div class="plan">
+            <div class="plan-name">Starter</div>
+            <div class="plan-price">$0<span>/mês</span></div>
+            <div class="plan-desc">Para explorar e aprender TokLang no seu ritmo.</div>
+            <ul class="plan-features">
+              <li>500 compressões/mês</li>
+              <li>Vocabulário base (80 tokens)</li>
+              <li>Dashboard básico</li>
+              <li>Extensão de navegador</li>
+              <li>Suporte via comunidade</li>
+            </ul>
+            <button class="plan-btn" onclick="navigate('app')">Criar conta grátis</button>
+          </div>
+          <div class="plan featured">
+            <div class="plan-badge">Mais popular</div>
+            <div class="plan-name">Pro</div>
+            <div class="plan-price">$19<span>/mês</span></div>
+            <div class="plan-desc">Para devs e power users que querem máxima economia.</div>
+            <ul class="plan-features">
+              <li>Compressões ilimitadas</li>
+              <li>API access + SDK npm</li>
+              <li>Vocabulário expandido (400+ tokens)</li>
+              <li>Vocabulário customizado</li>
+              <li>Analytics histórico</li>
+              <li>Relatório de economia em $</li>
+              <li>Suporte por email (48h)</li>
+            </ul>
+            <button class="plan-btn">Começar — 14 dias grátis</button>
+          </div>
+          <div class="plan">
+            <div class="plan-name">Team</div>
+            <div class="plan-price">$79<span>/mês</span></div>
+            <div class="plan-desc">Para equipes usando IA em produção em escala.</div>
+            <ul class="plan-features">
+              <li>Até 10 membros</li>
+              <li>Vocabulário compartilhado</li>
+              <li>Dashboard de equipe</li>
+              <li>Integração Slack + Notion</li>
+              <li>SSO / SAML</li>
+              <li>SLA 99.9% uptime</li>
+              <li>Suporte prioritário (4h)</li>
+            </ul>
+            <button class="plan-btn">Falar com vendas</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPARISON TABLE -->
+      <div class="compare-table">
+        <div class="section-tag" style="text-align:center;margin-bottom:12px">comparação detalhada</div>
+        <div class="ct-wrap">
+          <table class="ct-table">
+            <thead>
+              <tr>
+                <th>Funcionalidade</th>
+                <th>Starter</th>
+                <th class="featured-col">Pro</th>
+                <th>Team</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="section-row">
+                <td colspan="4">Compressão</td>
+              </tr>
+              <tr>
+                <td>Compressões/mês</td>
+                <td>500</td>
+                <td>Ilimitado</td>
+                <td>Ilimitado</td>
+              </tr>
+              <tr>
+                <td>Latência de compressão</td>
+                <td>&lt;50ms</td>
+                <td>&lt;10ms</td>
+                <td>&lt;10ms</td>
+              </tr>
+              <tr>
+                <td>Motor de IA (qualidade)</td>
+                <td>Base</td>
+                <td>Pro</td>
+                <td>Pro</td>
+              </tr>
+              <tr>
+                <td>Vocabulário base</td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Vocabulário expandido (400+ tokens)</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Vocabulário customizado</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr class="section-row">
+                <td colspan="4">Integração</td>
+              </tr>
+              <tr>
+                <td>Extensão de navegador</td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>API REST</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>SDK npm (Node/Python)</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Webhooks</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Slack + Notion</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="cross">—</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>SSO / SAML</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="cross">—</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr class="section-row">
+                <td colspan="4">Analytics</td>
+              </tr>
+              <tr>
+                <td>Dashboard básico</td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Histórico 30 dias</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Relatório de economia em $</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Dashboard de equipe</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="cross">—</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr class="section-row">
+                <td colspan="4">Suporte</td>
+              </tr>
+              <tr>
+                <td>Comunidade</td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+                <td><span class="check">✓</span></td>
+              </tr>
+              <tr>
+                <td>Email</td>
+                <td><span class="cross">—</span></td>
+                <td>48h</td>
+                <td>4h</td>
+              </tr>
+              <tr>
+                <td>SLA de uptime</td>
+                <td><span class="cross">—</span></td>
+                <td><span class="cross">—</span></td>
+                <td>99.9%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FAQ PRICING -->
+      <div class="faq-pricing">
+        <div class="section-tag" style="margin-bottom:12px">dúvidas sobre preços</div>
+        <div class="faq-list">
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">O que conta como uma "compressão"? <span
+                class="faq-icon">+</span></div>
+            <div class="faq-a">Cada chamada à API de compressão conta como uma compressão, independentemente do tamanho
+              do prompt. Prompts comprimidos pelo SDK ou extensão do navegador também contam.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">Posso mudar de plano a qualquer hora? <span
+                class="faq-icon">+</span></div>
+            <div class="faq-a">Sim. Upgrade entra em vigor imediatamente com cobrança proporcional. Downgrade entra em
+              vigor no próximo ciclo de cobrança. Cancelamento disponível a qualquer momento.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">Há desconto para pagamento anual? <span
+                class="faq-icon">+</span></div>
+            <div class="faq-a">Sim — pagamento anual tem 20% de desconto em todos os planos. Pro anual sai por $182/ano
+              (equivale a $15.17/mês). Team anual sai por $759/ano.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggleFaq(this)">Enterprise / volume personalizado? <span
+                class="faq-icon">+</span></div>
+            <div class="faq-a">Para equipes maiores que 10 pessoas ou volumes muito altos, entre em contato via
+              sales@toklang.dev para um plano personalizado com precificação por volume.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: LOGIN -->
+  <!-- ============================================================ -->
+  <div id="page-login" class="page">
+    <div class="auth-page">
+      <div class="auth-card">
+        <div class="auth-card-header">
+          <div class="auth-logo">Tok<span>Lang</span></div>
+          <div class="auth-title">Bem-vindo de volta</div>
+          <div class="auth-sub">// entre na sua conta para continuar</div>
+        </div>
+        <div class="auth-body">
+          <div class="demo-notice">
+            <span class="demo-notice-icon">🧪</span>
+            <span>Modo demonstração — qualquer email/senha válidos funcionam. Em produção, autenticação real via banco
+              de dados.</span>
+          </div>
+          <button class="oauth-btn" onclick="oauthLogin('google')" aria-label="Entrar com Google">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+              <path fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+              <path fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+              <path fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+            </svg>
+            Entrar com Google <span
+              style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:4px">[simulado]</span>
+          </button>
+          <div class="auth-divider">ou com e-mail</div>
+          <div class="form-group">
+            <label class="form-label" for="login-email">E-mail</label>
+            <input class="form-input" id="login-email" type="email" placeholder="voce@empresa.com" autocomplete="email"
+              onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()">
+          </div>
+          <div class="form-group" style="margin-bottom:8px">
+            <label class="form-label" style="display:flex;justify-content:space-between">
+              Senha
+              <a onclick="navigate('forgot')"
+                style="color:var(--green);cursor:pointer;font-size:10px;font-family:var(--mono)">Esqueci a senha</a>
+            </label>
+            <input class="form-input" id="login-password" type="password" placeholder="••••••••"
+              autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+            <div class="form-error" id="login-error" style="display:none"></div>
+          </div>
+          <button class="form-btn" onclick="doLogin()" id="login-btn">Entrar</button>
+          <div style="margin-top:12px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)">
+            Não tem conta? <a onclick="navigate('signup')" style="color:var(--green);cursor:pointer">Criar agora —
+              grátis</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: SIGNUP -->
+  <!-- ============================================================ -->
+  <div id="page-signup" class="page">
+    <div class="auth-page" style="padding-top:80px">
+      <div class="auth-card" style="max-width:500px">
+        <div class="auth-card-header">
+          <div class="auth-logo">Tok<span>Lang</span></div>
+          <div class="auth-title">Criar sua conta</div>
+          <div class="auth-sub">// grátis para sempre · sem cartão de crédito</div>
+        </div>
+        <div class="auth-body">
+          <div class="demo-notice">
+            <span class="demo-notice-icon">🧪</span>
+            <span>Modo demo — conta criada localmente. Em produção: verificação de e-mail, hash de senha, banco
+              real.</span>
+          </div>
+          <button class="oauth-btn" onclick="oauthLogin('google')" aria-label="Continuar com Google">
+            <svg width="16" height="16" viewBox="0 0 24 24">
+              <path fill="#4285F4"
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+              <path fill="#34A853"
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+              <path fill="#FBBC05"
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+              <path fill="#EA4335"
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+            </svg>
+            Continuar com Google <span
+              style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-left:4px">[simulado]</span>
+          </button>
+          <div class="auth-divider">ou preencha os dados</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div class="form-group">
+              <label class="form-label">Nome</label>
+              <input class="form-input" id="signup-name" type="text" placeholder="Seu nome">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sobrenome</label>
+              <input class="form-input" id="signup-last" type="text" placeholder="Sobrenome">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">E-mail</label>
+            <input class="form-input" id="signup-email" type="email" placeholder="voce@empresa.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Senha</label>
+            <input class="form-input" id="signup-password" type="password" placeholder="Mínimo 8 caracteres"
+              oninput="checkPasswordStrength(this.value)">
+            <div class="pw-strength">
+              <div class="pw-bar" id="pw-bar"></div>
+            </div>
+            <div class="form-hint" id="pw-hint">Crie uma senha forte</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Plano inicial</label>
+            <div class="plan-picker">
+              <div class="plan-option selected" onclick="selectPlan(this,'starter')">
+                <div class="plan-option-name">Starter</div>
+                <div class="plan-option-price">$0</div>
+              </div>
+              <div class="plan-option" onclick="selectPlan(this,'pro')">
+                <div class="plan-option-name">Pro</div>
+                <div class="plan-option-price">$19</div>
+              </div>
+              <div class="plan-option" onclick="selectPlan(this,'team')">
+                <div class="plan-option-name">Team</div>
+                <div class="plan-option-price">$79</div>
+              </div>
+            </div>
+          </div>
+          <label class="check-group">
+            <input type="checkbox" id="signup-terms">
+            <div class="check-box">✓</div>
+            <div class="check-label">Aceito os <a>Termos de Uso</a> e a <a>Política de Privacidade</a></div>
+          </label>
+          <div class="form-error" id="signup-error" style="display:none;margin-bottom:10px"></div>
+          <button class="form-btn" onclick="doSignup()" id="signup-btn">Criar conta grátis</button>
+          <div style="margin-top:12px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)">
+            Já tem conta? <a onclick="navigate('login')" style="color:var(--green);cursor:pointer">Entrar</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: FORGOT PASSWORD -->
+  <!-- ============================================================ -->
+  <div id="page-forgot" class="page">
+    <div class="auth-page">
+      <div class="auth-card">
+        <div class="auth-card-header">
+          <div class="auth-logo">Tok<span>Lang</span></div>
+          <div class="auth-title">Recuperar senha</div>
+          <div class="auth-sub">// enviaremos um link de redefinição</div>
+        </div>
+        <div class="auth-body">
+          <p style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.7">Digite
+            o e-mail associado à sua conta. Se existir, você receberá um link para criar uma nova senha.</p>
+          <div class="form-group">
+            <label class="form-label">E-mail da conta</label>
+            <input class="form-input" id="forgot-email" type="email" placeholder="voce@empresa.com">
+            <div class="form-error" id="forgot-error" style="display:none"></div>
+          </div>
+          <button class="form-btn" onclick="doForgot()" id="forgot-btn">Enviar link de recuperação</button>
+          <button class="form-btn-ghost" onclick="navigate('login')">← Voltar para login</button>
+        </div>
+        <div id="forgot-success" style="display:none;padding:24px 32px;text-align:center">
+          <div style="font-size:32px;margin-bottom:12px">📬</div>
+          <div style="font-size:15px;font-weight:700;margin-bottom:8px">E-mail enviado!</div>
+          <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.7">
+            Verifique sua caixa de entrada. O link expira em 15 minutos.</div>
+          <button class="form-btn-ghost" onclick="navigate('login')">← Voltar para login</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PAGE: DASHBOARD -->
+  <!-- ============================================================ -->
+  <div id="page-dashboard" class="page">
+    <div class="dashboard-page">
+
+      <!-- MOBILE OVERLAY & DRAWER -->
+      <div class="dash-mobile-overlay" id="dash-overlay" onclick="closeMobileMenu()"></div>
+      <div class="dash-mobile-drawer" id="dash-drawer">
+        <button class="dash-mobile-close" onclick="closeMobileMenu()" aria-label="Fechar menu">✕</button>
+        <div class="dash-user" style="margin-top:24px">
+          <div class="dash-avatar" id="dash-avatar-mobile">TW</div>
+          <div class="dash-user-name" id="dash-user-name-mobile">Twn</div>
+          <div class="dash-user-plan"><span class="pill pill-green" style="font-size:9px">Starter</span></div>
+        </div>
+        <ul class="dash-nav" id="dash-nav-mobile">
+          <li class="dash-nav-item active" onclick="showDashSection('overview',this);closeMobileMenu()"><span
+              class="dash-nav-icon">⬛</span>Visão geral</li>
+          <li class="dash-nav-item" onclick="showDashSection('history',this);closeMobileMenu()"><span
+              class="dash-nav-icon">⟳</span>Histórico</li>
+          <li class="dash-nav-item" onclick="showDashSection('api',this);closeMobileMenu()"><span
+              class="dash-nav-icon">⌘</span>API & SDK</li>
+          <div class="dash-nav-section">Conta</div>
+          <li class="dash-nav-item" onclick="showDashSection('settings',this);closeMobileMenu()"><span
+              class="dash-nav-icon">⚙</span>Configurações</li>
+          <li class="dash-nav-item" onclick="showDashSection('billing',this);closeMobileMenu()"><span
+              class="dash-nav-icon">◈</span>Plano & cobrança</li>
+          <div style="height:1px;background:var(--border);margin:12px 16px"></div>
+          <li class="dash-nav-item" onclick="navigate('app')"><span class="dash-nav-icon">↗</span>Abrir compressor</li>
+          <li class="dash-nav-item" onclick="doLogout()"><span class="dash-nav-icon">→</span>Sair</li>
+        </ul>
+      </div>
+
+      <!-- MOBILE HEADER BAR -->
+      <div class="dash-mobile-header">
+        <div class="dash-mobile-title" id="dash-mobile-section-title">Visão geral</div>
+        <button class="dash-mobile-menu-btn" onclick="openMobileMenu()" aria-label="Abrir menu">☰ Menu</button>
+      </div>
+
+      <div class="dash-layout">
+
+        <!-- SIDEBAR -->
+        <aside class="dash-sidebar">
+          <div class="dash-user">
+            <div class="dash-avatar" id="dash-avatar-txt">TW</div>
+            <div class="dash-user-name" id="dash-user-name">Twn</div>
+            <div class="dash-user-plan"><span class="pill pill-green" style="font-size:9px">Starter</span></div>
+          </div>
+          <ul class="dash-nav">
+            <li class="dash-nav-item active" onclick="showDashSection('overview',this)"><span
+                class="dash-nav-icon">⬛</span>Visão geral</li>
+            <li class="dash-nav-item" onclick="showDashSection('history',this)"><span
+                class="dash-nav-icon">⟳</span>Histórico</li>
+            <li class="dash-nav-item" onclick="showDashSection('api',this)"><span class="dash-nav-icon">⌘</span>API &
+              SDK</li>
+            <div class="dash-nav-section">Conta</div>
+            <li class="dash-nav-item" onclick="showDashSection('settings',this)"><span
+                class="dash-nav-icon">⚙</span>Configurações</li>
+            <li class="dash-nav-item" onclick="showDashSection('billing',this)"><span
+                class="dash-nav-icon">◈</span>Plano & cobrança</li>
+            <div style="height:1px;background:var(--border);margin:12px 16px"></div>
+            <li class="dash-nav-item" onclick="navigate('app')"><span class="dash-nav-icon">↗</span>Abrir compressor
+            </li>
+            <li class="dash-nav-item" onclick="doLogout()"><span class="dash-nav-icon">→</span>Sair</li>
+          </ul>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="dash-main">
+
+          <!-- OVERVIEW -->
+          <div class="dash-section active" id="dash-overview">
+            <div class="dash-section-title">Visão geral</div>
+            <div class="dash-section-sub">// resumo do seu uso este mês</div>
+
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="metric-label">Compressões</div>
+                <div class="metric-val">47</div>
+                <div class="metric-delta up">↑ 12 esta semana</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Tokens economizados</div>
+                <div class="metric-val green">8.2K</div>
+                <div class="metric-delta up">↑ 76% média</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Economizado em $</div>
+                <div class="metric-val amber">$0.024</div>
+                <div class="metric-delta">estimativa GPT-4o</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-label">Limite do plano</div>
+                <div class="metric-val">453</div>
+                <div class="metric-delta">restantes de 500</div>
+              </div>
+            </div>
+
+            <div class="usage-bar-wrap">
+              <div class="usage-bar-label">
+                <span>Uso mensal — Starter</span>
+                <span>47 / 500 compressões</span>
+              </div>
+              <div class="usage-bar-track">
+                <div class="usage-bar-fill" style="width:9.4%"></div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+              <div class="chart-wrap">
+                <div class="chart-title">Tokens economizados · últimos 7 dias</div>
+                <div class="chart-val">8.2K</div>
+                <div class="mini-chart" id="mini-chart-1"></div>
+              </div>
+              <div class="chart-wrap">
+                <div class="chart-title">Compressões · últimos 7 dias</div>
+                <div class="chart-val">47</div>
+                <div class="mini-chart" id="mini-chart-2"></div>
+              </div>
+            </div>
+
+            <div class="table-wrap">
+              <div
+                style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+                <span
+                  style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Atividade
+                  recente</span>
+                <button onclick="showDashSection('history',null)"
+                  style="font-family:var(--mono);font-size:10px;color:var(--green);background:none;border:none;cursor:pointer">ver
+                  tudo →</button>
+              </div>
+              <table class="history-table">
+                <thead>
+                  <tr>
+                    <th>Prompt (resumo)</th>
+                    <th>TokLang</th>
+                    <th>Economia</th>
+                    <th>Quando</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-recent-tbody"></tbody>
+              </table>
+            </div>
+
+            <div
+              style="background:var(--gdim);border:1px solid rgba(0,255,136,.12);border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+              <div>
+                <div style="font-size:14px;font-weight:700;margin-bottom:4px">Faça upgrade para Pro</div>
+                <div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Compressões ilimitadas · API
+                  access · Analytics histórico · $19/mês</div>
+              </div>
+              <button class="btn btn-primary" style="white-space:nowrap;font-size:12px;padding:10px 20px"
+                onclick="showDashSection('billing',null)">Upgrade agora →</button>
+            </div>
+          </div>
+
+          <!-- HISTORY -->
+          <div class="dash-section" id="dash-history">
+            <div class="dash-section-title">Histórico de compressões</div>
+            <div class="dash-section-sub">// todas as suas compressões deste mês</div>
+            <div class="table-wrap">
+              <table class="history-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Prompt original (resumo)</th>
+                    <th>Comprimido</th>
+                    <th>Tokens antes</th>
+                    <th>Tokens depois</th>
+                    <th>Economia</th>
+                    <th>Data</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-full-history"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- API -->
+          <div class="dash-section" id="dash-api">
+            <div class="dash-section-title">API & SDK</div>
+            <div class="dash-section-sub">// integre TokLang na sua aplicação</div>
+
+            <div
+              style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">
+              Sua chave de API</div>
+            <div class="api-key-box">
+              <span id="api-key-display">tl_live_••••••••••••••••••••••••••••••••</span>
+              <div class="api-key-actions">
+                <button class="api-key-btn" onclick="toggleApiKey()">Revelar</button>
+                <button class="api-key-btn" onclick="copyApiKey()">Copiar</button>
+                <button class="api-key-btn" style="color:var(--red)" onclick="rotateApiKey()">Rotacionar</button>
+              </div>
+            </div>
+            <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:24px">Nunca compartilhe
+              sua chave. Rotacione se comprometida.</div>
+
+            <div
+              style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">
+              Instalação rápida</div>
+            <div
+              style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:14px 18px;font-family:var(--mono);font-size:12px;margin-bottom:14px;line-height:1.8">
+              <span style="color:var(--muted)"># npm</span><br>
+              <span style="color:var(--green)">npm install toklang</span><br><br>
+              <span style="color:var(--muted)"># pip</span><br>
+              <span style="color:var(--green)">pip install toklang</span>
+            </div>
+            <div
+              style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:14px 18px;font-family:var(--mono);font-size:12px;margin-bottom:24px;line-height:1.9">
+              <span style="color:var(--blue)">import</span> { compress } <span style="color:var(--blue)">from</span>
+              <span style="color:var(--green)">'toklang'</span><br><br>
+              <span style="color:var(--blue)">const</span> result = <span style="color:var(--blue)">await</span>
+              compress(<span style="color:var(--green)">"Seu prompt aqui"</span>, {<br>
+              &nbsp;&nbsp;apiKey: <span style="color:var(--green)">'<span
+                  id="api-key-code">tl_live_••••••••••••</span>'</span><br>
+              })<br><br>
+              console.log(result.compressed) <span style="color:var(--muted)">// notação TokLang</span><br>
+              console.log(result.savings) <span style="color:var(--muted)">// 0.74 → 74%</span>
+            </div>
+            <div
+              style="background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius-sm);padding:12px 16px;font-family:var(--mono);font-size:11px;color:var(--amber);line-height:1.7">
+              ⚠ Plano Starter: acesso à API não incluso. <a onclick="showDashSection('billing',null)"
+                style="cursor:pointer;text-decoration:underline">Faça upgrade para Pro</a> para habilitar acesso via API
+              e SDK.
+            </div>
+          </div>
+
+          <!-- SETTINGS -->
+          <div class="dash-section" id="dash-settings">
+            <div class="dash-section-title">Configurações</div>
+            <div class="dash-section-sub">// preferências e perfil da conta</div>
+
+            <div
+              style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">
+              Perfil</div>
+            <div class="settings-group" style="margin-bottom:20px">
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row-label">Nome</div>
+                  <div class="settings-row-sub" id="set-name-display">Twn</div>
+                </div>
+                <button class="api-key-btn" onclick="editName()">Editar</button>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row-label">E-mail</div>
+                  <div class="settings-row-sub" id="set-email-display">twn@toklang.dev</div>
+                </div>
+                <button class="api-key-btn">Alterar</button>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row-label">Senha</div>
+                  <div class="settings-row-sub">Última alteração: nunca</div>
+                </div>
+                <button class="api-key-btn">Alterar</button>
+              </div>
+            </div>
+
+            <div
+              style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">
+              Preferências</div>
+            <div class="settings-group" style="margin-bottom:20px">
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row-label">Analytics histórico</div>
+                  <div class="settings-row-sub">Salvar histórico de compressões</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="showToast('Configuração salva','✓')">
+                  <div class="toggle-track">
+                    <div class="toggle-thumb"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row-label">Notificações por e-mail</div>
+                  <div class="settings-row-sub">Resumo semanal de uso</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" onchange="showToast('Configuração salva','✓')">
+                  <div class="toggle-track">
+                    <div class="toggle-thumb"></div>
+                  </div>
+                </label>
+              </div>
+              <div class="settings-row">
+                <div>
+                  <div class="settings-row-label">Alerta de limite</div>
+                  <div class="settings-row-sub">Notificar ao atingir 80% do limite</div>
+                </div>
+                <label class="toggle-switch">
+                  <input type="checkbox" checked onchange="showToast('Configuração salva','✓')">
+                  <div class="toggle-track">
+                    <div class="toggle-thumb"></div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="danger-zone">
+              <div class="danger-zone-title">// zona de perigo</div>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <button class="btn-danger" onclick="showToast('Dados exportados para seu e-mail','📦')">Exportar meus
+                  dados</button>
+                <button class="btn-danger" onclick="confirmDeleteAccount()">Excluir conta</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- BILLING -->
+          <div class="dash-section" id="dash-billing">
+            <div class="dash-section-title">Plano & cobrança</div>
+            <div class="dash-section-sub">// gerencie sua assinatura</div>
+
+            <div
+              style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+              <div>
+                <div
+                  style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">
+                  Plano atual</div>
+                <div style="font-size:22px;font-weight:800;letter-spacing:-.02em">Starter <span
+                    style="font-size:14px;font-weight:400;color:var(--muted)">· Gratuito</span></div>
+                <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px">500
+                  compressões/mês · Sem API · Dashboard básico</div>
+              </div>
+              <span class="pill pill-gray">Gratuito</span>
+            </div>
+
+            <div class="pricing-grid" style="margin-bottom:24px">
+              <div class="plan" style="opacity:.5;cursor:default">
+                <div class="plan-name">Starter</div>
+                <div class="plan-price">$0<span>/mês</span></div>
+                <div class="plan-desc">Plano atual</div>
+                <ul class="plan-features">
+                  <li>500 compressões/mês</li>
+                  <li>Dashboard básico</li>
+                </ul>
+                <div class="plan-btn" style="background:var(--bg3);cursor:default;opacity:.6">Plano atual</div>
+              </div>
+              <div class="plan featured">
+                <div class="plan-badge">Recomendado</div>
+                <div class="plan-name">Pro</div>
+                <div class="plan-price">$19<span>/mês</span></div>
+                <div class="plan-desc">Para devs e power users.</div>
+                <ul class="plan-features">
+                  <li>Ilimitado</li>
+                  <li>API + SDK</li>
+                  <li>Analytics histórico</li>
+                  <li>Vocabulário expandido</li>
+                </ul>
+                <button class="plan-btn" onclick="showToast('Redirecionando para checkout...','💳')">Assinar Pro — 14
+                  dias grátis</button>
+              </div>
+              <div class="plan">
+                <div class="plan-name">Team</div>
+                <div class="plan-price">$79<span>/mês</span></div>
+                <div class="plan-desc">Para equipes.</div>
+                <ul class="plan-features">
+                  <li>10 membros</li>
+                  <li>Dashboard time</li>
+                  <li>SSO/SAML</li>
+                </ul>
+                <button class="plan-btn" onclick="showToast('Abrindo contato com vendas...','📞')">Falar com
+                  vendas</button>
+              </div>
+            </div>
+
+            <div
+              style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+              <div style="padding:12px 16px;border-bottom:1px solid var(--border)"><span
+                  style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Histórico
+                  de faturas</span></div>
+              <div style="padding:40px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted)">
+                Nenhuma fatura ainda — você está no plano gratuito.</div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="global-toast">
+    <span class="toast-icon" id="toast-icon">✓</span>
+    <span class="toast-msg" id="toast-msg">Ação realizada</span>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- SCRIPTS -->
+  <!-- ============================================================ -->
+  <script>
+    /* ===== AUTH STATE ===== */
+    const AUTH_KEY = 'tl_auth_user';
+    const USAGE_KEY = 'tl_monthly_usage';
+
+    function getUser() { try { return JSON.parse(localStorage.getItem(AUTH_KEY)); } catch { return null; } }
+    function saveUser(u) { localStorage.setItem(AUTH_KEY, JSON.stringify(u)); }
+    function clearUser() { localStorage.removeItem(AUTH_KEY); }
+
+    /* ===== USAGE COUNTER (sessionStorage — resets per session, simulates monthly limit) ===== */
+    function getUsage() { return parseInt(sessionStorage.getItem(USAGE_KEY) || '0', 10); }
+    function incUsage() { const v = getUsage() + 1; sessionStorage.setItem(USAGE_KEY, v); return v; }
+
+    function updateUsageUI() {
+      const used = getUsage();
+      const limit = 500;
+      const pct = Math.min((used / limit) * 100, 100);
+      const el = document.getElementById('uc-used');
+      const fill = document.getElementById('uc-fill');
+      if (el) el.textContent = used;
+      if (fill) {
+        fill.style.width = pct + '%';
+        fill.className = 'uc-fill' + (pct >= 100 ? ' full' : pct >= 80 ? ' warn' : '');
+      }
+      const banner = document.getElementById('limit-banner');
+      if (banner) banner.style.display = pct >= 80 && pct < 100 ? 'block' : 'none';
+    }
+
+    /* ===== CURSOR GLOW — RAF throttled ===== */
+    let glowX = 0, glowY = 0, glowRaf = false;
+    const glow = document.getElementById('cursor-glow');
+    document.addEventListener('mousemove', e => {
+      glowX = e.clientX; glowY = e.clientY;
+      if (!glowRaf) {
+        glowRaf = true;
+        requestAnimationFrame(() => {
+          glow.style.left = glowX + 'px';
+          glow.style.top = glowY + 'px';
+          glowRaf = false;
+        });
+      }
+    });
+
+    /* ===== REVEAL — with disconnect ===== */
+    let revealObserver = null;
+    function initReveal() {
+      if (revealObserver) revealObserver.disconnect();
+      revealObserver = new IntersectionObserver(entries => {
+        entries.forEach((e, i) => {
+          if (e.isIntersecting) setTimeout(() => e.target.classList.add('visible'), i * 70);
+        });
+      }, { threshold: 0.08 });
+      setTimeout(() => {
+        document.querySelectorAll('.reveal:not(.visible)').forEach(el => revealObserver.observe(el));
+      }, 100);
+    }
+
+    /* ===== ROUTER ===== */
+    const VALID_PAGES = ['home', 'app', 'docs', 'pricing', 'login', 'signup', 'forgot', 'dashboard'];
+
+    function navigate(page) {
+      if (page === 'dashboard' && !getUser()) {
+        showToast('Faça login para acessar o dashboard', '🔒');
+        navigate('login');
+        return;
+      }
+      // Reset forgot form state when leaving
+      if (page !== 'forgot') resetForgotForm();
+
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('[data-page]').forEach(a => a.classList.remove('active'));
+      const el = document.getElementById('page-' + page);
+      if (el) el.classList.add('active');
+      const link = document.querySelector(`[data-page="${page}"]`);
+      if (link) link.classList.add('active');
+      window.location.hash = page;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      initReveal();
+      if (page === 'dashboard') initDashboard();
+      if (page === 'app') { updateUsageUI(); }
+    }
+
+    function initRouter() {
+      updateNavAuth();
+      const hash = window.location.hash.replace('#', '') || 'home';
+      navigate(VALID_PAGES.includes(hash) ? hash : 'home');
+    }
+
+    /* ===== NAV AUTH STATE ===== */
+    function updateNavAuth() {
+      const u = getUser();
+      const out = document.getElementById('nav-logged-out');
+      const inn = document.getElementById('nav-logged-in');
+      const av = document.getElementById('nav-avatar');
+      if (u) {
+        out.style.display = 'none';
+        inn.style.display = 'flex';
+        const initials = ((u.name || '').charAt(0) + (u.last || '').charAt(0)).toUpperCase() || 'TL';
+        if (av) av.textContent = initials;
+        syncDashUser(u);
+      } else {
+        out.style.display = 'flex';
+        inn.style.display = 'none';
+      }
+    }
+
+    function syncDashUser(u) {
+      const initials = ((u.name || '').charAt(0) + (u.last || '').charAt(0)).toUpperCase() || 'TL';
+      ['dash-avatar-txt', 'dash-avatar-mobile'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.textContent = initials;
+      });
+      ['dash-user-name', 'dash-user-name-mobile'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.textContent = u.name || 'Usuário';
+      });
+      const sn = document.getElementById('set-name-display');
+      if (sn) sn.textContent = (u.name || '') + ' ' + (u.last || '');
+      const se = document.getElementById('set-email-display');
+      if (se) se.textContent = u.email || '';
+    }
+
+    /* ===== FAQ ===== */
+    function toggleFaq(el) {
+      const item = el.parentElement;
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    }
+
+    /* ===== DOCS ===== */
+    function scrollToDoc(id, link) {
+      document.querySelectorAll('.dns-link').forEach(l => l.classList.remove('active'));
+      if (link) link.classList.add('active');
+      const el = document.getElementById(id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    /* ===== TOAST ===== */
+    let toastTimer;
+    function showToast(msg, icon = '✓') {
+      const t = document.getElementById('global-toast');
+      document.getElementById('toast-msg').textContent = msg;
+      document.getElementById('toast-icon').textContent = icon;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+    }
+
+    /* ===== FORGOT FORM RESET ===== */
+    function resetForgotForm() {
+      const btn = document.getElementById('forgot-btn');
+      const ghost = document.querySelector('#page-forgot .form-btn-ghost');
+      const p = document.querySelector('#page-forgot .auth-body p');
+      const fg = document.querySelector('#page-forgot .form-group');
+      const success = document.getElementById('forgot-success');
+      const err = document.getElementById('forgot-error');
+      const input = document.getElementById('forgot-email');
+      if (btn) { btn.style.display = ''; btn.disabled = false; btn.textContent = 'Enviar link de recuperação'; }
+      if (ghost) ghost.style.display = '';
+      if (p) p.style.display = '';
+      if (fg) fg.style.display = '';
+      if (success) success.style.display = 'none';
+      if (err) err.style.display = 'none';
+      if (input) input.value = '';
+    }
+
+    /* ===== AUTH FORMS ===== */
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    function doLogin() {
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
+      const err = document.getElementById('login-error');
+      const btn = document.getElementById('login-btn');
+      err.style.display = 'none';
+      if (!EMAIL_RE.test(email)) {
+        err.textContent = 'Informe um e-mail válido (ex: nome@empresa.com).';
+        err.style.display = 'block';
+        document.getElementById('login-email').classList.add('error');
+        return;
+      }
+      document.getElementById('login-email').classList.remove('error');
+      if (pass.length < 4) {
+        err.textContent = 'Senha muito curta. Mínimo 4 caracteres.';
+        err.style.display = 'block';
+        return;
+      }
+      btn.disabled = true; btn.textContent = 'Verificando...';
+      setTimeout(() => {
+        const parts = email.split('@')[0].split('.');
+        const name = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+        const last = parts[1] ? parts[1].charAt(0).toUpperCase() + parts[1].slice(1) : '';
+        saveUser({ name, last, email, plan: 'starter', apiKey: 'tl_live_' + crypto.randomUUID().replace(/-/g, '').slice(0, 16) });
+        updateNavAuth();
+        btn.disabled = false; btn.textContent = 'Entrar';
+        showToast('Bem-vindo de volta, ' + name + '!', '👋');
+        navigate('dashboard');
+      }, 900);
+    }
+
+    function doSignup() {
+      const name = document.getElementById('signup-name').value.trim();
+      const last = document.getElementById('signup-last').value.trim();
+      const email = document.getElementById('signup-email').value.trim();
+      const pass = document.getElementById('signup-password').value;
+      const terms = document.getElementById('signup-terms').checked;
+      const err = document.getElementById('signup-error');
+      const btn = document.getElementById('signup-btn');
+      err.style.display = 'none';
+      if (!name || name.length < 2) { err.textContent = 'Informe seu nome (mínimo 2 caracteres).'; err.style.display = 'block'; return; }
+      if (!EMAIL_RE.test(email)) { err.textContent = 'Informe um e-mail válido (ex: nome@empresa.com).'; err.style.display = 'block'; return; }
+      if (pass.length < 8) { err.textContent = 'Senha deve ter pelo menos 8 caracteres.'; err.style.display = 'block'; return; }
+      if (!terms) { err.textContent = 'Aceite os termos para continuar.'; err.style.display = 'block'; return; }
+      btn.disabled = true; btn.textContent = 'Criando conta...';
+      setTimeout(() => {
+        saveUser({ name, last, email, plan: selectedPlan, apiKey: 'tl_live_' + crypto.randomUUID().replace(/-/g, '').slice(0, 16) });
+        updateNavAuth();
+        btn.disabled = false; btn.textContent = 'Criar conta grátis';
+        showToast('Conta criada! Bem-vindo ao TokLang 🎉', '🎉');
+        navigate('dashboard');
+      }, 1100);
+    }
+
+    function doForgot() {
+      const email = document.getElementById('forgot-email').value.trim();
+      const err = document.getElementById('forgot-error');
+      const btn = document.getElementById('forgot-btn');
+      err.style.display = 'none';
+      if (!EMAIL_RE.test(email)) {
+        err.textContent = 'Informe um e-mail válido (ex: nome@empresa.com).';
+        err.style.display = 'block';
+        return;
+      }
+      btn.disabled = true; btn.textContent = 'Enviando...';
+      setTimeout(() => {
+        document.getElementById('forgot-btn').style.display = 'none';
+        document.querySelector('#page-forgot .form-btn-ghost').style.display = 'none';
+        document.querySelector('#page-forgot .auth-body p').style.display = 'none';
+        document.querySelector('#page-forgot .form-group').style.display = 'none';
+        document.getElementById('forgot-success').style.display = 'block';
+      }, 1000);
+    }
+
+    function oauthLogin(provider) {
+      showToast('Simulando autenticação OAuth via ' + provider + '...', '🔐');
+      setTimeout(() => {
+        saveUser({ name: 'Twn', last: '', email: 'twn@gmail.com', plan: 'starter', apiKey: 'tl_live_' + crypto.randomUUID().replace(/-/g, '').slice(0, 16) });
+        updateNavAuth();
+        showToast('Logado via ' + provider + '!', '✓');
+        navigate('dashboard');
+      }, 1200);
+    }
+
+    function doLogout() {
+      clearUser();
+      updateNavAuth();
+      showToast('Sessão encerrada. Até logo!', '👋');
+      navigate('home');
+    }
+
+    /* ===== SIGNUP HELPERS ===== */
+    let selectedPlan = 'starter';
+    function selectPlan(el, plan) {
+      document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedPlan = plan;
+    }
+
+    function checkPasswordStrength(val) {
+      const bar = document.getElementById('pw-bar');
+      const hint = document.getElementById('pw-hint');
+      let score = 0;
+      if (val.length >= 8) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      const colors = ['', '#ff5e5e', '#f5a623', '#4d9fff', '#00ff88'];
+      const labels = ['', 'Muito fraca', 'Fraca', 'Boa', 'Forte 💪'];
+      if (bar) { bar.style.width = (score * 25) + '%'; bar.style.background = colors[score] || ''; }
+      if (hint) { hint.textContent = labels[score] || 'Crie uma senha forte'; hint.style.color = colors[score] || 'var(--muted)'; }
+    }
+
+    /* ===== MOBILE DASHBOARD ===== */
+    function openMobileMenu() {
+      document.getElementById('dash-drawer').classList.add('open');
+      document.getElementById('dash-overlay').style.display = 'block';
+    }
+    function closeMobileMenu() {
+      document.getElementById('dash-drawer').classList.remove('open');
+      document.getElementById('dash-overlay').style.display = 'none';
+    }
+
+    /* ===== DASHBOARD ===== */
+    const FAKE_HISTORY = [
+      { orig: 'Bom dia! Faça um código python com streamlit para calcular velocidade', tok: 'cr $py @streamlit; calc velocidade; ui+', before: 34, after: 8, saving: 76, date: 'Hoje, 14:32' },
+      { orig: 'Preciso de uma API REST em Node com Express para usuários com CRUD', tok: 'cr $js @express; #api CRUD users; prd', before: 22, after: 7, saving: 68, date: 'Hoje, 11:15' },
+      { orig: 'Explique closures em JavaScript com exemplos práticos por favor', tok: 'ex $js closures; dk', before: 11, after: 4, saving: 63, date: 'Ontem, 18:44' },
+      { orig: 'Refatore essa função bagunçada pra ficar mais limpa e legível', tok: 'rf $js; clean fn; cm', before: 13, after: 6, saving: 54, date: 'Ontem, 16:20' },
+      { orig: 'Cria um dashboard com Plotly e Streamlit de vendas mensais', tok: 'cr $py @streamlit @plt; dashboard vendas; ui+', before: 15, after: 9, saving: 40, date: '25/01, 09:11' },
+      { orig: 'Script python para web scraping e salvar em CSV', tok: 'cr $py #scr; scraping; out[csv]', before: 11, after: 7, saving: 36, date: '24/01, 20:05' },
+      { orig: 'Escreva testes unitários para esse módulo em TypeScript', tok: 'tst $ts; unit; cm', before: 10, after: 5, saving: 50, date: '23/01, 15:30' },
+    ];
+
+    function initDashboard() {
+      const tbody = document.getElementById('dash-recent-tbody');
+      if (tbody) tbody.innerHTML = FAKE_HISTORY.slice(0, 4).map(h => `
+    <tr>
+      <td>${escHtml(h.orig.substring(0, 45))}...</td>
+      <td class="tok">${escHtml(h.tok)}</td>
+      <td class="saving">-${h.saving}%</td>
+      <td>${h.date}</td>
+    </tr>`).join('');
+
+      const fh = document.getElementById('dash-full-history');
+      if (fh) fh.innerHTML = FAKE_HISTORY.map((h, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td>${escHtml(h.orig.substring(0, 40))}...</td>
+      <td class="tok">${escHtml(h.tok)}</td>
+      <td>${h.before}</td>
+      <td>${h.after}</td>
+      <td class="saving">-${h.saving}%</td>
+      <td>${h.date}</td>
+    </tr>`).join('');
+
+      // Session-based live usage merged with demo data
+      const sessionUsed = getUsage();
+      const totalUsed = 40 + sessionUsed; // 40 = demo baseline
+      document.querySelectorAll('#dash-overview .metric-val').forEach((el, i) => {
+        if (i === 0) el.textContent = totalUsed;
+      });
+      const usageFill = document.querySelector('#dash-overview .usage-bar-fill');
+      if (usageFill) usageFill.style.width = ((totalUsed / 500) * 100).toFixed(1) + '%';
+      const usageLabel = document.querySelector('#dash-overview .usage-bar-label span:last-child');
+      if (usageLabel) usageLabel.textContent = totalUsed + ' / 500 compressões';
+
+      buildMiniChart('mini-chart-1', [120, 340, 280, 680, 450, 820, 1200 + sessionUsed * 40]);
+      buildMiniChart('mini-chart-2', [3, 8, 6, 14, 9, 12, 9 + sessionUsed]);
+
+      const u = getUser();
+      if (u?.apiKey) {
+        const el = document.getElementById('api-key-display');
+        const el2 = document.getElementById('api-key-code');
+        if (el) el.textContent = u.apiKey.substring(0, 8) + '••••••••••••••••••••••';
+        if (el2) el2.textContent = u.apiKey.substring(0, 12) + '...';
+      }
+
+      // Sync mobile user info
+      if (u) syncDashUser(u);
+    }
+
+    function buildMiniChart(id, data) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const max = Math.max(...data);
+      el.innerHTML = data.map(v => `<div class="mc-bar" style="height:${Math.max(4, Math.round((v / max) * 72))}px" title="${v}"></div>`).join('');
+    }
+
+    function showDashSection(name, navEl) {
+      document.querySelectorAll('.dash-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.dash-nav-item').forEach(i => i.classList.remove('active'));
+      const sec = document.getElementById('dash-' + name);
+      if (sec) sec.classList.add('active');
+      if (navEl) navEl.classList.add('active');
+      else {
+        document.querySelectorAll('.dash-nav-item').forEach(item => {
+          if (item.getAttribute('onclick')?.includes("'" + name + "'")) item.classList.add('active');
+        });
+      }
+      // Update mobile header title
+      const titles = { overview: 'Visão geral', history: 'Histórico', api: 'API & SDK', settings: 'Configurações', billing: 'Plano & cobrança' };
+      const mTitle = document.getElementById('dash-mobile-section-title');
+      if (mTitle) mTitle.textContent = titles[name] || name;
+    }
+
+    /* ===== API KEY ACTIONS ===== */
+    let apiRevealed = false;
+    function toggleApiKey() {
+      const u = getUser(); if (!u) return;
+      const el = document.getElementById('api-key-display');
+      apiRevealed = !apiRevealed;
+      el.textContent = apiRevealed ? u.apiKey : u.apiKey.substring(0, 8) + '••••••••••••••••••••••';
+      document.querySelectorAll('.api-key-btn')[0].textContent = apiRevealed ? 'Ocultar' : 'Revelar';
+    }
+    function copyApiKey() {
+      const u = getUser(); if (!u) return;
+      navigator.clipboard.writeText(u.apiKey).catch(() => { });
+      showToast('Chave de API copiada!', '📋');
+    }
+    function rotateApiKey() {
+      if (!confirm('Tem certeza? A chave atual será invalidada imediatamente.')) return;
+      const u = getUser(); if (!u) return;
+      u.apiKey = 'tl_live_' + crypto.randomUUID().replace(/-/g, '').slice(0, 16);
+      saveUser(u);
+      apiRevealed = false;
+      document.getElementById('api-key-display').textContent = u.apiKey.substring(0, 8) + '••••••••••••••••••••••';
+      showToast('Chave de API rotacionada com sucesso!', '🔄');
+    }
+    function editName() {
+      const u = getUser(); if (!u) return;
+      const n = prompt('Novo nome:', u.name);
+      if (n?.trim()) {
+        u.name = n.trim(); saveUser(u); updateNavAuth();
+        document.getElementById('set-name-display').textContent = u.name + ' ' + (u.last || '');
+        showToast('Nome atualizado!', '✓');
+      }
+    }
+    function confirmDeleteAccount() {
+      if (confirm('Excluir sua conta permanentemente? Esta ação não pode ser desfeita.')) {
+        doLogout(); showToast('Conta excluída.', '🗑');
+      }
+    }
+
+    /* ============================= */
+    /* ===== APP: COMPRESSOR ======= */
+    /* ============================= */
+    const SYSTEM_PROMPT = `Você é o motor de compressão do TokLang. Converta prompts em linguagem natural para notação TokLang comprimida.
+
+GRAMÁTICA TOKLANG:
+Formato: AÇÃO $LANG @FRAMEWORK #ESTRUTURA; tarefa; in[params]; modificadores
+
+AÇÕES: cr(criar) fix(debug) ex(explicar) rf(refatorar) op(otimizar) tst(testes) doc(documentar) cv(converter) rev(revisar) sum(resumir)
+LINGUAGEM: $py $js $ts $sql $go $rs $sh $css $java $rb
+FRAMEWORKS: @streamlit @fastapi @flask @react @next @express @pandas @plt @prisma @pg @mongo @jest
+ESTRUTURA: #fn #cls #scr #api #comp #hook #mod #mw
+PARÂMETROS: in[a,b,c] out[x,y] err[404,422]
+MODIFICADORES: ui+(visual bonito) cm(comentários) prd(produção) min(simples) dk(exemplos) typ(tipos) async *(máxima qualidade)
+
+REGRAS:
+1. REMOVA completamente: saudações, "por favor", "obrigado", cortesias, "você pode", "seria legal", "boa tarde"
+2. Identifique a ação principal
+3. Identifique linguagem ($) e framework (@) se mencionados
+4. Extraia parâmetros de entrada se houver
+5. Mapeie requisitos em modificadores
+6. Tarefa = 2-5 palavras descritivas no máximo
+
+RETORNE APENAS a notação TokLang em uma única linha. Sem explicação, sem markdown, sem aspas.`;
+
+    const EXAMPLES = [
+      "Bom dia! Por favor faça um código python que use streamlit como interface para ficar bonitinho podendo calcular a velocidade de um objeto quando eu colocar as grandezas",
+      "Preciso de uma API REST completa em Node.js com Express para gerenciar usuários, com operações CRUD. Os campos são nome, email e role. Trate os erros 404 e 422. Código pronto para produção.",
+      "Você pode me explicar o conceito de closures em JavaScript de forma bem didática? Seria ótimo ter exemplos práticos também",
+      "Tenho essa função aqui que tá muito bagunçada: function calc(a,b,c){return a*b/c*100}. Consegue refatorar ela pra ficar mais limpa seguindo boas práticas?",
+      "Cria um dashboard interativo em Python com Plotly e Streamlit mostrando gráficos de vendas mensais com filtro por região e produto. Quero que fique bem visual.",
+      "Preciso de um script python que faça web scraping do site exemplo.com pegando título e preço dos produtos e salvando num CSV"
+    ];
+
+    let sessionHistory = [];
+    let lastCompressedText = '';
+
+    function countTokens(t) { return t.trim() ? t.trim().split(/\s+/).length : 0; }
+
+    function clearInput() {
+      const ta = document.getElementById('app-input');
+      ta.value = '';
+      onInputChange();
+      ta.focus();
+    }
+
+    function onInputChange() {
+      const val = document.getElementById('app-input').value;
+      const len = val.length;
+      const MAX = 16000;
+      document.getElementById('input-tok-count').textContent = countTokens(val) + ' tokens';
+      document.getElementById('char-count').textContent = len.toLocaleString('pt-BR');
+      const pct = (len / MAX) * 100;
+      const bar = document.getElementById('char-bar');
+      if (bar) {
+        bar.style.width = Math.min(pct, 100) + '%';
+        bar.className = 'char-limit-fill' + (pct >= 100 ? ' over' : pct >= 85 ? ' warn' : '');
+      }
+    }
+
+    function fillPrompt(i) {
+      document.getElementById('app-input').value = EXAMPLES[i];
+      onInputChange();
+      document.getElementById('app-input').focus();
+    }
+
+    function copyOutput() {
+      if (!lastCompressedText) return;
+      navigator.clipboard.writeText(lastCompressedText).then(() => {
+        const btn = document.getElementById('copy-output-btn');
+        if (btn) { btn.classList.add('copied'); btn.innerHTML = '✓ Copiado'; }
+        showToast('Resultado copiado!', '📋');
+        setTimeout(() => {
+          if (btn) {
+            btn.classList.remove('copied');
+            btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar';
+          }
+        }, 2000);
+      }).catch(() => showToast('Erro ao copiar — use Ctrl+C', '⚠'));
+    }
+
+    function setPipeStep(step, state, value = '') {
+      const dot = document.getElementById('pipe-dot-' + step);
+      const lbl = document.getElementById('pipe-lbl-' + step);
+      const val = document.getElementById('pipe-val-' + step);
+      if (dot) dot.className = 'pipe-dot' + (state === 'done' ? ' done' : state === 'active' ? ' active' : '');
+      if (lbl && state !== 'idle') lbl.classList.add('done');
+      if (val && value) val.textContent = value;
+    }
+    function resetPipeline() {
+      for (let i = 1; i <= 4; i++) {
+        const dot = document.getElementById('pipe-dot-' + i); if (dot) dot.className = 'pipe-dot';
+        const lbl = document.getElementById('pipe-lbl-' + i); if (lbl) lbl.classList.remove('done');
+        const val = document.getElementById('pipe-val-' + i); if (val) val.textContent = '';
+      }
+      const ps = document.getElementById('pipe-status');
+      if (ps) { ps.textContent = 'aguardando'; ps.className = 'pill pill-gray'; }
+    }
+
+    async function doCompress() {
+      const input = document.getElementById('app-input').value.trim();
+      if (!input) { document.getElementById('app-input').focus(); return; }
+      if (input.length > 16000) { showToast('Prompt muito longo. Máximo 16.000 caracteres.', '⚠'); return; }
+
+      const btn = document.getElementById('compress-btn');
+      const output = document.getElementById('app-output');
+      const errorDiv = document.getElementById('app-error');
+      const copyBtn = document.getElementById('copy-output-btn');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="blink-cursor"></span>&nbsp; Comprimindo...';
+      output.innerHTML = '<span class="output-loading"><span class="blink-cursor"></span> analisando semântica...</span>';
+      document.getElementById('app-stats').style.display = 'none';
+      errorDiv.innerHTML = '';
+      if (copyBtn) copyBtn.style.display = 'none';
+      resetPipeline();
+
+      const tokBefore = countTokens(input);
+      const ps = document.getElementById('pipe-status');
+      if (ps) { ps.textContent = 'processando'; ps.className = 'pill pill-amber'; }
+
+      setPipeStep(1, 'done', tokBefore + 'tk');
+      await sleep(280);
+      setPipeStep(2, 'active');
+
+      try {
+        const res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 120,
+            system: SYSTEM_PROMPT,
+            messages: [{ role: 'user', content: input }]
+          })
+        });
+        if (!res.ok) throw new Error('API retornou status ' + res.status);
+        const data = await res.json();
+        const compressed = data.content[0].text.trim();
+        lastCompressedText = compressed;
+
+        await sleep(200);
+        setPipeStep(2, 'done', 'semântica mapeada');
+        await sleep(200);
+        setPipeStep(3, 'active');
+        await sleep(280);
+
+        const tokAfter = countTokens(compressed);
+        const savings = Math.max(0, Math.round((1 - tokAfter / tokBefore) * 100));
+        const usdSaved = ((tokBefore - tokAfter) * 0.003 / 1000).toFixed(5);
+
+        setPipeStep(3, 'done', tokAfter + 'tk');
+        await sleep(180);
+        setPipeStep(4, 'done', '✓ pronto para envio');
+
+        if (ps) { ps.textContent = 'concluído'; ps.className = 'pill pill-green'; }
+
+        output.innerHTML = `<span class="output-text">${escHtml(compressed)}</span>`;
+        document.getElementById('output-tok-count').textContent = tokAfter + ' tokens';
+        if (copyBtn) copyBtn.style.display = 'flex';
+
+        document.getElementById('stat-before').textContent = tokBefore;
+        document.getElementById('stat-after').textContent = tokAfter;
+        document.getElementById('stat-pct').textContent = savings + '%';
+        document.getElementById('stat-usd').textContent = '$' + usdSaved;
+        document.getElementById('app-stats').style.display = 'flex';
+
+        // Update usage counter
+        const used = incUsage();
+        updateUsageUI();
+
+        // Session history
+        const now = new Date();
+        sessionHistory.unshift({
+          compressed, savings,
+          time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+          original: input.substring(0, 60)
+        });
+        renderHistory();
+
+      } catch (err) {
+        lastCompressedText = '';
+        output.innerHTML = '<span class="output-placeholder">resultado aparecerá aqui...</span>';
+        setPipeStep(2, 'idle');
+        if (ps) { ps.textContent = 'erro'; ps.className = 'pill pill-gray'; }
+        errorDiv.innerHTML = `<div class="error-banner">
+      <strong>Erro de conexão:</strong> ${escHtml(err.message)}<br>
+      <span style="font-size:10px;opacity:.7">Verifique sua conexão com a internet e tente novamente.</span>
+    </div>`;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Comprimir <span style="font-weight:300;opacity:.6;font-size:10px">Ctrl+Enter</span>`;
+      }
+    }
+
+    function renderHistory() {
+      if (sessionHistory.length === 0) return;
+      const sec = document.getElementById('history-section');
+      const body = document.getElementById('history-body');
+      if (!sec || !body) return;
+      sec.style.display = 'block';
+      body.innerHTML = sessionHistory.slice(0, 8).map(h => `
+    <div class="history-item" title="${escHtml(h.original)}">
+      <div class="hi-compressed">${escHtml(h.compressed)}</div>
+      <div class="hi-meta">
+        <span class="hi-saving">−${h.savings}%</span>
+        <span class="hi-time">${h.time}</span>
+      </div>
+    </div>`).join('');
+    }
+
+    /* ===== UTILS ===== */
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+    function escHtml(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+
+    /* ===== KEYBOARD SHORTCUTS ===== */
+    document.addEventListener('keydown', e => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        const page = document.querySelector('.page.active');
+        if (!page) return;
+        if (page.id === 'page-app') doCompress();
+        if (page.id === 'page-login') doLogin();
+        if (page.id === 'page-signup') doSignup();
+      }
+      if (e.key === 'Escape') {
+        closeMobileMenu();
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+      }
+    });
+
+    /* ===== INIT ===== */
+    initRouter();
+    initReveal();
+    updateUsageUI();
+    window.addEventListener('hashchange', () => {
+      const hash = window.location.hash.replace('#', '');
+      if (VALID_PAGES.includes(hash)) navigate(hash);
+    });
+  </script>
+</body>
+
+</html>

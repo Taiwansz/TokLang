@@ -1,0 +1,44 @@
+/* ===== AUTH PAGES ===== */
+.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 24px 60px;position:relative;z-index:10}
+.auth-card{width:100%;max-width:440px;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.4)}
+.auth-card-header{background:var(--bg3);border-bottom:1px solid var(--border);padding:22px 32px}
+.auth-logo{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green);margin-bottom:6px}
+.auth-logo span{color:var(--muted);font-weight:300}
+.auth-title{font-size:20px;font-weight:800;letter-spacing:-.02em;margin-bottom:2px}
+.auth-sub{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.auth-body{padding:28px 32px}
+.auth-footer{padding:16px 32px;border-top:1px solid var(--border);background:var(--bg3);text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.auth-footer a{color:var(--green);cursor:pointer;transition:opacity .15s}
+.auth-footer a:hover{opacity:.75}
+.form-group{margin-bottom:18px}
+.form-label{font-family:var(--mono);font-size:11px;color:var(--muted2);display:block;margin-bottom:7px;letter-spacing:.03em}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:11px 14px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;transition:border-color .2s}
+.form-input:focus{border-color:rgba(0,255,136,.4);background:var(--bg)}
+.form-input::placeholder{color:var(--muted)}
+.form-input.error{border-color:rgba(255,94,94,.5)}
+.form-error{font-family:var(--mono);font-size:11px;color:var(--red);margin-top:5px}
+.form-hint{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:5px}
+.form-btn{width:100%;padding:13px;background:var(--green);color:var(--bg);border:none;border-radius:var(--radius-sm);font-family:var(--mono);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;letter-spacing:.02em}
+.form-btn:hover{background:var(--green2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,255,136,.25)}
+.form-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.form-btn-ghost{width:100%;padding:11px;background:transparent;color:var(--muted);border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .2s;margin-top:10px}
+.form-btn-ghost:hover{color:var(--text);border-color:var(--border3)}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.oauth-btn{width:100%;padding:11px;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:var(--mono);font-size:12px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:9px;margin-bottom:10px}
+.oauth-btn:hover{border-color:var(--border3);background:var(--bg)}
+.plan-picker{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px}
+.plan-option{border:1px solid var(--border2);border-radius:var(--radius-sm);padding:12px 10px;cursor:pointer;transition:all .2s;text-align:center}
+.plan-option:hover{border-color:var(--border3)}
+.plan-option.selected{border-color:var(--green);background:var(--gdim)}
+.plan-option-name{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.plan-option-price{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.plan-option.selected .plan-option-price{color:var(--green)}
+.pw-strength{height:3px;border-radius:2px;background:var(--border);margin-top:7px;overflow:hidden}
+.pw-bar{height:100%;border-radius:2px;transition:width .3s,background .3s;width:0%}
+.check-group{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;cursor:pointer}
+.check-box{width:16px;height:16px;border:1px solid var(--border2);border-radius:3px;background:var(--bg3);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:10px}
+.check-group input[type=checkbox]{display:none}
+.check-group input:checked+.check-box{background:var(--green);border-color:var(--green);color:var(--bg)}
+.check-label{font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6}
+.check-label a{color:var(--green);cursor:pointer}

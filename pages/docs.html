@@ -1,0 +1,171 @@
+<div class="docs-page">
+  <div class="docs-layout">
+    <!-- SIDEBAR NAV -->
+    <nav class="docs-nav">
+      <div class="docs-nav-section">
+        <div class="dns-title">Introdução</div>
+        <a class="dns-link active" href="#doc-intro" onclick="scrollToDoc('doc-intro',this)">O que é TokLang</a>
+        <a class="dns-link" href="#doc-quickstart" onclick="scrollToDoc('doc-quickstart',this)">Quickstart</a>
+        <a class="dns-link" href="#doc-how" onclick="scrollToDoc('doc-how',this)">Como funciona</a>
+      </div>
+      <div class="docs-nav-section">
+        <div class="dns-title">Gramática</div>
+        <a class="dns-link" href="#doc-syntax" onclick="scrollToDoc('doc-syntax',this)">Sintaxe</a>
+        <a class="dns-link" href="#doc-actions" onclick="scrollToDoc('doc-actions',this)">Ações</a>
+        <a class="dns-link" href="#doc-langs" onclick="scrollToDoc('doc-langs',this)">Linguagens</a>
+        <a class="dns-link" href="#doc-frameworks" onclick="scrollToDoc('doc-frameworks',this)">Frameworks</a>
+        <a class="dns-link" href="#doc-modifiers" onclick="scrollToDoc('doc-modifiers',this)">Modificadores</a>
+      </div>
+      <div class="docs-nav-section">
+        <div class="dns-title">Exemplos</div>
+        <a class="dns-link" href="#doc-examples" onclick="scrollToDoc('doc-examples',this)">Exemplos reais</a>
+        <a class="dns-link" href="#doc-api" onclick="scrollToDoc('doc-api',this)">API Reference</a>
+      </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="docs-content">
+      <div id="doc-intro">
+        <div class="section-tag" style="margin-bottom:8px">documentação</div>
+        <h1>TokLang</h1>
+        <p>TokLang é um <strong>middleware de compressão de prompts</strong> que atua como intermediário invisível entre o usuário e qualquer modelo de linguagem. Você escreve normalmente; ele comprime automaticamente.</p>
+        <p>A economia típica é de <strong>65–85% em tokens</strong>, sem nenhuma mudança na qualidade da resposta do modelo.</p>
+        <div class="callout"><strong>Princípio central:</strong> O usuário nunca vê ou toca na notação TokLang. Ela opera completamente em segundo plano.</div>
+      </div>
+
+      <div id="doc-quickstart">
+        <h2>Quickstart</h2>
+        <p>Instale o SDK e faça sua primeira compressão em menos de 5 minutos:</p>
+        <div class="code-block"><span class="c-muted"># instalar</span><br>npm install toklang<br><br><span class="c-muted"># uso básico</span><br><span class="c-blue">import</span> { compress } <span class="c-blue">from</span> <span class="c-green">'toklang'</span><br><br><span class="c-blue">const</span> result = <span class="c-blue">await</span> compress(<span class="c-green">"Bom dia! Pode fazer uma API em Node?"</span>)<br><span class="c-muted">// → "cr $js #api"</span><br><br>console.log(result.compressed)  <span class="c-muted">// cr $js #api</span><br>console.log(result.savings)     <span class="c-muted">// 0.71 (71%)</span></div>
+        <p>Para integrar como middleware transparente no seu pipeline:</p>
+        <div class="code-block"><span class="c-blue">import</span> { TokLangMiddleware } <span class="c-blue">from</span> <span class="c-green">'toklang'</span><br><br><span class="c-blue">const</span> client = <span class="c-blue">new</span> TokLangMiddleware({<br>&nbsp;&nbsp;target: <span class="c-green">'openai'</span>, <span class="c-muted">// ou 'anthropic' | 'gemini'</span><br>&nbsp;&nbsp;apiKey: process.env.OPENAI_KEY,<br>&nbsp;&nbsp;tokLangKey: process.env.TOKLANG_KEY<br>})<br><br><span class="c-muted">// use exatamente como o SDK original</span><br><span class="c-blue">const</span> response = <span class="c-blue">await</span> client.chat.completions.create({<br>&nbsp;&nbsp;model: <span class="c-green">'gpt-4o'</span>,<br>&nbsp;&nbsp;messages: [{ role: <span class="c-green">'user'</span>, content: userMessage }]<br>})</div>
+      </div>
+
+      <div id="doc-how">
+        <h2>Como funciona</h2>
+        <p>O pipeline completo tem quatro etapas:</p>
+        <div class="code-block"><span class="c-muted">1.</span> <span class="c-green">INPUT</span>   → prompt natural do usuário<br><span class="c-muted">2.</span> <span class="c-amber">COMPRESS</span> → motor TokLang → notação comprimida<br><span class="c-muted">3.</span> <span class="c-blue">EXPAND</span>  → expansor → linguagem natural limpa<br><span class="c-muted">4.</span> <span class="c-green">OUTPUT</span>  → enviado ao modelo de destino</div>
+        <p>A etapa 3 garante que o modelo nunca receba a notação TokLang — apenas um prompt limpo e preciso em linguagem natural.</p>
+      </div>
+
+      <div id="doc-syntax">
+        <h2>Sintaxe</h2>
+        <p>A gramática TokLang segue um formato posicional com separadores por ponto-e-vírgula:</p>
+        <div class="code-block"><span class="c-green">AÇÃO</span> <span class="c-blue">$LANG</span> <span class="c-amber">@FRAMEWORK</span> <span class="c-muted">#ESTRUTURA</span>; tarefa; <span class="c-muted">in[params]</span>; <span class="c-muted">modificadores</span></div>
+        <p>Apenas a <strong>AÇÃO</strong> é obrigatória. Todos os demais campos são opcionais e posicionais.</p>
+        <div class="callout"><strong>Separador ;</strong> divide os blocos lógicos do prompt. A ordem importa: ação+contexto técnico → tarefa → parâmetros → modificadores.</div>
+      </div>
+
+      <div id="doc-actions">
+        <h2>Ações</h2>
+        <p>O primeiro token do prompt define a ação. Sempre em letras minúsculas.</p>
+        <table class="token-table">
+          <tr><th>Token</th><th>Expande para</th><th>Uso</th></tr>
+          <tr><td class="tok">cr</td><td>Crie / Faça</td><td>Criar código, componentes, arquivos</td></tr>
+          <tr><td class="tok">fix</td><td>Corrija / Resolva o bug em</td><td>Debug e correção de erros</td></tr>
+          <tr><td class="tok">ex</td><td>Explique / Ensine</td><td>Explicações e tutoriais</td></tr>
+          <tr><td class="tok">rf</td><td>Refatore</td><td>Melhorar código existente</td></tr>
+          <tr><td class="tok">op</td><td>Otimize</td><td>Performance e eficiência</td></tr>
+          <tr><td class="tok">tst</td><td>Escreva testes para</td><td>Unit tests, integration tests</td></tr>
+          <tr><td class="tok">doc</td><td>Documente</td><td>JSDoc, docstrings, README</td></tr>
+          <tr><td class="tok">cv</td><td>Converta / Porte</td><td>Migração entre linguagens ou formatos</td></tr>
+          <tr><td class="tok">rev</td><td>Revise / Faça code review de</td><td>Review de código</td></tr>
+          <tr><td class="tok">sum</td><td>Resuma</td><td>Resumir texto ou código</td></tr>
+        </table>
+      </div>
+
+      <div id="doc-langs">
+        <h2>Linguagens</h2>
+        <p>Prefixo <strong style="color:var(--blue)">$</strong> identifica a linguagem de programação.</p>
+        <table class="token-table">
+          <tr><th>Token</th><th>Linguagem</th><th>Token</th><th>Linguagem</th></tr>
+          <tr><td class="tok-blue">$py</td><td>Python</td><td class="tok-blue">$go</td><td>Go</td></tr>
+          <tr><td class="tok-blue">$js</td><td>JavaScript</td><td class="tok-blue">$rs</td><td>Rust</td></tr>
+          <tr><td class="tok-blue">$ts</td><td>TypeScript</td><td class="tok-blue">$sh</td><td>Shell / Bash</td></tr>
+          <tr><td class="tok-blue">$sql</td><td>SQL</td><td class="tok-blue">$css</td><td>CSS</td></tr>
+          <tr><td class="tok-blue">$java</td><td>Java</td><td class="tok-blue">$rb</td><td>Ruby</td></tr>
+          <tr><td class="tok-blue">$cs</td><td>C#</td><td class="tok-blue">$cpp</td><td>C++</td></tr>
+        </table>
+      </div>
+
+      <div id="doc-frameworks">
+        <h2>Frameworks &amp; Libs</h2>
+        <p>Prefixo <strong style="color:var(--amber)">@</strong> identifica o framework ou biblioteca.</p>
+        <table class="token-table">
+          <tr><th>Token</th><th>Framework</th></tr>
+          <tr><td class="tok-amber">@streamlit</td><td>Streamlit (Python UI)</td></tr>
+          <tr><td class="tok-amber">@fastapi</td><td>FastAPI (Python API)</td></tr>
+          <tr><td class="tok-amber">@flask</td><td>Flask (Python web)</td></tr>
+          <tr><td class="tok-amber">@pandas</td><td>Pandas (data analysis)</td></tr>
+          <tr><td class="tok-amber">@plt</td><td>Matplotlib / Plotly</td></tr>
+          <tr><td class="tok-amber">@react</td><td>React</td></tr>
+          <tr><td class="tok-amber">@next</td><td>Next.js</td></tr>
+          <tr><td class="tok-amber">@express</td><td>Express.js</td></tr>
+          <tr><td class="tok-amber">@prisma</td><td>Prisma ORM</td></tr>
+          <tr><td class="tok-amber">@pg</td><td>PostgreSQL</td></tr>
+          <tr><td class="tok-amber">@mongo</td><td>MongoDB</td></tr>
+          <tr><td class="tok-amber">@jest</td><td>Jest (testing)</td></tr>
+        </table>
+      </div>
+
+      <div id="doc-modifiers">
+        <h2>Modificadores</h2>
+        <p>Ajustam a qualidade, estilo ou requisitos da resposta.</p>
+        <table class="token-table">
+          <tr><th>Token</th><th>Significado</th></tr>
+          <tr><td class="tok">ui+</td><td>Interface visualmente agradável / estilizada</td></tr>
+          <tr><td class="tok">prd</td><td>Production-ready, boas práticas, robusto</td></tr>
+          <tr><td class="tok">cm</td><td>Incluir comentários explicativos no código</td></tr>
+          <tr><td class="tok">dk</td><td>Dar exemplos de uso práticos</td></tr>
+          <tr><td class="tok">typ</td><td>Incluir tipagem / type hints / annotations</td></tr>
+          <tr><td class="tok">async</td><td>Implementação assíncrona</td></tr>
+          <tr><td class="tok">min</td><td>Versão mínima / simples / sem dependências extras</td></tr>
+          <tr><td class="tok">*</td><td>Máxima qualidade — não economize esforço</td></tr>
+          <tr><td class="tok">in[a,b]</td><td>Parâmetros de entrada / campos</td></tr>
+          <tr><td class="tok">out[x,y]</td><td>Valores de saída esperados</td></tr>
+          <tr><td class="tok">err[404,500]</td><td>Tratar esses códigos de erro especificamente</td></tr>
+        </table>
+      </div>
+
+      <div id="doc-examples">
+        <h2>Exemplos reais</h2>
+        <div class="example-block">
+          <div class="eb-head"><span class="eb-label">código · python · streamlit</span><span class="pill pill-green">−76%</span></div>
+          <div class="eb-body">
+            <div class="eb-compressed">cr $py @streamlit; calc velocidade; in[dist,t,a]; ui+</div>
+            <div class="eb-arrow">↑ comprimido de ↓</div>
+            <div class="eb-expanded">"Bom dia! Por favor faça um código python que use streamlit como interface para ficar bonitinho podendo calcular a velocidade de um objeto quando eu colocar as grandezas"</div>
+            <div class="eb-saving">34 tokens → 8 tokens</div>
+          </div>
+        </div>
+        <div class="example-block">
+          <div class="eb-head"><span class="eb-label">api · node · express</span><span class="pill pill-green">−71%</span></div>
+          <div class="eb-body">
+            <div class="eb-compressed">cr $js @express; #api CRUD users; in[name,email,role]; err[404,422]; prd</div>
+            <div class="eb-arrow">↑ comprimido de ↓</div>
+            <div class="eb-expanded">"Preciso de uma API REST completa em Node.js com Express para gerenciar usuários, com operações de criar, listar, atualizar e deletar. Os campos são nome, email e role. Trate os erros 404 e 422. Código pronto para produção."</div>
+            <div class="eb-saving">47 tokens → 14 tokens</div>
+          </div>
+        </div>
+        <div class="example-block">
+          <div class="eb-head"><span class="eb-label">explicação · javascript</span><span class="pill pill-green">−68%</span></div>
+          <div class="eb-body">
+            <div class="eb-compressed">ex $js @react; #hook fetch; dk cm</div>
+            <div class="eb-arrow">↑ comprimido de ↓</div>
+            <div class="eb-expanded">"Você pode me explicar como criar um React hook customizado para busca de dados? Seria ótimo ter exemplos práticos e comentários no código."</div>
+            <div class="eb-saving">28 tokens → 9 tokens</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="doc-api">
+        <h2>API Reference</h2>
+        <h3>POST /v1/compress</h3>
+        <div class="code-block"><span class="c-muted">// Request</span><br>{<br>&nbsp;&nbsp;<span class="c-green">"prompt"</span>: <span class="c-green">"seu prompt natural aqui"</span>,<br>&nbsp;&nbsp;<span class="c-green">"model"</span>: <span class="c-green">"haiku"</span>  <span class="c-muted">// haiku | sonnet | flash</span><br>}<br><br><span class="c-muted">// Response</span><br>{<br>&nbsp;&nbsp;<span class="c-green">"compressed"</span>: <span class="c-green">"cr $py @streamlit; calc velocidade; ui+"</span>,<br>&nbsp;&nbsp;<span class="c-green">"tokens_before"</span>: 34,<br>&nbsp;&nbsp;<span class="c-green">"tokens_after"</span>: 8,<br>&nbsp;&nbsp;<span class="c-green">"savings"</span>: 0.76,<br>&nbsp;&nbsp;<span class="c-green">"latency_ms"</span>: 7<br>}</div>
+        <h3>Autenticação</h3>
+        <div class="code-block">Authorization: Bearer <span class="c-amber">tl_live_xxxxxxxxxxxxxxxx</span></div>
+        <div class="callout"><strong>Rate limits:</strong> Starter 500/mês · Pro ilimitado · Team ilimitado com SLA garantido.</div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card-header">
+      <div class="auth-logo">Tok<span>Lang</span></div>
+      <div class="auth-title">Recuperar senha</div>
+      <div class="auth-sub">// enviaremos um link de redefinição</div>
+    </div>
+    <div class="auth-body">
+      <p style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.7">Digite o e-mail associado à sua conta. Se existir, você receberá um link para criar uma nova senha.</p>
+      <div class="form-group"><label class="form-label">E-mail da conta</label><input class="form-input" id="forgot-email" type="email" placeholder="voce@empresa.com"><div class="form-error" id="forgot-error" style="display:none"></div></div>
+      <button class="form-btn" onclick="doForgot()" id="forgot-btn">Enviar link de recuperação</button>
+      <button class="form-btn-ghost" onclick="navigate('login')">← Voltar para login</button>
+    </div>
+    <div id="forgot-success" style="display:none;padding:24px 32px;text-align:center">
+      <div style="font-size:32px;margin-bottom:12px">📬</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:8px">E-mail enviado!</div>
+      <div style="font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.7">Verifique sua caixa de entrada. O link expira em 15 minutos.</div>
+      <button class="form-btn-ghost" onclick="navigate('login')">← Voltar para login</button>
+    </div>
+  </div>
+</div>

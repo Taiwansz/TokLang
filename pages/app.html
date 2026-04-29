@@ -1,0 +1,122 @@
+<div class="app-page">
+  <div class="app-layout">
+    <!-- MAIN -->
+    <div class="app-main">
+      <div class="app-header">
+        <h1 class="app-title">Compressor</h1>
+        <p class="app-sub">// escreva normalmente → TokLang comprime automaticamente</p>
+      </div>
+
+      <!-- INPUT -->
+      <div class="app-panel">
+        <div class="panel-header">
+          <span class="panel-label">→ prompt natural</span>
+          <span class="panel-label" id="input-tok-count" style="color:var(--muted)">0 tokens</span>
+        </div>
+        <div class="panel-body">
+          <textarea class="prompt-input" id="app-input" maxlength="16000" placeholder="Escreva seu prompt normalmente aqui...&#10;&#10;Ex: Bom dia! Por favor faça um código python que use streamlit como interface para ficar bonitinho podendo calcular a velocidade de um objeto quando eu colocar as grandezas" oninput="onInputChange()" aria-label="Prompt de entrada em linguagem natural"></textarea>
+        </div>
+        <div class="input-actions-row">
+          <button class="input-clear-btn" onclick="clearInput()" aria-label="Limpar campo de entrada">✕ Limpar</button>
+        </div>
+        <div class="char-limit-row">
+          <span id="char-count">0</span>
+          <div class="char-limit-bar"><div class="char-limit-fill" id="char-bar" style="width:0%"></div></div>
+          <span>16.000 chars</span>
+        </div>
+      </div>
+
+      <div class="limit-banner" id="limit-banner">
+        ⚠ Você atingiu 80% do limite mensal (400/500 compressões). <span class="uc-upgrade" onclick="navigate('pricing')">Faça upgrade para Pro →</span>
+      </div>
+
+      <div class="usage-counter-bar" id="usage-counter-bar">
+        <span class="uc-label">Uso mensal (Starter):</span>
+        <div class="uc-bar"><div class="uc-fill" id="uc-fill" style="width:0%"></div></div>
+        <span class="uc-value"><span id="uc-used">0</span>/500</span>
+        <span class="uc-upgrade" onclick="navigate('pricing')" title="Upgrade para ilimitado">↑ Pro</span>
+      </div>
+
+      <button class="compress-btn" id="compress-btn" onclick="doCompress()" aria-label="Comprimir prompt">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        Comprimir  <span style="font-weight:300;opacity:.6;font-size:10px">Ctrl+Enter</span>
+      </button>
+
+      <div id="app-error"></div>
+
+      <!-- OUTPUT -->
+      <div class="app-panel">
+        <div class="panel-header">
+          <div class="output-header-row">
+            <span class="panel-label">✓ toklang comprimido</span>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="panel-label" id="output-tok-count" style="color:var(--muted)"></span>
+              <button class="copy-output-btn" id="copy-output-btn" onclick="copyOutput()" aria-label="Copiar resultado" style="display:none">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                Copiar
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="output-body" id="app-output">
+            <span class="output-placeholder">resultado aparecerá aqui...</span>
+          </div>
+        </div>
+        <div class="stats-strip" id="app-stats" style="display:none">
+          <div class="ss-item"><div class="ss-num neutral" id="stat-before">—</div><div class="ss-lbl">tokens antes</div></div>
+          <div class="ss-item"><div class="ss-num neutral" id="stat-after">—</div><div class="ss-lbl">tokens depois</div></div>
+          <div class="ss-item"><div class="ss-num" id="stat-pct">—</div><div class="ss-lbl">economia</div></div>
+          <div class="ss-item"><div class="ss-num" id="stat-usd" style="color:var(--amber)">—</div><div class="ss-lbl">$ economizado*</div></div>
+        </div>
+      </div>
+
+      <!-- PIPELINE -->
+      <div class="pipeline">
+        <div class="pipeline-header">
+          <span class="panel-label">pipeline completo</span>
+          <span class="pill pill-gray" id="pipe-status">aguardando</span>
+        </div>
+        <div class="pipeline-steps">
+          <div class="pipe-step" id="pipe1"><div class="pipe-dot" id="pipe-dot-1"></div><div class="pipe-label" id="pipe-lbl-1">1. Receber prompt natural</div><div class="pipe-value" id="pipe-val-1"></div></div>
+          <div class="pipe-step" id="pipe2"><div class="pipe-dot" id="pipe-dot-2"></div><div class="pipe-label" id="pipe-lbl-2">2. Análise semântica</div><div class="pipe-value" id="pipe-val-2"></div></div>
+          <div class="pipe-step" id="pipe3"><div class="pipe-dot" id="pipe-dot-3"></div><div class="pipe-label" id="pipe-lbl-3">3. Compressão TokLang</div><div class="pipe-value" id="pipe-val-3"></div></div>
+          <div class="pipe-step" id="pipe4"><div class="pipe-dot" id="pipe-dot-4"></div><div class="pipe-label" id="pipe-lbl-4">4. Pronto para envio ao modelo</div><div class="pipe-value" id="pipe-val-4"></div></div>
+        </div>
+      </div>
+
+      <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px">*Estimativa baseada em $0.003/1K tokens (GPT-4o). Valor real varia por modelo.</p>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="app-sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-header"><div class="sidebar-title">// referência rápida</div></div>
+        <div class="sidebar-body">
+          <div class="qref-group"><div class="qref-label">ações</div><div class="qref-tokens"><span class="qref-token qt-green">cr</span><span class="qref-token qt-green">fix</span><span class="qref-token qt-green">ex</span><span class="qref-token qt-green">rf</span><span class="qref-token qt-green">op</span><span class="qref-token qt-green">tst</span><span class="qref-token qt-green">doc</span><span class="qref-token qt-green">cv</span></div></div>
+          <div class="qref-group"><div class="qref-label">linguagem <span style="color:var(--blue)">$prefix</span></div><div class="qref-tokens"><span class="qref-token qt-blue">$py</span><span class="qref-token qt-blue">$js</span><span class="qref-token qt-blue">$ts</span><span class="qref-token qt-blue">$sql</span><span class="qref-token qt-blue">$go</span><span class="qref-token qt-blue">$rs</span><span class="qref-token qt-blue">$sh</span></div></div>
+          <div class="qref-group"><div class="qref-label">framework <span style="color:var(--amber)">@prefix</span></div><div class="qref-tokens"><span class="qref-token qt-amber">@streamlit</span><span class="qref-token qt-amber">@fastapi</span><span class="qref-token qt-amber">@react</span><span class="qref-token qt-amber">@next</span><span class="qref-token qt-amber">@express</span><span class="qref-token qt-amber">@pandas</span></div></div>
+          <div class="qref-group"><div class="qref-label">modificadores</div><div class="qref-tokens"><span class="qref-token qt-gray">ui+</span><span class="qref-token qt-gray">prd</span><span class="qref-token qt-gray">cm</span><span class="qref-token qt-gray">dk</span><span class="qref-token qt-gray">typ</span><span class="qref-token qt-gray">async</span><span class="qref-token qt-gray">*</span></div></div>
+          <button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:11px;padding:8px;margin-top:8px" onclick="navigate('docs')">Ver documentação completa →</button>
+        </div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-header"><div class="sidebar-title">// exemplos rápidos</div></div>
+        <div class="sidebar-body">
+          <ul class="examples-list">
+            <li class="example-item" onclick="fillPrompt(0)">Calcular velocidade com Streamlit</li>
+            <li class="example-item" onclick="fillPrompt(1)">API REST com autenticação JWT</li>
+            <li class="example-item" onclick="fillPrompt(2)">Explicar closures em JS</li>
+            <li class="example-item" onclick="fillPrompt(3)">Refatorar função bagunçada</li>
+            <li class="example-item" onclick="fillPrompt(4)">Dashboard interativo com Plotly</li>
+            <li class="example-item" onclick="fillPrompt(5)">Script de web scraping</li>
+          </ul>
+        </div>
+      </div>
+      <div class="sidebar-section" id="history-section" style="display:none">
+        <div class="sidebar-header"><div class="sidebar-title">// histórico da sessão</div></div>
+        <div class="sidebar-body" id="history-body"></div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,23 @@
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+  .app-layout{grid-template-columns:1fr}
+  .app-sidebar{display:none}
+  .docs-layout{grid-template-columns:1fr}
+  .docs-nav{display:none}
+  .pricing-grid{grid-template-columns:1fr}
+  .compare-grid{grid-template-columns:1fr}
+  .dash-sidebar{display:none}
+  .dash-mobile-header{display:flex}
+  .metrics-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  #nav{padding:0 20px}
+  .nav-links{display:none}
+  .nav-mobile-btn{display:block}
+  footer{padding:32px 20px;flex-direction:column;gap:20px}
+  .stats-bar{flex-wrap:wrap}
+  .stat-block{min-width:50%}
+  .cta-box{padding:36px 24px}
+  .metrics-grid{grid-template-columns:1fr}
+  .dash-main{padding:20px}
+}

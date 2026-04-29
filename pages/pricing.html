@@ -1,0 +1,58 @@
+<div class="pricing-page">
+  <div class="pricing-hero">
+    <div class="badge" style="display:inline-flex;margin-bottom:24px"><div class="badge-dot"></div>Preços simples e previsíveis</div>
+    <h1 style="font-size:clamp(38px,6vw,72px);font-weight:800;letter-spacing:-.04em;margin-bottom:16px">Pague pelo que <em style="font-style:normal;color:var(--green)">economiza</em>.</h1>
+    <p style="font-family:var(--mono);font-size:14px;color:var(--muted);max-width:480px;margin:0 auto 48px;line-height:1.8">Sem surpresas. Cancele a qualquer hora. Downgrade gratuito para Starter.</p>
+    <div class="pricing-grid" style="text-align:left;max-width:900px;margin:0 auto">
+      <div class="plan"><div class="plan-name">Starter</div><div class="plan-price">$0<span>/mês</span></div><div class="plan-desc">Para explorar e aprender TokLang no seu ritmo.</div><ul class="plan-features"><li>500 compressões/mês</li><li>Vocabulário base (80 tokens)</li><li>Dashboard básico</li><li>Extensão de navegador</li><li>Suporte via comunidade</li></ul><button class="plan-btn" onclick="navigate('app')">Criar conta grátis</button></div>
+      <div class="plan featured"><div class="plan-badge">Mais popular</div><div class="plan-name">Pro</div><div class="plan-price">$19<span>/mês</span></div><div class="plan-desc">Para devs e power users que querem máxima economia.</div><ul class="plan-features"><li>Compressões ilimitadas</li><li>API access + SDK npm</li><li>Vocabulário expandido (400+ tokens)</li><li>Vocabulário customizado</li><li>Analytics histórico</li><li>Relatório de economia em $</li><li>Suporte por email (48h)</li></ul><button class="plan-btn">Começar — 14 dias grátis</button></div>
+      <div class="plan"><div class="plan-name">Team</div><div class="plan-price">$79<span>/mês</span></div><div class="plan-desc">Para equipes usando IA em produção em escala.</div><ul class="plan-features"><li>Até 10 membros</li><li>Vocabulário compartilhado</li><li>Dashboard de equipe</li><li>Integração Slack + Notion</li><li>SSO / SAML</li><li>SLA 99.9% uptime</li><li>Suporte prioritário (4h)</li></ul><button class="plan-btn">Falar com vendas</button></div>
+    </div>
+  </div>
+
+  <!-- COMPARISON TABLE -->
+  <div class="compare-table">
+    <div class="section-tag" style="text-align:center;margin-bottom:12px">comparação detalhada</div>
+    <div class="ct-wrap">
+      <table class="ct-table">
+        <thead><tr><th>Funcionalidade</th><th>Starter</th><th class="featured-col">Pro</th><th>Team</th></tr></thead>
+        <tbody>
+          <tr class="section-row"><td colspan="4">Compressão</td></tr>
+          <tr><td>Compressões/mês</td><td>500</td><td>Ilimitado</td><td>Ilimitado</td></tr>
+          <tr><td>Latência de compressão</td><td>&lt;50ms</td><td>&lt;10ms</td><td>&lt;10ms</td></tr>
+          <tr><td>Motor de IA (qualidade)</td><td>Base</td><td>Pro</td><td>Pro</td></tr>
+          <tr><td>Vocabulário base</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Vocabulário expandido (400+ tokens)</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Vocabulário customizado</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr class="section-row"><td colspan="4">Integração</td></tr>
+          <tr><td>Extensão de navegador</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>API REST</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>SDK npm (Node/Python)</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Webhooks</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Slack + Notion</td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>SSO / SAML</td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="check">✓</span></td></tr>
+          <tr class="section-row"><td colspan="4">Analytics</td></tr>
+          <tr><td>Dashboard básico</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Histórico 30 dias</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Relatório de economia em $</td><td><span class="cross">—</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Dashboard de equipe</td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td><span class="check">✓</span></td></tr>
+          <tr class="section-row"><td colspan="4">Suporte</td></tr>
+          <tr><td>Comunidade</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+          <tr><td>Email</td><td><span class="cross">—</span></td><td>48h</td><td>4h</td></tr>
+          <tr><td>SLA de uptime</td><td><span class="cross">—</span></td><td><span class="cross">—</span></td><td>99.9%</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FAQ PRICING -->
+  <div class="faq-pricing">
+    <div class="section-tag" style="margin-bottom:12px">dúvidas sobre preços</div>
+    <div class="faq-list">
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">O que conta como uma "compressão"? <span class="faq-icon">+</span></div><div class="faq-a">Cada chamada à API de compressão conta como uma compressão, independentemente do tamanho do prompt. Prompts comprimidos pelo SDK ou extensão do navegador também contam.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Posso mudar de plano a qualquer hora? <span class="faq-icon">+</span></div><div class="faq-a">Sim. Upgrade entra em vigor imediatamente com cobrança proporcional. Downgrade entra em vigor no próximo ciclo de cobrança. Cancelamento disponível a qualquer momento.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Há desconto para pagamento anual? <span class="faq-icon">+</span></div><div class="faq-a">Sim — pagamento anual tem 20% de desconto em todos os planos. Pro anual sai por $182/ano (equivale a $15.17/mês). Team anual sai por $759/ano.</div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Enterprise / volume personalizado? <span class="faq-icon">+</span></div><div class="faq-a">Para equipes maiores que 10 pessoas ou volumes muito altos, entre em contato via sales@toklang.dev para um plano personalizado com precificação por volume.</div></div>
+    </div>
+  </div>
+</div>

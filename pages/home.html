@@ -1,0 +1,307 @@
+<!-- PAGE: HOME -->
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="badge hero-badge">
+      <div class="badge-dot"></div>Acesso antecipado — beta aberto
+    </div>
+    <h1 class="hero-title">Fale mais.<br>Gaste <em>menos</em>.</h1>
+    <p class="hero-sub">
+      TokLang é um <strong>middleware invisível</strong> entre você e qualquer IA.<br>
+      Você escreve naturalmente. Ele comprime automaticamente.<br>
+      Até 85% menos tokens. Zero mudança de comportamento.
+    </p>
+
+    <div class="terminal">
+      <div class="term-bar">
+        <div class="term-dot td-r"></div>
+        <div class="term-dot td-y"></div>
+        <div class="term-dot td-g"></div>
+        <span class="term-title">toklang · compression engine v1.0</span>
+      </div>
+      <div class="term-body">
+        <div class="tl"><span class="tp">input</span><span class="tc" style="color:var(--muted)">"Bom dia! Por favor
+            faça um código python que use streamlit como interface para calcular a velocidade de um objeto"</span></div>
+        <div class="tsp"></div>
+        <div class="tl"><span class="to">→ removendo saudações e cortesias...</span></div>
+        <div class="tl"><span class="to">→ identificando linguagem: Python · framework: Streamlit...</span></div>
+        <div class="tl"><span class="to">→ extraindo tarefa e parâmetros...</span></div>
+        <div class="tsp"></div>
+        <div class="tl"><span class="tp">✓</span><span class="tc" style="color:var(--green);font-weight:700">cr $py
+            @streamlit; calc velocidade; ui+</span></div>
+        <div class="tsp"></div>
+        <div class="tl"><span class="ts-amber">💾 34 tokens → 8 tokens · economia de 76%</span></div>
+      </div>
+    </div>
+
+    <div class="hero-ctas">
+      <button class="btn btn-primary btn-lg" onclick="navigate('app')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 14 10 14 10 20" />
+          <polyline points="20 10 14 10 14 4" />
+          <line x1="14" y1="10" x2="21" y2="3" />
+          <line x1="3" y1="21" x2="10" y2="14" />
+        </svg>
+        Testar agora — grátis
+      </button>
+      <button class="btn btn-ghost btn-lg" onclick="navigate('docs')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+        Ver documentação
+      </button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-block reveal">
+      <div class="stat-num" id="stat-1">85%</div>
+      <div class="stat-lbl">menos tokens</div>
+    </div>
+    <div class="stat-block reveal reveal-d1">
+      <div class="stat-num" id="stat-2">3×</div>
+      <div class="stat-lbl">mais rápido</div>
+    </div>
+    <div class="stat-block reveal reveal-d2">
+      <div class="stat-num" style="font-size:14px;padding-top:6px">GPT · Claude · Gemini</div>
+      <div class="stat-lbl">compatível com</div>
+    </div>
+    <div class="stat-block reveal reveal-d3">
+      <div class="stat-num">&lt;10ms</div>
+      <div class="stat-lbl">latência adicionada</div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="hiw-section">
+    <div class="reveal">
+      <div class="section-tag">como funciona</div>
+      <h2 class="section-title">Três passos.<br><em>Zero fricção.</em></h2>
+      <p class="section-sub">Sem treinamento. Sem configuração. Funciona com a IA que você já usa hoje.</p>
+    </div>
+    <div class="steps-grid reveal">
+      <div class="step">
+        <div class="step-num">01 ///</div>
+        <div class="step-title">Você escreve normalmente</div>
+        <div class="step-desc">Escreva como sempre escreveu. Com saudações, "por favor", redundâncias — tudo normal.
+        </div>
+        <div class="step-code">
+          <div class="sc-in">→ input do usuário:</div>
+          <div class="sc-out" style="color:var(--muted);font-size:11px">"Bom dia! Pode me fazer uma API em Node com
+            autenticação JWT?"</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02 ///</div>
+        <div class="step-title">TokLang comprime</div>
+        <div class="step-desc">O motor analisa, remove redundâncias e comprime para notação densa em milissegundos.
+        </div>
+        <div class="step-code">
+          <div class="sc-in">→ TokLang comprimido:</div>
+          <div class="sc-out">cr $js @express; #api auth jwt; prd</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03 ///</div>
+        <div class="step-title">IA responde normalmente</div>
+        <div class="step-desc">O prompt expandido chega limpo ao modelo. Resposta normal. Seu custo reduzido
+          drasticamente.</div>
+        <div class="step-code">
+          <div class="sc-in">→ economia real:</div>
+          <div class="sc-out">input −72% · custo −72%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="compare-grid reveal">
+      <div class="compare-col bad">
+        <div class="compare-head">✗ — sem TokLang</div>
+        <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Prompts longos consomem contexto
+            valioso</span></div>
+        <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Custo de API cresce com volume</span></div>
+        <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Saudações e cortesias pagam token</span>
+        </div>
+        <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Difícil auditar e otimizar em prod</span>
+        </div>
+      </div>
+      <div class="compare-col good">
+        <div class="compare-head">✓ — com TokLang</div>
+        <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Prompts até 85% menores, mesmo
+            resultado</span></div>
+        <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Custo previsível e drasticamente
+            menor</span></div>
+        <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Zero mudança no fluxo de trabalho</span>
+        </div>
+        <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Dashboard de analytics em tempo real</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF -->
+  <section class="social-section">
+    <div class="reveal">
+      <div class="section-tag">quem usa</div>
+      <h2 class="section-title">Devs que <em>pagam menos</em>.</h2>
+    </div>
+    <div class="quotes-grid reveal">
+      <div class="quote-card">
+        <p class="quote-text">"Integrei o TokLang na nossa pipeline em 20 minutos. Primeiro mês economizamos R$1.400 em
+          créditos de API sem alterar nenhum prompt."</p>
+        <div class="quote-author">
+          <div class="qa-avatar">RB</div>
+          <div>
+            <div class="qa-name">Rafael Borges</div>
+            <div class="qa-role">Senior Engineer · Fintech</div>
+          </div>
+        </div>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">"Antes eu revisava cada prompt manualmente pra cortar tokens. Agora o TokLang faz isso
+          automaticamente e eu nem percebo que está lá."</p>
+        <div class="quote-author">
+          <div class="qa-avatar">AM</div>
+          <div>
+            <div class="qa-name">Ana Martins</div>
+            <div class="qa-role">Product Manager · SaaS</div>
+          </div>
+        </div>
+      </div>
+      <div class="quote-card">
+        <p class="quote-text">"Com 50k chamadas por dia o custo de tokens era absurdo. TokLang cortou 68% disso. ROI no
+          primeiro dia de uso."</p>
+        <div class="quote-author">
+          <div class="qa-avatar">LP</div>
+          <div>
+            <div class="qa-name">Lucas Prado</div>
+            <div class="qa-role">CTO · AI Startup</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING PREVIEW -->
+  <section class="pricing-section">
+    <div class="reveal">
+      <div class="section-tag">preços</div>
+      <h2 class="section-title">Simples.<br><em>Previsível.</em></h2>
+      <p class="section-sub">Comece grátis. Escale quando precisar.</p>
+    </div>
+    <div class="pricing-grid reveal">
+      <div class="plan">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">$0<span>/mês</span></div>
+        <div class="plan-desc">Para explorar e aprender TokLang.</div>
+        <ul class="plan-features">
+          <li>500 compressões/mês</li>
+          <li>Vocabulário base</li>
+          <li>Dashboard básico</li>
+          <li>Suporte via comunidade</li>
+        </ul>
+        <button class="plan-btn" onclick="navigate('app')">Criar conta grátis</button>
+      </div>
+      <div class="plan featured">
+        <div class="plan-badge">Popular</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">$19<span>/mês</span></div>
+        <div class="plan-desc">Para devs que querem máxima economia.</div>
+        <ul class="plan-features">
+          <li>Ilimitado</li>
+          <li>API access + SDK</li>
+          <li>Vocabulário expandido</li>
+          <li>Analytics de economia</li>
+          <li>Vocabulário customizado</li>
+          <li>Suporte prioritário</li>
+        </ul>
+        <button class="plan-btn" onclick="navigate('pricing')">Começar — 14 dias grátis</button>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Team</div>
+        <div class="plan-price">$79<span>/mês</span></div>
+        <div class="plan-desc">Para equipes em produção em escala.</div>
+        <ul class="plan-features">
+          <li>Até 10 membros</li>
+          <li>Vocabulário compartilhado</li>
+          <li>Dashboard de equipe</li>
+          <li>Slack + Notion</li>
+          <li>SSO / SAML</li>
+        </ul>
+        <button class="plan-btn" onclick="navigate('pricing')">Falar com vendas</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="cta-final">
+    <div class="cta-box reveal">
+      <div class="section-tag" style="justify-content:center;display:flex;margin-bottom:14px">comece agora</div>
+      <h2>Pronto para <em>parar</em><br>de desperdiçar tokens?</h2>
+      <p>Configure em menos de 5 minutos. Sem cartão de crédito.</p>
+      <button class="btn btn-primary btn-lg" onclick="navigate('app')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="4 14 10 14 10 20" />
+          <polyline points="20 10 14 10 14 4" />
+          <line x1="14" y1="10" x2="21" y2="3" />
+          <line x1="3" y1="21" x2="10" y2="14" />
+        </svg>
+        Comprimir agora — grátis
+      </button>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq-section">
+    <div class="reveal">
+      <div class="section-tag">dúvidas</div>
+      <h2 class="section-title">Perguntas<br><em>frequentes.</em></h2>
+    </div>
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Preciso mudar como escrevo meus prompts? <span
+            class="faq-icon">+</span></div>
+        <div class="faq-a">Não. Esse é o ponto central do TokLang — você escreve exatamente como sempre escreveu. O
+          motor de compressão opera em segundo plano e é completamente invisível.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Funciona com qualquer modelo de IA? <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Sim. TokLang é agnóstico ao modelo. Funciona com OpenAI, Anthropic Claude, Google Gemini,
+          Mistral, ou qualquer modelo via API. A compressão acontece antes da chamada.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">A qualidade das respostas cai? <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">Não. O TokLang comprime sem perder intenção semântica. O modelo recebe um prompt limpo e
+          completo — apenas sem verbosidade desnecessária. Em muitos casos a resposta melhora por ser mais precisa.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Como é calculada a economia de tokens? <span
+            class="faq-icon">+</span></div>
+        <div class="faq-a">Comparamos o token count do prompt original com o prompt comprimido antes de enviar ao
+          modelo. O dashboard mostra em tempo real quanto você economizou em tokens e em dólares.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Meus prompts ficam armazenados? <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">No plano Starter, os prompts são processados e descartados. Nos planos Pro e Team você pode
+          ativar analytics histórico, sempre com opt-in explícito e dados criptografados em repouso.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Tok<span>Lang</span></div>
+    <div class="footer-copy">© 2025 TokLang · Feito com obsessão por tokens</div>
+    <ul class="footer-links">
+      <li><a onclick="navigate('docs')">Docs</a></li>
+      <li><a onclick="navigate('pricing')">API</a></li>
+      <li><a>Privacidade</a></li>
+      <li><a>Status</a></li>
+      <li><a>GitHub</a></li>
+    </ul>
+  </footer>

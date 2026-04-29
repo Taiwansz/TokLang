@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="TokLang — Comprima prompts de IA automaticamente. Escreva naturalmente, economize até 85% em tokens. Compatível com GPT, Claude, Gemini.">
+<meta property="og:title" content="TokLang — Comprima. Comunique. Economize.">
+<meta property="og:description" content="Middleware inteligente que comprime seus prompts automaticamente. Escreva normalmente, pague menos.">
+<title>TokLang — Comprima. Comunique. Economize.</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+<!-- CSS Architecture -->
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/animations.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/pages/home.css">
+<link rel="stylesheet" href="css/pages/app.css">
+<link rel="stylesheet" href="css/pages/docs.css">
+<link rel="stylesheet" href="css/pages/pricing.css">
+<link rel="stylesheet" href="css/pages/auth.css">
+<link rel="stylesheet" href="css/pages/dashboard.css">
+<link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+<!-- GLOBAL BG -->
+<div id="grid-bg"></div>
+<div id="noise-bg"></div>
+<div id="cursor-glow"></div>
+
+<!-- ===== NAV ===== -->
+<nav id="nav">
+  <div class="nav-logo" onclick="navigate('home')">Tok<span>Lang</span></div>
+  <ul class="nav-links">
+    <li><a onclick="navigate('home')" data-page="home">Início</a></li>
+    <li><a onclick="navigate('app')" data-page="app">App</a></li>
+    <li><a onclick="navigate('docs')" data-page="docs">Docs</a></li>
+    <li><a onclick="navigate('pricing')" data-page="pricing">Preços</a></li>
+  </ul>
+  <div class="nav-auth-logged-out" id="nav-logged-out">
+    <button class="nav-link-login" onclick="navigate('login')">Entrar</button>
+    <button class="nav-cta" onclick="navigate('signup')">Criar conta</button>
+  </div>
+  <div class="nav-auth-logged-in" id="nav-logged-in" style="display:none">
+    <button class="btn btn-ghost" onclick="navigate('dashboard')" style="padding:7px 16px;font-size:11px">Dashboard</button>
+    <div class="nav-user-avatar" id="nav-avatar" onclick="navigate('dashboard')" title="Minha conta">TW</div>
+  </div>
+  <button class="nav-mobile-btn" onclick="navigate('app')">≡</button>
+</nav>
+
+<!-- ============================================================ -->
+<!-- PAGES: loaded via includes below                              -->
+<!-- ============================================================ -->
+
+<!-- PAGE: HOME (inline — loaded from pages/home.html concept) -->
+<div id="page-home" class="page"></div>
+
+<!-- PAGE: APP -->
+<div id="page-app" class="page"></div>
+
+<!-- PAGE: DOCS -->
+<div id="page-docs" class="page"></div>
+
+<!-- PAGE: PRICING -->
+<div id="page-pricing" class="page"></div>
+
+<!-- PAGE: LOGIN -->
+<div id="page-login" class="page"></div>
+
+<!-- PAGE: SIGNUP -->
+<div id="page-signup" class="page"></div>
+
+<!-- PAGE: FORGOT -->
+<div id="page-forgot" class="page"></div>
+
+<!-- PAGE: DASHBOARD -->
+<div id="page-dashboard" class="page"></div>
+
+<!-- TOAST -->
+<div class="toast" id="global-toast">
+  <span class="toast-icon" id="toast-icon">✓</span>
+  <span class="toast-msg" id="toast-msg">Ação realizada</span>
+</div>
+
+<!-- JS Architecture -->
+<script src="js/auth.js"></script>
+<script src="js/router.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/compressor.js"></script>
+
+<!-- Page loader: fetches HTML partials into placeholders -->
+<script>
+async function loadPages() {
+  const pages = ['home','app','docs','pricing','login','signup','forgot','dashboard'];
+  await Promise.all(pages.map(async p => {
+    try {
+      const res = await fetch('pages/' + p + '.html');
+      if (res.ok) {
+        document.getElementById('page-' + p).innerHTML = await res.text();
+      }
+    } catch(e) { console.warn('Could not load page: ' + p, e); }
+  }));
+  // Init after all pages loaded
+  initRouter();
+  initReveal();
+  updateUsageUI();
+  window.addEventListener('hashchange', () => {
+    const hash = window.location.hash.replace('#','');
+    if (VALID_PAGES.includes(hash)) navigate(hash);
+  });
+}
+loadPages();
+</script>
+</body>
+</html>

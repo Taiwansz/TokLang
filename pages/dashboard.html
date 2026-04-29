@@ -1,0 +1,134 @@
+<div class="dashboard-page">
+  <!-- MOBILE OVERLAY & DRAWER -->
+  <div class="dash-mobile-overlay" id="dash-overlay" onclick="closeMobileMenu()"></div>
+  <div class="dash-mobile-drawer" id="dash-drawer">
+    <button class="dash-mobile-close" onclick="closeMobileMenu()" aria-label="Fechar menu">✕</button>
+    <div class="dash-user" style="margin-top:24px">
+      <div class="dash-avatar" id="dash-avatar-mobile">TW</div>
+      <div class="dash-user-name" id="dash-user-name-mobile">Twn</div>
+      <div class="dash-user-plan"><span class="pill pill-green" style="font-size:9px">Starter</span></div>
+    </div>
+    <ul class="dash-nav" id="dash-nav-mobile">
+      <li class="dash-nav-item active" onclick="showDashSection('overview',this);closeMobileMenu()"><span class="dash-nav-icon">⬛</span>Visão geral</li>
+      <li class="dash-nav-item" onclick="showDashSection('history',this);closeMobileMenu()"><span class="dash-nav-icon">⟳</span>Histórico</li>
+      <li class="dash-nav-item" onclick="showDashSection('api',this);closeMobileMenu()"><span class="dash-nav-icon">⌘</span>API &amp; SDK</li>
+      <div class="dash-nav-section">Conta</div>
+      <li class="dash-nav-item" onclick="showDashSection('settings',this);closeMobileMenu()"><span class="dash-nav-icon">⚙</span>Configurações</li>
+      <li class="dash-nav-item" onclick="showDashSection('billing',this);closeMobileMenu()"><span class="dash-nav-icon">◈</span>Plano &amp; cobrança</li>
+      <div style="height:1px;background:var(--border);margin:12px 16px"></div>
+      <li class="dash-nav-item" onclick="navigate('app')"><span class="dash-nav-icon">↗</span>Abrir compressor</li>
+      <li class="dash-nav-item" onclick="doLogout()"><span class="dash-nav-icon">→</span>Sair</li>
+    </ul>
+  </div>
+
+  <!-- MOBILE HEADER BAR -->
+  <div class="dash-mobile-header">
+    <div class="dash-mobile-title" id="dash-mobile-section-title">Visão geral</div>
+    <button class="dash-mobile-menu-btn" onclick="openMobileMenu()" aria-label="Abrir menu">☰ Menu</button>
+  </div>
+
+  <div class="dash-layout">
+    <!-- SIDEBAR -->
+    <aside class="dash-sidebar">
+      <div class="dash-user">
+        <div class="dash-avatar" id="dash-avatar-txt">TW</div>
+        <div class="dash-user-name" id="dash-user-name">Twn</div>
+        <div class="dash-user-plan"><span class="pill pill-green" style="font-size:9px">Starter</span></div>
+      </div>
+      <ul class="dash-nav">
+        <li class="dash-nav-item active" onclick="showDashSection('overview',this)"><span class="dash-nav-icon">⬛</span>Visão geral</li>
+        <li class="dash-nav-item" onclick="showDashSection('history',this)"><span class="dash-nav-icon">⟳</span>Histórico</li>
+        <li class="dash-nav-item" onclick="showDashSection('api',this)"><span class="dash-nav-icon">⌘</span>API &amp; SDK</li>
+        <div class="dash-nav-section">Conta</div>
+        <li class="dash-nav-item" onclick="showDashSection('settings',this)"><span class="dash-nav-icon">⚙</span>Configurações</li>
+        <li class="dash-nav-item" onclick="showDashSection('billing',this)"><span class="dash-nav-icon">◈</span>Plano &amp; cobrança</li>
+        <div style="height:1px;background:var(--border);margin:12px 16px"></div>
+        <li class="dash-nav-item" onclick="navigate('app')"><span class="dash-nav-icon">↗</span>Abrir compressor</li>
+        <li class="dash-nav-item" onclick="doLogout()"><span class="dash-nav-icon">→</span>Sair</li>
+      </ul>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="dash-main">
+      <!-- OVERVIEW -->
+      <div class="dash-section active" id="dash-overview">
+        <div class="dash-section-title">Visão geral</div>
+        <div class="dash-section-sub">// resumo do seu uso este mês</div>
+        <div class="metrics-grid">
+          <div class="metric-card"><div class="metric-label">Compressões</div><div class="metric-val">47</div><div class="metric-delta up">↑ 12 esta semana</div></div>
+          <div class="metric-card"><div class="metric-label">Tokens economizados</div><div class="metric-val green">8.2K</div><div class="metric-delta up">↑ 76% média</div></div>
+          <div class="metric-card"><div class="metric-label">Economizado em $</div><div class="metric-val amber">$0.024</div><div class="metric-delta">estimativa GPT-4o</div></div>
+          <div class="metric-card"><div class="metric-label">Limite do plano</div><div class="metric-val">453</div><div class="metric-delta">restantes de 500</div></div>
+        </div>
+        <div class="usage-bar-wrap"><div class="usage-bar-label"><span>Uso mensal — Starter</span><span>47 / 500 compressões</span></div><div class="usage-bar-track"><div class="usage-bar-fill" style="width:9.4%"></div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+          <div class="chart-wrap"><div class="chart-title">Tokens economizados · últimos 7 dias</div><div class="chart-val">8.2K</div><div class="mini-chart" id="mini-chart-1"></div></div>
+          <div class="chart-wrap"><div class="chart-title">Compressões · últimos 7 dias</div><div class="chart-val">47</div><div class="mini-chart" id="mini-chart-2"></div></div>
+        </div>
+        <div class="table-wrap">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center"><span style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Atividade recente</span><button onclick="showDashSection('history',null)" style="font-family:var(--mono);font-size:10px;color:var(--green);background:none;border:none;cursor:pointer">ver tudo →</button></div>
+          <table class="history-table"><thead><tr><th>Prompt (resumo)</th><th>TokLang</th><th>Economia</th><th>Quando</th></tr></thead><tbody id="dash-recent-tbody"></tbody></table>
+        </div>
+        <div style="background:var(--gdim);border:1px solid rgba(0,255,136,.12);border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px">
+          <div><div style="font-size:14px;font-weight:700;margin-bottom:4px">Faça upgrade para Pro</div><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Compressões ilimitadas · API access · Analytics histórico · $19/mês</div></div>
+          <button class="btn btn-primary" style="white-space:nowrap;font-size:12px;padding:10px 20px" onclick="showDashSection('billing',null)">Upgrade agora →</button>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div class="dash-section" id="dash-history">
+        <div class="dash-section-title">Histórico de compressões</div>
+        <div class="dash-section-sub">// todas as suas compressões deste mês</div>
+        <div class="table-wrap"><table class="history-table"><thead><tr><th>#</th><th>Prompt original (resumo)</th><th>Comprimido</th><th>Tokens antes</th><th>Tokens depois</th><th>Economia</th><th>Data</th></tr></thead><tbody id="dash-full-history"></tbody></table></div>
+      </div>
+
+      <!-- API -->
+      <div class="dash-section" id="dash-api">
+        <div class="dash-section-title">API &amp; SDK</div>
+        <div class="dash-section-sub">// integre TokLang na sua aplicação</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Sua chave de API</div>
+        <div class="api-key-box"><span id="api-key-display">tl_live_••••••••••••••••••••••••••••••••</span><div class="api-key-actions"><button class="api-key-btn" onclick="toggleApiKey()">Revelar</button><button class="api-key-btn" onclick="copyApiKey()">Copiar</button><button class="api-key-btn" style="color:var(--red)" onclick="rotateApiKey()">Rotacionar</button></div></div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-bottom:24px">Nunca compartilhe sua chave. Rotacione se comprometida.</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Instalação rápida</div>
+        <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:14px 18px;font-family:var(--mono);font-size:12px;margin-bottom:14px;line-height:1.8"><span style="color:var(--muted)"># npm</span><br><span style="color:var(--green)">npm install toklang</span><br><br><span style="color:var(--muted)"># pip</span><br><span style="color:var(--green)">pip install toklang</span></div>
+        <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:14px 18px;font-family:var(--mono);font-size:12px;margin-bottom:24px;line-height:1.9"><span style="color:var(--blue)">import</span> { compress } <span style="color:var(--blue)">from</span> <span style="color:var(--green)">'toklang'</span><br><br><span style="color:var(--blue)">const</span> result = <span style="color:var(--blue)">await</span> compress(<span style="color:var(--green)">"Seu prompt aqui"</span>, {<br>&nbsp;&nbsp;apiKey: <span style="color:var(--green)">'<span id="api-key-code">tl_live_••••••••••••</span>'</span><br>})<br><br>console.log(result.compressed) <span style="color:var(--muted)">// notação TokLang</span><br>console.log(result.savings)    <span style="color:var(--muted)">// 0.74 → 74%</span></div>
+        <div style="background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius-sm);padding:12px 16px;font-family:var(--mono);font-size:11px;color:var(--amber);line-height:1.7">⚠ Plano Starter: acesso à API não incluso. <a onclick="showDashSection('billing',null)" style="cursor:pointer;text-decoration:underline">Faça upgrade para Pro</a> para habilitar acesso via API e SDK.</div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="dash-section" id="dash-settings">
+        <div class="dash-section-title">Configurações</div>
+        <div class="dash-section-sub">// preferências e perfil da conta</div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Perfil</div>
+        <div class="settings-group" style="margin-bottom:20px">
+          <div class="settings-row"><div><div class="settings-row-label">Nome</div><div class="settings-row-sub" id="set-name-display">Twn</div></div><button class="api-key-btn" onclick="editName()">Editar</button></div>
+          <div class="settings-row"><div><div class="settings-row-label">E-mail</div><div class="settings-row-sub" id="set-email-display">twn@toklang.dev</div></div><button class="api-key-btn">Alterar</button></div>
+          <div class="settings-row"><div><div class="settings-row-label">Senha</div><div class="settings-row-sub">Última alteração: nunca</div></div><button class="api-key-btn">Alterar</button></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Preferências</div>
+        <div class="settings-group" style="margin-bottom:20px">
+          <div class="settings-row"><div><div class="settings-row-label">Analytics histórico</div><div class="settings-row-sub">Salvar histórico de compressões</div></div><label class="toggle-switch"><input type="checkbox" checked onchange="showToast('Configuração salva','✓')"><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+          <div class="settings-row"><div><div class="settings-row-label">Notificações por e-mail</div><div class="settings-row-sub">Resumo semanal de uso</div></div><label class="toggle-switch"><input type="checkbox" onchange="showToast('Configuração salva','✓')"><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+          <div class="settings-row"><div><div class="settings-row-label">Alerta de limite</div><div class="settings-row-sub">Notificar ao atingir 80% do limite</div></div><label class="toggle-switch"><input type="checkbox" checked onchange="showToast('Configuração salva','✓')"><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+        </div>
+        <div class="danger-zone"><div class="danger-zone-title">// zona de perigo</div><div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn-danger" onclick="showToast('Dados exportados para seu e-mail','📦')">Exportar meus dados</button><button class="btn-danger" onclick="confirmDeleteAccount()">Excluir conta</button></div></div>
+      </div>
+
+      <!-- BILLING -->
+      <div class="dash-section" id="dash-billing">
+        <div class="dash-section-title">Plano &amp; cobrança</div>
+        <div class="dash-section-sub">// gerencie sua assinatura</div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+          <div><div style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">Plano atual</div><div style="font-size:22px;font-weight:800;letter-spacing:-.02em">Starter <span style="font-size:14px;font-weight:400;color:var(--muted)">· Gratuito</span></div><div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:4px">500 compressões/mês · Sem API · Dashboard básico</div></div>
+          <span class="pill pill-gray">Gratuito</span>
+        </div>
+        <div class="pricing-grid" style="margin-bottom:24px">
+          <div class="plan" style="opacity:.5;cursor:default"><div class="plan-name">Starter</div><div class="plan-price">$0<span>/mês</span></div><div class="plan-desc">Plano atual</div><ul class="plan-features"><li>500 compressões/mês</li><li>Dashboard básico</li></ul><div class="plan-btn" style="background:var(--bg3);cursor:default;opacity:.6">Plano atual</div></div>
+          <div class="plan featured"><div class="plan-badge">Recomendado</div><div class="plan-name">Pro</div><div class="plan-price">$19<span>/mês</span></div><div class="plan-desc">Para devs e power users.</div><ul class="plan-features"><li>Ilimitado</li><li>API + SDK</li><li>Analytics histórico</li><li>Vocabulário expandido</li></ul><button class="plan-btn" onclick="showToast('Redirecionando para checkout...','💳')">Assinar Pro — 14 dias grátis</button></div>
+          <div class="plan"><div class="plan-name">Team</div><div class="plan-price">$79<span>/mês</span></div><div class="plan-desc">Para equipes.</div><ul class="plan-features"><li>10 membros</li><li>Dashboard time</li><li>SSO/SAML</li></ul><button class="plan-btn" onclick="showToast('Abrindo contato com vendas...','📞')">Falar com vendas</button></div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden"><div style="padding:12px 16px;border-bottom:1px solid var(--border)"><span style="font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em">Histórico de faturas</span></div><div style="padding:40px;text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted)">Nenhuma fatura ainda — você está no plano gratuito.</div></div>
+      </div>
+    </main>
+  </div>
+</div>
