@@ -122,19 +122,17 @@ async function doCompress() {
   setPipeStep(2, 'active');
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/compress', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 120,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: input }]
-      })
+      body: JSON.stringify({ prompt: input })
     });
-    if (!res.ok) throw new Error('API retornou status ' + res.status);
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.error || 'Erro no servidor');
+    }
     const data = await res.json();
-    const compressed = data.content[0].text.trim();
+    const compressed = data.compressed;
     lastCompressedText = compressed;
 
     await sleep(200);
@@ -163,18 +161,29 @@ async function doCompress() {
     document.getElementById('stat-usd').textContent    = '$' + usdSaved;
     document.getElementById('app-stats').style.display = 'flex';
 
-    // Update usage counter
-    const used = incUsage();
-    updateUsageUI();
+    // 1. Salvar no Supabase (se logado)
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      await supabase.from('history').insert({
+        user_id: session.user.id,
+        original_text: input,
+        compressed_text: compressed,
+        tokens_before: tokBefore,
+        tokens_after: tokAfter,
+        savings_pct: savings
+      });
+    }
 
-    // Session history
+    // 2. Fallback local para a sessão atual (opcional)
     const now = new Date();
     sessionHistory.unshift({
       compressed, savings,
       time: now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
       original: input.substring(0,60)
     });
+
     renderHistory();
+    updateUsageUI();
 
   } catch (err) {
     lastCompressedText = '';
@@ -182,8 +191,8 @@ async function doCompress() {
     setPipeStep(2, 'idle');
     if (ps) { ps.textContent = 'erro'; ps.className = 'pill pill-gray'; }
     errorDiv.innerHTML = `<div class="error-banner">
-      <strong>Erro de conexão:</strong> ${escHtml(err.message)}<br>
-      <span style="font-size:10px;opacity:.7">Verifique sua conexão com a internet e tente novamente.</span>
+      <strong>Erro:</strong> ${escHtml(err.message)}<br>
+      <span style="font-size:10px;opacity:.7">Verifique sua conexão ou chaves de API.</span>
     </div>`;
   } finally {
     btn.disabled = false;
@@ -191,11 +200,39 @@ async function doCompress() {
   }
 }
 
-function renderHistory() {
-  if (sessionHistory.length === 0) return;
+async function renderHistory() {
   const sec  = document.getElementById('history-section');
   const body = document.getElementById('history-body');
   if (!sec || !body) return;
+
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (session) {
+    const { data: dbHistory, error } = await supabase
+      .from('history')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(8);
+
+    if (!error && dbHistory && dbHistory.length > 0) {
+      sec.style.display = 'block';
+      body.innerHTML = dbHistory.map(h => `
+        <div class="history-item" title="${escHtml(h.original_text)}">
+          <div class="hi-compressed">${escHtml(h.compressed_text)}</div>
+          <div class="hi-meta">
+            <span class="hi-saving">−${h.savings_pct}%</span>
+            <span class="hi-time">${new Date(h.created_at).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })}</span>
+          </div>
+        </div>`).join('');
+      return;
+    }
+  }
+
+  // Fallback para histórico da sessão local
+  if (sessionHistory.length === 0) {
+    sec.style.display = 'none';
+    return;
+  }
   sec.style.display = 'block';
   body.innerHTML = sessionHistory.slice(0, 8).map(h => `
     <div class="history-item" title="${escHtml(h.original)}">

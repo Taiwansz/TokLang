@@ -1,0 +1,16 @@
+{
+  "name": "toklang",
+  "version": "1.0.0",
+  "description": "Semantic compression middleware for LLMs",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 5500"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.20.0",
+    "stripe": "^14.0.0"
+  },
+  "devDependencies": {
+    "vercel": "^34.0.0"
+  }
+}
