@@ -162,9 +162,13 @@ async function doCompress() {
     document.getElementById('app-stats').style.display = 'flex';
 
     // 1. Salvar no Supabase (se logado)
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session) {
-      await supabase.from('history').insert({
+    let session = null;
+    if (window.supabase && !window.IS_DEMO) {
+      const res = await window.supabase.auth.getSession();
+      session = res.data.session;
+    }
+    if (session && !window.IS_DEMO) {
+      await window.supabase.from('history').insert({
         user_id: session.user.id,
         original_text: input,
         compressed_text: compressed,
@@ -205,10 +209,10 @@ async function renderHistory() {
   const body = document.getElementById('history-body');
   if (!sec || !body) return;
 
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await window.supabase.auth.getSession();
   
   if (session) {
-    const { data: dbHistory, error } = await supabase
+    const { data: dbHistory, error } = await window.supabase
       .from('history')
       .select('*')
       .order('created_at', { ascending: false })

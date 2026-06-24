@@ -3,11 +3,13 @@ const USAGE_KEY = 'tl_monthly_usage';
 
 // Get current user from Supabase session
 async function getUser() {
-  if (!supabase) return null;
-  const { data: { session } } = await supabase.auth.getSession();
+  const mock = sessionStorage.getItem('mock_user');
+  if (mock) return JSON.parse(mock);
+
+  if (!window.supabase || window.IS_DEMO) return null;
+  const { data: { session } } = await window.supabase.auth.getSession();
   if (!session) return null;
   
-  // Normalizar objeto de usuário para o resto do app
   const u = session.user;
   return {
     name: u.user_metadata.name || u.email.split('@')[0],
@@ -87,7 +89,17 @@ async function doLogin() {
 
   btn.disabled = true; btn.textContent = 'Entrando...';
 
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+
+  let error = null;
+  if (window.supabase && !window.IS_DEMO) {
+    const res = await window.supabase.auth.signInWithPassword({ email, password: pass });
+    error = res.error;
+  } else {
+    // Mock successful login if Supabase isn't configured
+    console.warn("Supabase not configured. Mocking login.");
+    sessionStorage.setItem('mock_user', JSON.stringify({ email, name: email.split('@')[0] }));
+  }
+
 
   if (error) {
     err.textContent = 'Erro: ' + error.message;
@@ -121,7 +133,11 @@ async function doSignup() {
 
   btn.disabled = true; btn.textContent = 'Criando conta...';
 
-  const { data, error } = await supabase.auth.signUp({
+
+  let error = null;
+  if (window.supabase && !window.IS_DEMO) {
+    const res = await window.supabase.auth.signUp({
+
     email,
     password: pass,
     options: {
@@ -133,6 +149,11 @@ async function doSignup() {
       }
     }
   });
+    error = res.error;
+  } else {
+    console.warn("Supabase not configured. Mocking signup.");
+    sessionStorage.setItem('mock_user', JSON.stringify({ email }));
+  }
 
   if (error) {
     err.textContent = 'Erro: ' + error.message;
@@ -147,20 +168,21 @@ async function doSignup() {
 }
 
 async function doLogout() {
-  await supabase.auth.signOut();
+  sessionStorage.removeItem('mock_user');
+  if (window.supabase && !window.IS_DEMO) await window.supabase.auth.signOut();
   updateNavAuth();
   showToast('Sessão encerrada.', '👋');
   navigate('home');
 }
 
 async function oauthLogin(provider) {
-  const { data, error } = await supabase.auth.signInWithOAuth({ provider });
+  const { data, error } = await window.supabase.auth.signInWithOAuth({ provider });
   if (error) showToast('Erro no login social: ' + error.message, '⚠');
 }
 
 async function doForgot() {
   const email = document.getElementById('forgot-email').value.trim();
-  const { error } = await supabase.auth.resetPasswordForEmail(email);
+  const { error } = await window.supabase.auth.resetPasswordForEmail(email);
   if (error) {
     const err = document.getElementById('forgot-error');
     if (err) { err.textContent = error.message; err.style.display = 'block'; }
@@ -170,7 +192,7 @@ async function doForgot() {
 }
 
 // Escutar mudanças de autenticação globalmente
-if (supabase) {
+if (window.supabase && !window.IS_DEMO) {
   supabase.auth.onAuthStateChange((event, session) => {
     console.log('Auth Event:', event);
     updateNavAuth();
@@ -183,4 +205,35 @@ function selectPlan(el, plan) {
   document.querySelectorAll('.plan-option').forEach(o => o.classList.remove('selected'));
   if (el) el.classList.add('selected');
   selectedPlan = plan;
+}
+
+function checkPasswordStrength(val) {
+  const bar = document.getElementById('pw-bar');
+  const hint = document.getElementById('pw-hint');
+  let score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  const colors = ['', '#ff5e5e', '#f5a623', '#4d9fff', '#00ff88'];
+  const labels = ['', 'Muito fraca', 'Fraca', 'Boa', 'Forte 💪'];
+  if (bar) { bar.style.width = (score * 25) + '%'; bar.style.background = colors[score] || ''; }
+  if (hint) { hint.textContent = labels[score] || 'Crie uma senha forte'; }
+}
+
+function resetForgotForm() {
+  const btn = document.getElementById('forgot-btn');
+  const ghost = document.querySelector('#page-forgot .form-btn-ghost');
+  const p = document.querySelector('#page-forgot .auth-body p');
+  const fg = document.querySelector('#page-forgot .form-group');
+  const success = document.getElementById('forgot-success');
+  const err = document.getElementById('forgot-error');
+  const input = document.getElementById('forgot-email');
+  if (btn) { btn.style.display = ''; btn.disabled = false; btn.textContent = 'Enviar link de recuperação'; }
+  if (ghost) ghost.style.display = '';
+  if (p) p.style.display = '';
+  if (fg) fg.style.display = '';
+  if (success) success.style.display = 'none';
+  if (err) err.style.display = 'none';
+  if (input) input.value = '';
 }

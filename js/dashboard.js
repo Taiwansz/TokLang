@@ -17,10 +17,18 @@ async function initDashboard() {
   const fh = document.getElementById('dash-full-history');
 
   // Fetch real data from Supabase
-  const { data: dbHistory, error, count } = await supabase
-    .from('history')
-    .select('*', { count: 'exact' })
-    .order('created_at', { ascending: false });
+
+  let dbHistory = null, error = null, count = 0;
+  if (window.supabase && !window.IS_DEMO) { // Prevent hitting unconfigured generic db
+    try {
+      const res = await window.supabase.from('history').select('*', { count: 'exact' }).order('created_at', { ascending: false });
+      dbHistory = res.data; error = res.error; count = res.count;
+    } catch(e) { console.warn("Supabase fetch failed", e); }
+  } else {
+    dbHistory = FAKE_HISTORY.map(h => ({ original_text: h.orig, compressed_text: h.tok, savings_pct: h.saving, created_at: new Date().toISOString(), tokens_before: h.before, tokens_after: h.after }));
+    count = dbHistory.length;
+  }
+
 
   if (!error && dbHistory) {
     if (tbody) tbody.innerHTML = dbHistory.slice(0,4).map(h => `
@@ -114,9 +122,19 @@ async function rotateApiKey() {
   const u = await getUser(); if (!u) return;
   const newKey = 'tl_live_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   
-  const { error } = await supabase.auth.updateUser({
+
+  let error = null;
+  if (window.supabase && !window.IS_DEMO) {
+    const res = await window.supabase.auth.updateUser({
+
     data: { apiKey: newKey }
-  });
+    });
+    error = res.error;
+  } else {
+    let mock = JSON.parse(sessionStorage.getItem('mock_user') || '{}');
+    mock.apiKey = newKey;
+    sessionStorage.setItem('mock_user', JSON.stringify(mock));
+  }
 
   if (error) {
     showToast('Erro ao rotacionar chave: ' + error.message, '⚠');
@@ -132,9 +150,19 @@ async function editName() {
   const u = await getUser(); if (!u) return;
   const n = prompt('Novo nome:', u.name);
   if (n?.trim()) {
-    const { error } = await supabase.auth.updateUser({
+
+  let error = null;
+  if (window.supabase && !window.IS_DEMO) {
+    const res = await window.supabase.auth.updateUser({
+
       data: { name: n.trim() }
     });
+    error = res.error;
+  } else {
+    let mock = JSON.parse(sessionStorage.getItem('mock_user') || '{}');
+    mock.name = n.trim();
+    sessionStorage.setItem('mock_user', JSON.stringify(mock));
+  }
     if (error) {
       showToast('Erro ao atualizar nome: ' + error.message, '⚠');
       return;
