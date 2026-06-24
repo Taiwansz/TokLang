@@ -96,6 +96,7 @@
 
 <!-- Page loader: fetches HTML partials into placeholders -->
 <script>
+let pagesLoaded = false;
 async function loadPages() {
   const pages = ['home','app','docs','pricing','login','signup','forgot','dashboard'];
   await Promise.all(pages.map(async p => {
@@ -106,10 +107,11 @@ async function loadPages() {
       }
     } catch(e) { console.warn('Could not load page: ' + p, e); }
   }));
+  pagesLoaded = true;
   // Init after all pages loaded
   initRouter();
   initReveal();
-  updateUsageUI();
+  if (typeof updateUsageUI === 'function') updateUsageUI();
   window.addEventListener('hashchange', () => {
     const hash = window.location.hash.replace('#','');
     if (VALID_PAGES.includes(hash)) navigate(hash);

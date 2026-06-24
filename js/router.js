@@ -31,6 +31,10 @@ function initReveal() {
 const VALID_PAGES = ['home','app','docs','pricing','login','signup','forgot','dashboard'];
 
 function navigate(page) {
+  if (typeof pagesLoaded !== 'undefined' && !pagesLoaded) {
+    setTimeout(() => navigate(page), 50);
+    return;
+  }
   if (page === 'dashboard' && !getUser()) {
     showToast('Faça login para acessar o dashboard', '🔒');
     navigate('login');
