@@ -7,6 +7,14 @@
 <meta property="og:title" content="TokLang — Comprima. Comunique. Economize.">
 <meta property="og:description" content="Middleware inteligente que comprime seus prompts automaticamente. Escreva normalmente, pague menos.">
 <title>TokLang — Comprima. Comunique. Economize.</title>
+<script>
+  (function() {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+      document.documentElement.classList.add('light-theme');
+    }
+  })();
+</script>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&family=Syne:wght@400;500;700;800&display=swap" rel="stylesheet">
 
 <!-- CSS Architecture -->
@@ -38,13 +46,19 @@
     <li><a onclick="navigate('docs')" data-page="docs">Docs</a></li>
     <li><a onclick="navigate('pricing')" data-page="pricing">Preços</a></li>
   </ul>
-  <div class="nav-auth-logged-out" id="nav-logged-out">
-    <button class="nav-link-login" onclick="navigate('login')">Entrar</button>
-    <button class="nav-cta" onclick="navigate('signup')">Criar conta</button>
-  </div>
-  <div class="nav-auth-logged-in" id="nav-logged-in" style="display:none">
-    <button class="btn btn-ghost" onclick="navigate('dashboard')" style="padding:7px 16px;font-size:11px">Dashboard</button>
-    <div class="nav-user-avatar" id="nav-avatar" onclick="navigate('dashboard')" title="Minha conta">TW</div>
+  <div style="display:flex;align-items:center">
+    <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alterar tema" style="background:none;border:none;color:var(--text);cursor:pointer;padding:6px;display:flex;align-items:center;margin-right:12px;transition:transform 0.2s ease" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='none'">
+      <svg id="theme-icon-dark" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+      <svg id="theme-icon-light" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+    </button>
+    <div class="nav-auth-logged-out" id="nav-logged-out">
+      <button class="nav-link-login" onclick="navigate('login')">Entrar</button>
+      <button class="nav-cta" onclick="navigate('signup')">Criar conta</button>
+    </div>
+    <div class="nav-auth-logged-in" id="nav-logged-in" style="display:none">
+      <button class="btn btn-ghost" onclick="navigate('dashboard')" style="padding:7px 16px;font-size:11px">Dashboard</button>
+      <div class="nav-user-avatar" id="nav-avatar" onclick="navigate('dashboard')" title="Minha conta">TW</div>
+    </div>
   </div>
   <button class="nav-mobile-btn" onclick="navigate('app')">≡</button>
 </nav>
@@ -95,7 +109,24 @@
 <script src="js/toklang-engine.js"></script>
 <script src="js/compressor.js"></script>
 
-<!-- Page loader: fetches HTML partials into placeholders -->
+<script>
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light-theme');
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  updateThemeIcons();
+}
+
+function updateThemeIcons() {
+  const isLight = document.documentElement.classList.contains('light-theme');
+  const darkIcon = document.getElementById('theme-icon-dark');
+  const lightIcon = document.getElementById('theme-icon-light');
+  if (darkIcon && lightIcon) {
+    darkIcon.style.display = isLight ? 'none' : 'block';
+    lightIcon.style.display = isLight ? 'block' : 'none';
+  }
+}
+document.addEventListener('DOMContentLoaded', updateThemeIcons);
+</script>
 <script>
 let pagesLoaded = false;
 async function loadPages() {
