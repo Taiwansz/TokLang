@@ -23,18 +23,21 @@ class TokLang {
     if (!apiKey) throw new Error('TokLang API Key is required');
     this.apiKey = apiKey;
     this.baseUrl = options.baseUrl || 'https://toklang.dev/api/v1';
+    this.customVocab = options.customVocab || null;
   }
 
   /**
    * Comprime um prompt usando compressão semântica.
    * @param {string} prompt - O prompt em linguagem natural.
+   * @param {Object} [options] - Opções extras da chamada (pode conter customVocab).
    * @returns {Promise<Object>} - Objeto contendo o texto comprimido e a economia.
    */
-  async compress(prompt) {
+  async compress(prompt, options = {}) {
+    const customVocab = options.customVocab || this.customVocab;
     // Check local engine first
     const engine = LocalEngine || (typeof window !== 'undefined' && window.TokLangEngine);
     if (engine) {
-      const local = engine.compressLocally(prompt);
+      const local = engine.compressLocally(prompt, customVocab);
       if (local) {
         const tokBefore = countTokens(prompt);
         const tokAfter = countTokens(local);
@@ -52,7 +55,7 @@ class TokLang {
           'Content-Type': 'application/json',
           'x-api-key': this.apiKey
         },
-        body: JSON.stringify({ prompt })
+        body: JSON.stringify({ prompt, customVocab })
       });
 
       const data = await response.json();
@@ -67,6 +70,21 @@ class TokLang {
       throw error;
     }
   }
+
+  /**
+   * Expande um prompt TokLang de volta para linguagem natural usando motor local.
+   * @param {string} toklangText - O texto comprimido em TokLang.
+   * @param {Object} [options] - Opções de expansão.
+   * @returns {string} - O prompt expandido.
+   */
+  expand(toklangText, options = {}) {
+    const customVocab = options.customVocab || this.customVocab;
+    const engine = LocalEngine || (typeof window !== 'undefined' && window.TokLangEngine);
+    if (engine) {
+      return engine.expand(toklangText, customVocab);
+    }
+    throw new Error('Mecanismo de expansão TokLang não encontrado');
+  }
 }
 
 class TokLangMiddleware {
@@ -75,12 +93,13 @@ class TokLangMiddleware {
     this.apiKey = config.apiKey;
     this.tokLangKey = config.tokLangKey;
     this.baseUrl = config.baseUrl || 'https://toklang.dev/api/v1';
+    this.customVocab = config.customVocab || null;
 
     const compressFn = async (prompt) => {
       // Try local engine first
       const engine = LocalEngine || (typeof window !== 'undefined' && window.TokLangEngine);
       if (engine) {
-        const local = engine.compressLocally(prompt);
+        const local = engine.compressLocally(prompt, this.customVocab);
         if (local) return local;
       }
       if (!this.tokLangKey) return prompt; // Return uncompressed if key missing
@@ -92,7 +111,7 @@ class TokLangMiddleware {
             'Content-Type': 'application/json',
             'x-api-key': this.tokLangKey
           },
-          body: JSON.stringify({ prompt })
+          body: JSON.stringify({ prompt, customVocab: this.customVocab })
         });
         if (response.ok) {
           const data = await response.json();

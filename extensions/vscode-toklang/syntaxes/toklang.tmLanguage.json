@@ -1,0 +1,112 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "TokLang",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#actions"
+    },
+    {
+      "include": "#languages"
+    },
+    {
+      "include": "#frameworks"
+    },
+    {
+      "include": "#structures"
+    },
+    {
+      "include": "#parameters"
+    },
+    {
+      "include": "#modifiers"
+    },
+    {
+      "include": "#punctuation"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.number-sign.toklang",
+          "match": "#(?!fn\\b|cls\\b|scr\\b|api\\b|comp\\b|hook\\b|mod\\b|mw\\b).*$"
+        }
+      ]
+    },
+    "actions": {
+      "patterns": [
+        {
+          "name": "keyword.control.action.toklang",
+          "match": "\\b(cr|fix|ex|rf|op|tst|doc|cv|rev|sum)\\b"
+        }
+      ]
+    },
+    "languages": {
+      "patterns": [
+        {
+          "name": "entity.name.type.language.toklang",
+          "match": "\\$[a-zA-Z0-9+#-]+"
+        }
+      ]
+    },
+    "frameworks": {
+      "patterns": [
+        {
+          "name": "entity.name.class.framework.toklang",
+          "match": "@[a-zA-Z0-9.-]+"
+        }
+      ]
+    },
+    "structures": {
+      "patterns": [
+        {
+          "name": "entity.name.section.structure.toklang",
+          "match": "#(fn|cls|scr|api|comp|hook|mod|mw)\\b"
+        }
+      ]
+    },
+    "parameters": {
+      "patterns": [
+        {
+          "begin": "\\b(in|out|err)\\[",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.other.parameter.toklang"
+            }
+          },
+          "end": "\\]",
+          "patterns": [
+            {
+              "name": "variable.parameter.toklang",
+              "match": "[^\\],]+"
+            },
+            {
+              "name": "punctuation.separator.parameter.toklang",
+              "match": ","
+            }
+          ]
+        }
+      ]
+    },
+    "modifiers": {
+      "patterns": [
+        {
+          "name": "storage.modifier.toklang",
+          "match": "\\b(ui\\+|prd|cm|dk|typ|async|min)\\b|\\*"
+        }
+      ]
+    },
+    "punctuation": {
+      "patterns": [
+        {
+          "name": "punctuation.terminator.statement.toklang",
+          "match": ";"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.toklang"
+}

@@ -48,6 +48,46 @@ test.describe('TokLang Engine - Unit Tests', () => {
     expect(TokLangEngine.expand(null)).toBe('');
     expect(TokLangEngine.expand(undefined)).toBe('');
   });
+
+  test('expand - with customVocab object mapping', () => {
+    const shorthand = "cr $myLang @myFW; task details; myTerm";
+    const customVocab = {
+      "$myLang": "Minha Linguagem Especial",
+      "@myFW": "Meu Framework Top",
+      "myTerm": "definição customizada do termo"
+    };
+    const expanded = TokLangEngine.expand(shorthand, customVocab);
+    expect(expanded).toContain('Crie');
+    expect(expanded).toContain('Minha Linguagem Especial');
+    expect(expanded).toContain('Meu Framework Top');
+    expect(expanded).toContain('definição customizada do termo');
+  });
+
+  test('expand - with customVocab array mapping', () => {
+    const shorthand = "cr $myLang @myFW; task details; myTerm";
+    const customVocab = [
+      { key: "$myLang", value: "Minha Linguagem Especial" },
+      { term: "@myFW", definition: "Meu Framework Top" },
+      { word: "myTerm", expanded: "definição customizada do termo" }
+    ];
+    const expanded = TokLangEngine.expand(shorthand, customVocab);
+    expect(expanded).toContain('Crie');
+    expect(expanded).toContain('Minha Linguagem Especial');
+    expect(expanded).toContain('Meu Framework Top');
+    expect(expanded).toContain('definição customizada do termo');
+  });
+
+  test('compressLocally - with customVocab definitions', () => {
+    const prompt = "Cria um script em Minha Linguagem Especial usando Meu Framework Top.";
+    const customVocab = {
+      "$myLang": "Minha Linguagem Especial",
+      "@myFW": "Meu Framework Top"
+    };
+    const compressed = TokLangEngine.compressLocally(prompt, customVocab);
+    expect(compressed).toContain('cr');
+    expect(compressed).toContain('$myLang');
+    expect(compressed).toContain('@myFW');
+  });
 });
 
 test.describe('TokLang SDK & Middleware - Unit Tests', () => {
@@ -62,6 +102,14 @@ test.describe('TokLang SDK & Middleware - Unit Tests', () => {
     const result = await client.compress(prompt);
     expect(result.compressed).toContain('cr');
     expect(result.savings).toBeDefined();
+  });
+
+  test('TokLang client - expand using customVocab', () => {
+    const client = new TokLang('mock-key', {
+      customVocab: { "$myLang": "Minha Linguagem Especial" }
+    });
+    const expanded = client.expand("cr $myLang");
+    expect(expanded).toContain('Minha Linguagem Especial');
   });
 
   test('TokLangMiddleware - intercepts OpenAI request and compresses content', async () => {

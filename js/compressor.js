@@ -106,6 +106,11 @@ async function doCompress() {
   if (!input) { document.getElementById('app-input').focus(); return; }
   if (input.length > 16000) { showToast('Prompt muito longo. Máximo 16.000 caracteres.', '⚠'); return; }
 
+  const u = await getUser();
+  if (typeof loadActiveVocabulary === 'function') {
+    await loadActiveVocabulary();
+  }
+
   const btn      = document.getElementById('compress-btn');
   const output   = document.getElementById('app-output');
   const errorDiv = document.getElementById('app-error');
@@ -134,7 +139,7 @@ async function doCompress() {
   }
 
   if (typeof TokLangEngine !== 'undefined') {
-    const localCompressed = TokLangEngine.compressLocally(input);
+    const localCompressed = TokLangEngine.compressLocally(input, window.activeVocabulary);
     if (localCompressed) {
       console.log('[LOCAL COMPILER] Prompt comprimido localmente (0ms):', localCompressed);
       lastCompressedText = localCompressed;
@@ -191,7 +196,7 @@ async function doCompress() {
     const res = await fetch('/api/compress', {
       method: 'POST',
       headers: headers,
-      body: JSON.stringify({ prompt: input })
+      body: JSON.stringify({ prompt: input, userId: u ? u.id : null })
     });
     if (!res.ok) {
       const errData = await res.json();
@@ -272,6 +277,10 @@ async function doExpand() {
   const input = document.getElementById('app-input').value.trim();
   if (!input) { document.getElementById('app-input').focus(); return; }
 
+  if (typeof loadActiveVocabulary === 'function') {
+    await loadActiveVocabulary();
+  }
+
   const btn      = document.getElementById('expand-btn');
   const output   = document.getElementById('app-output');
   const errorDiv = document.getElementById('app-error');
@@ -298,7 +307,7 @@ async function doExpand() {
     if (typeof TokLangEngine === 'undefined') {
       throw new Error('Mecanismo de expansão TokLang não foi carregado.');
     }
-    const expanded = TokLangEngine.expand(input);
+    const expanded = TokLangEngine.expand(input, window.activeVocabulary);
     if (!expanded) {
       throw new Error('Formato TokLang inválido ou vazio.');
     }

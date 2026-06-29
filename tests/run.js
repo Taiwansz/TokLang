@@ -79,6 +79,31 @@ try {
   assert.ok(e6.includes('com comentários explicativos'), 'Deve conter comentários');
   assert.ok(e6.includes('usando implementação assíncrona'), 'Deve conter async');
   console.log('   ✅ Teste 6 OK.');
+
+  // Teste 7: Expansão com customVocab (objeto)
+  const t7 = "cr $myLang @myFW; task details; myTerm";
+  const vocab7 = {
+    "$myLang": "Minha Linguagem Especial",
+    "@myFW": "Meu Framework Top",
+    "myTerm": "definição customizada do termo"
+  };
+  const e7 = TokLangEngine.expand(t7, vocab7);
+  console.log('   Input: ', t7);
+  console.log('   Output:', e7);
+  assert.ok(e7.includes('Minha Linguagem Especial'), 'Deve expandir linguagem customizada');
+  assert.ok(e7.includes('Meu Framework Top'), 'Deve expandir framework customizado');
+  assert.ok(e7.includes('definição customizada do termo'), 'Deve expandir termo customizado');
+  console.log('   ✅ Teste 7 OK.');
+
+  // Teste 8: Compressão local com customVocab (objeto)
+  const t8 = "Cria um script em Minha Linguagem Especial usando Meu Framework Top.";
+  const c8 = TokLangEngine.compressLocally(t8, vocab7);
+  console.log('   Input: ', t8);
+  console.log('   Output:', c8);
+  assert.ok(c8.includes('cr'), 'Deve conter cr');
+  assert.ok(c8.includes('$myLang'), 'Deve conter $myLang');
+  assert.ok(c8.includes('@myFW'), 'Deve conter @myFW');
+  console.log('   ✅ Teste 8 OK.');
 } catch (e) {
   console.error('❌ Falha nos testes de Expansão Local:', e);
   process.exit(1);

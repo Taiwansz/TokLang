@@ -11,6 +11,7 @@
     <ul class="dash-nav" id="dash-nav-mobile">
       <li class="dash-nav-item active" onclick="showDashSection('overview',this);closeMobileMenu()"><span class="dash-nav-icon">⬛</span>Visão geral</li>
       <li class="dash-nav-item" onclick="showDashSection('history',this);closeMobileMenu()"><span class="dash-nav-icon">⟳</span>Histórico</li>
+      <li class="dash-nav-item" onclick="showDashSection('vocabulary',this);closeMobileMenu()"><span class="dash-nav-icon">📖</span>Vocabulário</li>
       <li class="dash-nav-item" onclick="showDashSection('api',this);closeMobileMenu()"><span class="dash-nav-icon">⌘</span>API &amp; SDK</li>
       <div class="dash-nav-section">Conta</div>
       <li class="dash-nav-item" onclick="showDashSection('settings',this);closeMobileMenu()"><span class="dash-nav-icon">⚙</span>Configurações</li>
@@ -38,6 +39,7 @@
       <ul class="dash-nav">
         <li class="dash-nav-item active" onclick="showDashSection('overview',this)"><span class="dash-nav-icon">⬛</span>Visão geral</li>
         <li class="dash-nav-item" onclick="showDashSection('history',this)"><span class="dash-nav-icon">⟳</span>Histórico</li>
+        <li class="dash-nav-item" onclick="showDashSection('vocabulary',this)"><span class="dash-nav-icon">📖</span>Vocabulário</li>
         <li class="dash-nav-item" onclick="showDashSection('api',this)"><span class="dash-nav-icon">⌘</span>API &amp; SDK</li>
         <div class="dash-nav-section">Conta</div>
         <li class="dash-nav-item" onclick="showDashSection('settings',this)"><span class="dash-nav-icon">⚙</span>Configurações</li>
@@ -80,6 +82,38 @@
         <div class="dash-section-title">Histórico de compressões</div>
         <div class="dash-section-sub">// todas as suas compressões deste mês</div>
         <div class="table-wrap"><table class="history-table"><thead><tr><th>#</th><th>Prompt original (resumo)</th><th>Comprimido</th><th>Tokens antes</th><th>Tokens depois</th><th>Economia</th><th>Data</th></tr></thead><tbody id="dash-full-history"></tbody></table></div>
+      </div>
+
+      <!-- VOCABULARY -->
+      <div class="dash-section" id="dash-vocabulary">
+        <div class="dash-section-title">Vocabulário customizado</div>
+        <div class="dash-section-sub">// defina termos e substituições para abreviar prompts recorrentes no motor</div>
+        
+        <div style="background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; margin-bottom:24px;">
+          <div style="font-family:var(--mono); font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:14px;" id="vocab-form-title">Adicionar novo termo</div>
+          <form id="vocab-form" onsubmit="handleSaveVocab(event)" style="display:flex; flex-direction:column; gap:12px;">
+            <input type="hidden" id="vocab-id" value="">
+            <div style="display:grid; grid-template-columns:1fr 2fr; gap:12px;">
+              <div>
+                <label for="vocab-term" style="display:block; font-family:var(--mono); font-size:10px; color:var(--muted); margin-bottom:6px;">Termo / Token</label>
+                <input type="text" id="vocab-term" placeholder="ex: auth" required style="width:100%; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:10px 12px; color:var(--text); font-family:var(--mono); font-size:12px;">
+              </div>
+              <div>
+                <label for="vocab-def" style="display:block; font-family:var(--mono); font-size:10px; color:var(--muted); margin-bottom:6px;">Definição / Substituição</label>
+                <input type="text" id="vocab-def" placeholder="ex: autenticação JWT via Supabase" required style="width:100%; background:var(--bg3); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:10px 12px; color:var(--text); font-family:var(--mono); font-size:12px;">
+              </div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:8px;">
+              <button type="button" id="vocab-cancel-btn" onclick="clearVocabForm()" style="display:none; background:transparent; border:1px solid var(--border2); color:var(--muted); font-family:var(--mono); font-size:11px; padding:8px 16px; border-radius:var(--radius-sm); cursor:pointer;">Cancelar</button>
+              <button type="submit" id="vocab-submit-btn" class="btn btn-primary" style="font-size:11px; padding:8px 20px;">Salvar Termo →</button>
+            </div>
+          </form>
+        </div>
+
+        <div style="font-family:var(--mono); font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.07em; margin-bottom:12px;">Seus termos ativos</div>
+        <div id="vocab-list" class="vocab-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 24px;">
+          <!-- Termos renderizados dinamicamente -->
+        </div>
       </div>
 
       <!-- API -->

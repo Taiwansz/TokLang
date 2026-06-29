@@ -78,9 +78,61 @@ const TokLangEngine = {
    * @param {string} toklangText
    * @returns {string} Natural language output
    */
-  expand(toklangText) {
+  expand(toklangText, customVocab) {
     if (!toklangText || typeof toklangText !== 'string') return '';
     
+    // Normalize customVocab
+    const normalizedVocab = {};
+    if (customVocab) {
+      if (Array.isArray(customVocab)) {
+        for (const item of customVocab) {
+          if (!item) continue;
+          if (Array.isArray(item)) {
+            if (item.length >= 2) {
+              normalizedVocab[item[0]] = item[1];
+            }
+          } else if (typeof item === 'object') {
+            const key = item.key || item.term || item.word || item.token;
+            const val = item.value || item.definition || item.expanded || item.translation || item.val;
+            if (key && val !== undefined) {
+              normalizedVocab[key] = val;
+            } else {
+              for (const k of Object.keys(item)) {
+                normalizedVocab[k] = item[k];
+              }
+            }
+          } else if (typeof item === 'string') {
+            normalizedVocab[item] = item;
+          }
+        }
+      } else if (typeof customVocab === 'object') {
+        for (const k of Object.keys(customVocab)) {
+          normalizedVocab[k] = customVocab[k];
+        }
+      }
+    }
+
+    const localActions = { ...ACTIONS };
+    const localLanguages = { ...LANGUAGES };
+    const localFrameworks = { ...FRAMEWORKS };
+    const localStructures = { ...STRUCTURES };
+    const localModifiers = { ...MODIFIERS };
+
+    for (const [key, val] of Object.entries(normalizedVocab)) {
+      const lowerKey = key.toLowerCase();
+      if (key.startsWith('$')) {
+        localLanguages[key.slice(1).toLowerCase()] = val;
+      } else if (key.startsWith('@')) {
+        localFrameworks[key.slice(1).toLowerCase()] = val;
+      } else if (key.startsWith('#')) {
+        localStructures[key.slice(1).toLowerCase()] = val;
+      } else if (localActions[lowerKey]) {
+        localActions[lowerKey] = val;
+      } else if (localModifiers[lowerKey]) {
+        localModifiers[lowerKey] = val;
+      }
+    }
+
     const parts = toklangText.split(';').map(p => p.trim()).filter(Boolean);
     if (parts.length === 0) return '';
     
@@ -95,17 +147,17 @@ const TokLangEngine = {
     
     for (const token of tokens) {
       const lowerToken = token.toLowerCase();
-      if (ACTIONS[lowerToken]) {
-        action = ACTIONS[lowerToken];
+      if (localActions[lowerToken]) {
+        action = localActions[lowerToken];
       } else if (token.startsWith('$')) {
         const lKey = token.slice(1).toLowerCase();
-        lang = LANGUAGES[lKey] || lKey;
+        lang = localLanguages[lKey] || lKey;
       } else if (token.startsWith('@')) {
         const fKey = token.slice(1).toLowerCase();
-        framework = FRAMEWORKS[fKey] || fKey;
+        framework = localFrameworks[fKey] || fKey;
       } else if (token.startsWith('#')) {
         const sKey = token.slice(1).toLowerCase();
-        structure = STRUCTURES[sKey] || sKey;
+        structure = localStructures[sKey] || sKey;
       }
     }
     
@@ -136,10 +188,10 @@ const TokLangEngine = {
       } else {
         // Check if it's a list of modifiers
         const words = part.split(/\s+/);
-        const modsOnly = words.every(w => MODIFIERS[w.toLowerCase()]);
+        const modsOnly = words.every(w => localModifiers[w.toLowerCase()]);
         if (modsOnly && words.length > 0) {
           for (const w of words) {
-            const mVal = MODIFIERS[w.toLowerCase()];
+            const mVal = localModifiers[w.toLowerCase()];
             if (mVal) activeModifiers.push(mVal);
           }
         } else {
@@ -200,6 +252,27 @@ const TokLangEngine = {
     if (result && !result.endsWith('.')) {
       result += '.';
     }
+
+    // General substitution for custom terms anywhere in the expanded text
+    // Sort keys by length descending to avoid replacing substrings first
+    const sortedTerms = Object.keys(normalizedVocab).sort((a, b) => b.length - a.length);
+    for (const key of sortedTerms) {
+      const val = normalizedVocab[key];
+      const keysToReplace = [key];
+      if (key.startsWith('$') || key.startsWith('@') || key.startsWith('#')) {
+        keysToReplace.push(key.slice(1));
+      }
+      
+      for (const k of keysToReplace) {
+        if (!k || k.length < 2) continue;
+        // Escape regex special chars
+        const escapedKey = k.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const startBoundary = /^[a-zA-Z0-9_]/.test(k) ? '\\b' : '';
+        const endBoundary = /[a-zA-Z0-9_]$/.test(k) ? '\\b' : '';
+        const regex = new RegExp(startBoundary + escapedKey + endBoundary, 'gi');
+        result = result.replace(regex, val);
+      }
+    }
     
     return result;
   },
@@ -210,9 +283,52 @@ const TokLangEngine = {
    * @param {string} text
    * @returns {string|null} TokLang shorthand or null for fallback
    */
-  compressLocally(text) {
+  compressLocally(text, customVocab) {
     if (!text || typeof text !== 'string') return '';
     let cleanText = text.trim();
+    
+    // Normalize customVocab
+    const normalizedVocab = {};
+    if (customVocab) {
+      if (Array.isArray(customVocab)) {
+        for (const item of customVocab) {
+          if (!item) continue;
+          if (Array.isArray(item)) {
+            if (item.length >= 2) {
+              normalizedVocab[item[0]] = item[1];
+            }
+          } else if (typeof item === 'object') {
+            const key = item.key || item.term || item.word || item.token;
+            const val = item.value || item.definition || item.expanded || item.translation || item.val;
+            if (key && val !== undefined) {
+              normalizedVocab[key] = val;
+            } else {
+              for (const k of Object.keys(item)) {
+                normalizedVocab[k] = item[k];
+              }
+            }
+          } else if (typeof item === 'string') {
+            normalizedVocab[item] = item;
+          }
+        }
+      } else if (typeof customVocab === 'object') {
+        for (const k of Object.keys(customVocab)) {
+          normalizedVocab[k] = customVocab[k];
+        }
+      }
+    }
+
+    // Replace definitions with keys in cleanText before heuristics
+    // Sort by definition length descending
+    const sortedEntries = Object.entries(normalizedVocab).sort((a, b) => b[1].length - a[1].length);
+    for (const [key, val] of sortedEntries) {
+      if (typeof val === 'string' && val.length > 0) {
+        // Escape regex special chars in definition
+        const escapedVal = val.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+        const regex = new RegExp(escapedVal, 'gi');
+        cleanText = cleanText.replace(regex, key);
+      }
+    }
     
     // Avoid local compression for long/complex prompts
     if (cleanText.length > 250) return null;

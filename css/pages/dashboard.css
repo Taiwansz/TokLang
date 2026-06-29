@@ -73,3 +73,83 @@
 .dash-mobile-drawer{position:fixed;left:0;top:0;bottom:0;z-index:90;width:260px;background:var(--bg2);border-right:1px solid var(--border2);padding:20px 0;transform:translateX(-100%);transition:transform .25s ease;overflow-y:auto}
 .dash-mobile-drawer.open{transform:translateX(0)}
 .dash-mobile-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+
+/* Custom Vocabulary styles */
+.vocab-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  animation: vocabFadeIn 0.3s ease forwards;
+}
+.vocab-card:hover {
+  border-color: rgba(0, 255, 136, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 255, 136, 0.05);
+}
+.vocab-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.vocab-card-term {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--green);
+  background: var(--gdim);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+}
+.vocab-card-actions {
+  display: flex;
+  gap: 4px;
+}
+.vocab-action-btn {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vocab-action-btn:hover {
+  color: var(--text);
+  background: var(--bg3);
+}
+.vocab-action-btn.delete:hover {
+  color: var(--red);
+  background: rgba(255, 94, 94, 0.1);
+}
+.vocab-card-def {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+  word-break: break-word;
+}
+.vocab-card-date {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  opacity: 0.6;
+  margin-top: 4px;
+}
+@keyframes vocabFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
