@@ -11,7 +11,7 @@ async function subscribe(planName) {
   const u = await getUser();
   
   if (!u) {
-    showToast('Você precisa estar logado para assinar.', '🔐');
+    showToast('Você precisa estar logado para assinar.', '!');
     navigate('login');
     return;
   }
@@ -19,7 +19,7 @@ async function subscribe(planName) {
   const priceId = STRIPE_PRICES[planName];
   if (!priceId) return;
 
-  showToast('Iniciando checkout seguro...', '💳');
+  showToast('Iniciando checkout seguro...', '✓');
 
   try {
     const res = await fetch('/api/create-checkout-session', {
@@ -39,6 +39,6 @@ async function subscribe(planName) {
       throw new Error(data.error || 'Erro ao criar sessão');
     }
   } catch (err) {
-    showToast('Erro: ' + err.message, '⚠');
+    showToast('Erro: ' + err.message, '!');
   }
 }
