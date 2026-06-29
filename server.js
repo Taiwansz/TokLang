@@ -2,6 +2,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const Stripe = require('stripe');
+const { createClient } = require('@supabase/supabase-js');
+global.WebSocket = require('ws');
+
+const stripeClient = process.env.STRIPE_SECRET_KEY ? new Stripe(process.env.STRIPE_SECRET_KEY) : null;
+const supabaseAdmin = (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
+  ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+  : null;
 
 const app = express();
 const PORT = process.env.PORT || 5500;
@@ -167,8 +175,78 @@ app.post('/api/create-checkout-session', async (req, res) => {
     console.log('[MOCK] Criando sessão Stripe Mockada');
     return res.status(200).json({ url: '/#dashboard?success=true' });
   }
-  // Implementação real exigiria pacote stripe configurado
-  res.status(500).json({ error: 'Stripe backend integration not available locally' });
+
+  try {
+    const session = await stripeClient.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: `${req.headers.origin || 'https://toklang.dev'}/#dashboard?success=true`,
+      cancel_url: `${req.headers.origin || 'https://toklang.dev'}/#dashboard?cancel=true`,
+      metadata: {
+        userId: userId,
+        priceId: priceId
+      },
+      customer_email: email,
+    });
+
+    res.status(200).json({ url: session.url });
+  } catch (err) {
+    console.error('Stripe Checkout Error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Stripe Webhook Endpoint for local Express server
+app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  
+  if (!stripeClient) {
+    console.warn('[Stripe Webhook Warning] Stripe client not initialized, skipping signature verification.');
+    return res.status(200).json({ received: true, msg: 'Mock handled' });
+  }
+
+  let event;
+  try {
+    event = stripeClient.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error(`Webhook Signature Error: ${err.message}`);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    const userId = session.metadata.userId;
+    const priceId = session.metadata.priceId;
+    
+    const PRICE_PLAN_MAP = {
+      'price_1TncHw238tVr1DQSsxeUAEOu': 'pro',
+      'price_1TncHx238tVr1DQSOX9zHT8I': 'team'
+    };
+    const plan = PRICE_PLAN_MAP[priceId] || 'pro';
+
+    console.log(`[Stripe Webhook] Updating user ${userId} plan to ${plan}`);
+    
+    if (supabaseAdmin) {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        user_metadata: { plan: plan }
+      });
+      if (error) {
+        console.error('[Supabase Webhook Update Error]:', error);
+      } else {
+        console.log(`[Stripe Webhook] Supabase user ${userId} plan successfully updated to ${plan}.`);
+      }
+    } else {
+      console.log(`[Stripe Webhook MOCK] Updated user ${userId} plan to ${plan} (No Supabase Admin Client connected)`);
+    }
+  }
+
+  res.status(200).json({ received: true });
 });
 
 app.listen(PORT, () => {

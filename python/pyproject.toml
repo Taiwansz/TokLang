@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "toklang"
+version = "0.1.0"
+description = "Semantic compression middleware for LLMs (Python SDK)"
+readme = "README.md"
+authors = [
+    { name = "Matheus Sousa", email = "matheus.sousa@agi.com.br" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+requires-python = ">=3.7"
+dependencies = []
+
+[project.urls]
+"Homepage" = "https://github.com/Taiwansz/TokLang"
+"Bug Tracker" = "https://github.com/Taiwansz/TokLang/issues"
