@@ -618,6 +618,10 @@ const TokLangEngine = {
     // Detect language (expanded with Phase 4 languages)
     // ============================================================
     let langToken = null;
+    const customLangMatch = cleanText.match(/\$[a-zA-Z0-9_]+/);
+    if (customLangMatch) {
+      langToken = customLangMatch[0];
+    } else {
     const langPatterns = [
       [/\b(python|py)\b/i, '$py'],
       [/\b(javascript|js)\b/i, '$js'],
@@ -645,11 +649,18 @@ const TokLangEngine = {
     for (const [pat, tok] of langPatterns) {
       if (pat.test(textLower)) { langToken = tok; break; }
     }
+    }
 
     // ============================================================
     // Detect Framework (expanded with Phase 4 frameworks)
     // ============================================================
     let frameworkTokens = [];
+    const customFwMatches = cleanText.match(/@[a-zA-Z0-9_]+/g);
+    if (customFwMatches) {
+      for (const fw of customFwMatches) {
+        if (!frameworkTokens.includes(fw)) frameworkTokens.push(fw);
+      }
+    }
     const fwPatterns = [
       [/\bstreamlit\b/i, '@streamlit'],
       [/\bfastapi\b/i, '@fastapi'],
@@ -724,7 +735,11 @@ const TokLangEngine = {
     // Detect Structure
     // ============================================================
     let structureToken = null;
-    if (/\b(fun[cç][aã]o|funcoes|fun[cç][oõ]es|function)\b/.test(textLower)) structureToken = '#fn';
+    const customStructMatch = cleanText.match(/\#[a-zA-Z0-9_]+/);
+    if (customStructMatch) {
+      structureToken = customStructMatch[0];
+    } else {
+      if (/\b(fun[cç][aã]o|funcoes|fun[cç][oõ]es|function)\b/.test(textLower)) structureToken = '#fn';
     else if (/\b(classe|class)\b/.test(textLower)) structureToken = '#cls';
     else if (/\bscript\b/.test(textLower)) structureToken = '#scr';
     else if (/\b(api|rest|endpoint)\b/.test(textLower)) structureToken = '#api';
@@ -732,6 +747,7 @@ const TokLangEngine = {
     else if (/\bhook\b/.test(textLower)) structureToken = '#hook';
     else if (/\b(m[oó]dulo|module)\b/.test(textLower)) structureToken = '#mod';
     else if (/\bmiddleware\b/.test(textLower)) structureToken = '#mw';
+    }
 
     // ============================================================
     // Modifiers detection (expanded)
@@ -896,6 +912,9 @@ const TokLangEngine = {
     const words = cleanText.split(/\s+/);
     const taskWords = [];
     for (const word of words) {
+      // Skip technical tokens starting with $, @, or #
+      if (/^[^a-zA-Z0-9À-ÿ]*[\$@#]/.test(word)) continue;
+      
       const clean = word.replace(/^[^a-zA-Z0-9À-ÿ]+|[^a-zA-Z0-9À-ÿ]+$/g, '');
       if (!clean || clean.length <= 1) continue;
       const lw = clean.toLowerCase();
