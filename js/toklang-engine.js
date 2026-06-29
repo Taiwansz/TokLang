@@ -1,6 +1,110 @@
 /**
  * TokLang Engine - Shared compiler & expander parser
  */
+const PORTUGUESE_DICT = {
+  // Verbos
+  "adicionar": "add", "remover": "rm", "deletar": "del", "atualizar": "upd",
+  "buscar": "get", "salvar": "save", "enviar": "send", "receber": "recv",
+  "conectar": "conn", "configurar": "cfg", "mostrar": "show", "exibir": "show",
+  "gerar": "gen", "criar": "cr", "refatorar": "rf", "otimizar": "op",
+  "corrigir": "fix", "documentar": "doc", "testar": "tst", "converter": "cv",
+  "calcular": "calc", "executar": "run", "iniciar": "init", "finalizar": "end",
+  "parar": "stop", "limpar": "clear", "ajudar": "help", "precisar": "need",
+  "querer": "want", "gostar": "like", "fazer": "make", "verificar": "chk",
+  "validar": "val", "processar": "proc", "importar": "imp", "exportar": "exp",
+  "desenvolver": "dev", "autenticar": "auth", "autorizar": "auth", "carregar": "load",
+  "filtrar": "filt", "ordenar": "sort", "listar": "list", "inserir": "ins",
+  "alterar": "alt", "modificar": "mod", "encontrar": "find", "pesquisar": "search",
+  "perguntar": "ask", "responder": "resp", "escrever": "write", "ler": "read",
+  "chamar": "call", "abrir": "open", "fechar": "close", "começar": "start",
+
+  // TI / Computação
+  "código": "cod", "função": "func", "funcao": "func", "classe": "cls", "script": "scr",
+  "componente": "comp", "middleware": "mw", "banco": "db", "tabela": "tbl", "coluna": "col",
+  "linha": "row", "chave": "key", "valor": "val", "usuário": "usr", "usuario": "usr",
+  "senha": "pwd", "nome": "name", "perfil": "profile", "registro": "reg", "cadastro": "reg",
+  "sessão": "sess", "sessao": "sess", "conexão": "conn", "conexao": "conn",
+  "configuração": "cfg", "configuracao": "cfg", "parâmetro": "param", "parametro": "param",
+  "argumento": "arg", "variável": "var", "variavel": "var", "constante": "const",
+  "objeto": "obj", "lista": "list", "dicionário": "dict", "dicionario": "dict",
+  "arquivo": "file", "pasta": "dir", "diretório": "dir", "diretorio": "dir",
+  "caminho": "path", "erro": "err", "exceção": "exc", "excecao": "exc", "mensagem": "msg",
+  "notificação": "notif", "notificacao": "notif", "alerta": "alert", "aviso": "warn",
+  "sucesso": "ok", "falha": "fail", "teste": "tst", "dados": "data", "informação": "info",
+  "informacao": "info", "relatório": "rep", "relatorio": "rep", "gráfico": "chart",
+  "grafico": "chart", "imagem": "img", "vídeo": "vid", "video": "vid", "áudio": "aud",
+  "audio": "aud", "documento": "doc", "página": "pg", "pagina": "pg", "tela": "scr",
+  "botão": "btn", "botao": "btn", "campo": "fld", "entrada": "in", "saída": "out",
+  "saida": "out", "projeto": "proj", "aplicação": "app", "aplicacao": "app",
+  "aplicativo": "app", "sistema": "sys", "servidor": "srv", "cliente": "cli",
+  "nuvem": "cloud", "rede": "net", "porta": "port", "endereço": "addr", "endereco": "addr",
+  "rota": "route", "requisição": "req", "requisicao": "req", "resposta": "res",
+  "cabeçalho": "hdr", "cabecalho": "hdr", "corpo": "body", "token": "tok", "filtro": "filt",
+  "busca": "search", "pesquisa": "search", "velocidade": "vel", "tempo": "time",
+  "data": "date", "hora": "hour", "minuto": "min", "segundo": "sec", "dia": "day",
+  "mês": "month", "mes": "month", "ano": "year", "região": "reg", "regiao": "reg",
+  "país": "country", "pais": "country", "estado": "state", "cidade": "city",
+  "produto": "prod", "venda": "sale", "preço": "price", "preco": "price", "total": "tot",
+  "quantidade": "qty", "tamanho": "size", "largura": "width", "altura": "height",
+  "cor": "color", "fonte": "font", "estilo": "style", "tema": "theme", "layout": "layout",
+  "painel": "panel", "dashboard": "dash", "admin": "admin", "gerenciador": "mgr",
+  "serviço": "svc", "servico": "svc", "modelo": "model", "visão": "view", "visao": "view",
+  "controle": "ctrl", "controlador": "ctrl", "evento": "evt", "histórico": "hist",
+  "historico": "hist", "grátis": "free", "gratis": "free", "preços": "pricing",
+  "precos": "pricing", "plano": "plan", "assinatura": "sub", "pagamento": "pay",
+  "fatura": "invoice", "cartão": "card", "cartao": "card", "compra": "buy",
+  "carrinho": "cart", "desconto": "disc", "cupom": "coup", "integração": "int",
+  "integracao": "int", "suporte": "sup", "ajuda": "help", "documentação": "docs",
+  "documentacao": "docs", "tutorial": "tut", "exemplo": "ex", "conceito": "concept",
+  "definição": "def", "definicao": "def", "termo": "term", "palavra": "word",
+  "vocabulário": "vocab", "vocabulario": "vocab", "idioma": "lang", "língua": "lang",
+  "lingua": "lang", "tradução": "trans", "traducao": "trans", "ferramenta": "tool",
+  "biblioteca": "lib", "pacote": "pkg", "módulo": "mod", "modulo": "mod",
+  "dependência": "dep", "dependencia": "dep", "versão": "ver", "versao": "ver",
+  "atualização": "upd", "atualizacao": "upd", "melhoria": "imp", "novidade": "new",
+  "recurso": "feat", "funcionalidade": "feat",
+
+  // Geral / Alta frequência
+  "tarde": "trd", "noite": "nt", "manhã": "mnh", "manha": "mnh", "bonito": "bnt",
+  "bonita": "bnt", "lindo": "lnd", "linda": "lnd", "bom": "bm", "boa": "ba",
+  "ruim": "rm", "melhor": "mlhr", "pior": "pr", "grande": "grd", "pequeno": "pqn",
+  "pequena": "pqn", "rápido": "rpd", "rapido": "rpd", "rápida": "rpd", "rapida": "rpd",
+  "lento": "lnt", "lenta": "lnt", "fácil": "fcl", "facil": "fcl", "difícil": "dfcl",
+  "dificil": "dfcl", "novo": "nv", "nova": "nv", "velho": "vlh", "velha": "vlh",
+  "antigo": "atg", "antiga": "atg", "primeiro": "1o", "primeira": "1a", "segundo": "2o",
+  "segunda": "2a", "último": "ult", "ultimo": "ult", "última": "ult", "ultima": "ult",
+  "próximo": "prox", "proximo": "prox", "próxima": "prox", "proxima": "prox",
+  "anterior": "ant", "atual": "act", "diferente": "diff", "igual": "eq", "mesmo": "msm",
+  "mesma": "msm", "outro": "otr", "outra": "otr", "todos": "tds", "todas": "tds",
+  "tudo": "td", "nada": "nd", "algo": "alg", "algum": "alg", "alguma": "alg",
+  "alguns": "alg", "nenhum": "nhm", "nenhuma": "nhm", "qualquer": "qql", "muito": "mt",
+  "muita": "mt", "pouco": "pc", "pouca": "pc", "mais": "ms", "menos": "mn",
+  "bastante": "bst", "apenas": "apn", "somente": "smt", "sempre": "spr", "nunca": "nc",
+  "talvez": "tlv", "quase": "qs", "agora": "ag", "depois": "dps", "antes": "ant",
+  "hoje": "hj", "ontem": "otm", "amanhã": "amh", "amanha": "amh", "aqui": "aq",
+  "ali": "al", "lá": "la", "onde": "ond", "como": "cm", "quando": "qnd",
+  "porque": "pq", "porquê": "pq", "quem": "qm", "quanto": "qnt", "quanta": "qnt",
+  "beleza": "blz", "verdade": "vrd", "certeza": "crtz", "dúvida": "dvd", "duvida": "dvd",
+  "problema": "prob", "solução": "sol", "solucao": "sol", "pergunta": "perg",
+  "resposta": "resp", "pessoa": "psa", "povo": "pv", "mundo": "mnd", "vida": "vd",
+  "casa": "cs", "trabalho": "trb", "empresa": "emp", "negócio": "biz", "negocio": "biz",
+  "dinheiro": "cash", "preço": "prc", "preco": "prc", "pagar": "pag", "custo": "cst",
+  "desenvolvimento": "dev", "programação": "prog", "programacao": "prog",
+  "tecnologia": "tech", "computador": "pc", "internet": "net", "celular": "cel",
+  "telefone": "tel", "aplicativo": "app", "software": "sw", "hardware": "hw",
+  "máquina": "maq", "maquina": "maq", "inteligência": "intel", "inteligencia": "intel",
+  "artificial": "art"
+};
+
+const REVERSE_DICT = {};
+for (const [key, val] of Object.entries(PORTUGUESE_DICT)) {
+  if (val.length >= 3 || val === 'db' || val === 'pg') {
+    if (!REVERSE_DICT[val] || key.length < REVERSE_DICT[val].length) {
+      REVERSE_DICT[val] = key;
+    }
+  }
+}
+
 const ACTIONS = {
   cr: "Crie",
   fix: "Corrija o bug em",
@@ -132,6 +236,42 @@ const MODIFIERS = {
   min: "versão minimalista/simples (sem dependências extras)",
   '*': "com máxima qualidade possível"
 };
+
+function abbreviateWord(word) {
+  if (!word || typeof word !== 'string') return '';
+  const lower = word.toLowerCase();
+  
+  // 1. Check dictionary
+  if (PORTUGUESE_DICT[lower]) {
+    return PORTUGUESE_DICT[lower];
+  }
+  
+  // 2. Short words are not compressed
+  if (word.length <= 3) {
+    return word;
+  }
+  
+  // 3. Apply suffix abbreviations
+  let abbr = lower;
+  if (abbr.endsWith('ção')) abbr = abbr.slice(0, -3) + 'ç';
+  else if (abbr.endsWith('ções')) abbr = abbr.slice(0, -4) + 'ç';
+  else if (abbr.endsWith('mente')) abbr = abbr.slice(0, -5) + 'mt';
+  else if (abbr.endsWith('mento')) abbr = abbr.slice(0, -5) + 'mt';
+  else if (abbr.endsWith('mentos')) abbr = abbr.slice(0, -6) + 'mt';
+  else if (abbr.endsWith('gem')) abbr = abbr.slice(0, -3) + 'gm';
+  else if (abbr.endsWith('gens')) abbr = abbr.slice(0, -4) + 'gm';
+  else if (abbr.endsWith('dade')) abbr = abbr.slice(0, -4) + 'dd';
+  else if (abbr.endsWith('dades')) abbr = abbr.slice(0, -5) + 'dd';
+  
+  // 4. Consonant skeleton
+  const firstChar = abbr[0];
+  const rest = abbr.slice(1);
+  
+  // Keep first char, remove all vowels from the rest
+  const restNoVowels = rest.replace(/[aeiouáàâãéêíóôõúü]/g, '');
+  
+  return firstChar + restNoVowels;
+}
 
 const TokLangEngine = {
   ACTIONS,
@@ -340,6 +480,23 @@ const TokLangEngine = {
         result = result.replace(regex, val);
       }
     }
+
+    // Expand Portuguese abbreviations
+    let wordsInResult = result.split(/([^a-zA-Z0-9áàãâéêíóôõúüçÀ-ÿ]+)/gi);
+    for (let i = 0; i < wordsInResult.length; i++) {
+      const w = wordsInResult[i].toLowerCase();
+      if (REVERSE_DICT[w]) {
+        const orig = REVERSE_DICT[w];
+        if (wordsInResult[i] === wordsInResult[i].toUpperCase()) {
+          wordsInResult[i] = orig.toUpperCase();
+        } else if (wordsInResult[i][0] === wordsInResult[i][0].toUpperCase()) {
+          wordsInResult[i] = orig[0].toUpperCase() + orig.slice(1);
+        } else {
+          wordsInResult[i] = orig;
+        }
+      }
+    }
+    result = wordsInResult.join('');
     
     return result;
   },
@@ -744,7 +901,7 @@ const TokLangEngine = {
       const lw = clean.toLowerCase();
       if (STOP_WORDS.has(lw)) continue;
       if (CAPTURED_WORDS.has(lw)) continue;
-      taskWords.push(clean);
+      taskWords.push(abbreviateWord(clean));
     }
 
     // Keep max 8 meaningful words for the task
