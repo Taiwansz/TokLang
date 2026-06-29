@@ -9,8 +9,8 @@ const supabase = createClient(
 
 // Mapeamento de Price ID do Stripe para Nome do Plano no TokLang
 const PRICE_PLAN_MAP = {
-  'price_1TYyeH238tVr1DQSmKDrWSd5': 'pro',
-  'price_1TYydo238tVr1DQSJuuDPcZ3': 'enterprise'
+  'price_1TncHw238tVr1DQSsxeUAEOu': 'pro',
+  'price_1TncHx238tVr1DQSOX9zHT8I': 'team'
 };
 
 export const config = {

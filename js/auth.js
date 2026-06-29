@@ -68,6 +68,15 @@ function syncDashUser(u) {
   if (sn) sn.textContent = (u.name||'') + ' ' + (u.last||'');
   const se = document.getElementById('set-email-display');
   if (se) se.textContent = u.email || '';
+
+  const plan = u.plan || 'starter';
+  ['dash-user-plan-desktop','dash-user-plan-mobile'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = plan.charAt(0).toUpperCase() + plan.slice(1).toLowerCase();
+      el.className = 'pill ' + (plan.toLowerCase() === 'starter' ? 'pill-green' : plan.toLowerCase() === 'pro' ? 'pill-blue' : 'pill-amber');
+    }
+  });
 }
 
 /* ===== AUTH FORMS ===== */

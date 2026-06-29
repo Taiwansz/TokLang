@@ -286,11 +286,13 @@ async function initDashboard() {
 
   const avgSavingsPct = totalUsed > 0 ? (dbHistory.reduce((acc, curr) => acc + curr.savings_pct, 0) / totalUsed).toFixed(0) : '0';
 
+  const isStarter = !u || !u.plan || u.plan.toLowerCase() === 'starter';
+
   document.querySelectorAll('#dash-overview .metric-val').forEach((el, i) => {
     if (i === 0) el.textContent = totalUsed;
     if (i === 1) el.textContent = formatTokens(totalTokensSaved);
     if (i === 2) el.textContent = avgSavingsPct + '%';
-    if (i === 3) el.textContent = Math.max(0, 500 - totalUsed);
+    if (i === 3) el.textContent = isStarter ? Math.max(0, 500 - totalUsed) : 'Ilimitado';
   });
   
   const deltaElements = document.querySelectorAll('#dash-overview .metric-delta');
@@ -298,13 +300,22 @@ async function initDashboard() {
     deltaElements[1].innerHTML = `↑ ${avgSavingsPct}% média`;
   }
   if (deltaElements.length >= 4) {
-    deltaElements[3].textContent = `restantes de 500`;
+    deltaElements[3].textContent = isStarter ? `restantes de 500` : `plano ${u.plan.toUpperCase()}`;
   }
 
   const usageFill = document.querySelector('#dash-overview .usage-bar-fill');
-  if (usageFill) usageFill.style.width = Math.min(100, (totalUsed/500)*100).toFixed(1) + '%';
   const usageLabel = document.querySelector('#dash-overview .usage-bar-label span:last-child');
-  if (usageLabel) usageLabel.textContent = totalUsed + ' / 500 compressões';
+  const usageTitle = document.querySelector('#dash-overview .usage-bar-label span:first-child');
+  
+  if (isStarter) {
+    if (usageFill) usageFill.style.width = Math.min(100, (totalUsed/500)*100).toFixed(1) + '%';
+    if (usageLabel) usageLabel.textContent = totalUsed + ' / 500 compressões';
+    if (usageTitle) usageTitle.textContent = `Uso mensal — ${u?.plan ? u.plan.charAt(0).toUpperCase() + u.plan.slice(1) : 'Starter'}`;
+  } else {
+    if (usageFill) usageFill.style.width = '100%';
+    if (usageLabel) usageLabel.textContent = totalUsed + ' compressões';
+    if (usageTitle) usageTitle.textContent = `Uso mensal — ${u.plan.toUpperCase()} (Ilimitado)`;
+  }
 
   // Group by day for the last 7 days to draw SVG charts
   const last7Days = [];
