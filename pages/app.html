@@ -37,10 +37,16 @@
         <span class="uc-upgrade" onclick="navigate('pricing')" title="Upgrade para ilimitado">↑ Pro</span>
       </div>
 
-      <button class="compress-btn" id="compress-btn" onclick="doCompress()" aria-label="Comprimir prompt">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-        Comprimir  <span style="font-weight:300;opacity:.6;font-size:10px">Ctrl+Enter</span>
-      </button>
+      <div class="actions-btn-row">
+        <button class="compress-btn" id="compress-btn" onclick="doCompress()" aria-label="Comprimir prompt">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+          Comprimir <span style="font-weight:300;opacity:.6;font-size:10px;margin-left:4px">Ctrl+Enter</span>
+        </button>
+        <button class="expand-btn" id="expand-btn" onclick="doExpand()" aria-label="Expandir prompt">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 10 14 10 14 4"/><polyline points="4 14 10 14 10 20"/><line x1="10" y1="14" x2="3" y2="21"/><line x1="21" y1="3" x2="14" y2="10"/></svg>
+          Expandir <span style="font-weight:300;opacity:.6;font-size:10px;margin-left:4px">Shift+Enter</span>
+        </button>
+      </div>
 
       <div id="app-error"></div>
 

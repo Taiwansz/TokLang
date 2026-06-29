@@ -81,3 +81,9 @@ textarea.prompt-input::placeholder{color:var(--muted)}
 .input-clear-btn{font-family:var(--mono);font-size:10px;color:var(--muted);background:none;border:1px solid var(--border);padding:4px 10px;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s}
 .input-clear-btn:hover{color:var(--red);border-color:rgba(255,94,94,.3)}
 .limit-banner{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:10px;font-family:var(--mono);font-size:11px;color:var(--amber);display:none}
+
+.actions-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.actions-btn-row .compress-btn{margin-bottom:0}
+.expand-btn{width:100%;padding:15px;background:var(--blue);color:var(--bg);border:none;border-radius:var(--radius-sm);font-family:var(--mono);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;transition:all .2s;letter-spacing:.02em}
+.expand-btn:hover{background:#3b82f6;transform:translateY(-1px);box-shadow:0 6px 22px rgba(77,159,255,.22)}
+.expand-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}

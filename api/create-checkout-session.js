@@ -34,6 +34,7 @@ export default async function handler(req, res) {
       cancel_url: `${req.headers.origin}/#pricing?canceled=true`,
       metadata: {
         userId: userId,
+        priceId: priceId,
       },
     });
 

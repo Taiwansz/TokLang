@@ -126,10 +126,19 @@ async function rotateApiKey() {
   let error = null;
   if (window.supabase && !window.IS_DEMO) {
     const res = await window.supabase.auth.updateUser({
-
-    data: { apiKey: newKey }
+      data: { apiKey: newKey }
     });
     error = res.error;
+
+    if (!error && u.id) {
+      const { error: profileError } = await window.supabase
+        .from('profiles')
+        .update({ api_key: newKey })
+        .eq('id', u.id);
+      if (profileError) {
+        console.error('Erro ao atualizar a chave de API na tabela profiles:', profileError);
+      }
+    }
   } else {
     let mock = JSON.parse(sessionStorage.getItem('mock_user') || '{}');
     mock.apiKey = newKey;
@@ -141,6 +150,7 @@ async function rotateApiKey() {
     return;
   }
 
+  u.apiKey = newKey;
   apiRevealed = false;
   document.getElementById('api-key-display').textContent = newKey.substring(0,8) + '••••••••••••••••••••••';
   showToast('Chave de API rotacionada!', '🔄');

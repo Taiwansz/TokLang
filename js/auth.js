@@ -12,6 +12,7 @@ async function getUser() {
   
   const u = session.user;
   return {
+    id: u.id,
     name: u.user_metadata.name || u.email.split('@')[0],
     last: u.user_metadata.last || '',
     email: u.email,

@@ -27,7 +27,7 @@ async function subscribe(planName) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         priceId: priceId,
-        userId: supabase ? (await window.supabase.auth.getUser()).data?.user?.id || 'mock_id' : 'mock_id',
+        userId: window.supabase ? (await window.supabase.auth.getUser()).data?.user?.id || 'mock_id' : 'mock_id',
         email: u.email
       })
     });

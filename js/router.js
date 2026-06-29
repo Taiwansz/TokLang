@@ -30,12 +30,12 @@ function initReveal() {
 /* ===== ROUTER ===== */
 const VALID_PAGES = ['home','app','docs','pricing','login','signup','forgot','dashboard'];
 
-function navigate(page) {
+async function navigate(page) {
   if (typeof pagesLoaded !== 'undefined' && !pagesLoaded) {
     setTimeout(() => navigate(page), 50);
     return;
   }
-  if (page === 'dashboard' && !getUser()) {
+  if (page === 'dashboard' && !(await getUser())) {
     showToast('Faça login para acessar o dashboard', '🔒');
     navigate('login');
     return;
@@ -98,9 +98,17 @@ document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     const page = document.querySelector('.page.active');
     if (!page) return;
-    if (page.id === 'page-app') doCompress();
-    if (page.id === 'page-login') doLogin();
-    if (page.id === 'page-signup') doSignup();
+    if (page.id === 'page-app') {
+      if (e.shiftKey) {
+        e.preventDefault();
+        doExpand();
+      } else {
+        e.preventDefault();
+        doCompress();
+      }
+    }
+    if (page.id === 'page-login' && !e.shiftKey) doLogin();
+    if (page.id === 'page-signup' && !e.shiftKey) doSignup();
   }
   if (e.key === 'Escape') {
     closeMobileMenu();

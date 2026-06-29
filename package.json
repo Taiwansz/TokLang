@@ -4,7 +4,8 @@
   "description": "Semantic compression middleware for LLMs",
   "main": "index.html",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node tests/run.js && npx playwright test"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.0",
@@ -14,6 +15,7 @@
     "stripe": "^14.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "playwright": "^1.61.1",
     "vercel": "^34.0.0"
   }

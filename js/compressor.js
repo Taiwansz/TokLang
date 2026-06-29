@@ -33,7 +33,13 @@ const EXAMPLES = [
 let sessionHistory = [];
 let lastCompressedText = '';
 
-function countTokens(t) { return t.trim() ? t.trim().split(/\s+/).length : 0; }
+function countTokens(t) {
+  if (!t || !t.trim()) return 0;
+  const words = t.trim().split(/\s+/).length;
+  const puncMatches = t.match(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g);
+  const puncCount = puncMatches ? puncMatches.length : 0;
+  return Math.max(1, Math.round(words * 1.25 + puncCount * 0.4));
+}
 
 function clearInput() {
   const ta = document.getElementById('app-input');
@@ -118,8 +124,60 @@ async function doCompress() {
   if (ps) { ps.textContent = 'processando'; ps.className = 'pill pill-amber'; }
 
   setPipeStep(1, 'done', tokBefore + 'tk');
-  await sleep(280);
+  await sleep(100);
   setPipeStep(2, 'active');
+
+  const items = document.querySelectorAll('.ss-lbl');
+  if (items.length >= 4) {
+    items[2].textContent = 'economia';
+    items[3].textContent = '$ economizado*';
+  }
+
+  if (typeof TokLangEngine !== 'undefined') {
+    const localCompressed = TokLangEngine.compressLocally(input);
+    if (localCompressed) {
+      console.log('[LOCAL COMPILER] Prompt comprimido localmente (0ms):', localCompressed);
+      lastCompressedText = localCompressed;
+      
+      await sleep(100);
+      setPipeStep(2, 'done', 'semântica mapeada (local)');
+      await sleep(80);
+      setPipeStep(3, 'active');
+      await sleep(100);
+      
+      const tokAfter = countTokens(localCompressed);
+      const savings  = Math.max(0, Math.round((1 - tokAfter / tokBefore) * 100));
+      const usdSaved = ((tokBefore - tokAfter) * 0.003 / 1000).toFixed(5);
+      
+      setPipeStep(3, 'done', tokAfter + 'tk');
+      await sleep(60);
+      setPipeStep(4, 'done', '✓ pronto para envio');
+      
+      if (ps) { ps.textContent = 'concluído'; ps.className = 'pill pill-green'; }
+      output.innerHTML = `<span class="output-text">${escHtml(localCompressed)}</span>`;
+      document.getElementById('output-tok-count').textContent = tokAfter + ' tokens';
+      if (copyBtn) copyBtn.style.display = 'flex';
+      
+      document.getElementById('stat-before').textContent = tokBefore;
+      document.getElementById('stat-after').textContent  = tokAfter;
+      document.getElementById('stat-pct').textContent    = savings + '%';
+      document.getElementById('stat-usd').textContent    = '$' + usdSaved;
+      document.getElementById('app-stats').style.display = 'flex';
+      
+      const now = new Date();
+      sessionHistory.unshift({
+        compressed: localCompressed, savings,
+        time: now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
+        original: input.substring(0,60)
+      });
+      renderHistory();
+      updateUsageUI();
+      
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Comprimir <span style="font-weight:300;opacity:.6;font-size:10px;margin-left:4px">Ctrl+Enter</span>`;
+      return;
+    }
+  }
 
   try {
     const res = await fetch('/api/compress', {
@@ -161,7 +219,6 @@ async function doCompress() {
     document.getElementById('stat-usd').textContent    = '$' + usdSaved;
     document.getElementById('app-stats').style.display = 'flex';
 
-    // 1. Salvar no Supabase (se logado)
     let session = null;
     if (window.supabase && !window.IS_DEMO) {
       const res = await window.supabase.auth.getSession();
@@ -178,7 +235,6 @@ async function doCompress() {
       });
     }
 
-    // 2. Fallback local para a sessão atual (opcional)
     const now = new Date();
     sessionHistory.unshift({
       compressed, savings,
@@ -200,7 +256,89 @@ async function doCompress() {
     </div>`;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Comprimir <span style="font-weight:300;opacity:.6;font-size:10px">Ctrl+Enter</span>`;
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Comprimir <span style="font-weight:300;opacity:.6;font-size:10px;margin-left:4px">Ctrl+Enter</span>`;
+  }
+}
+
+async function doExpand() {
+  const input = document.getElementById('app-input').value.trim();
+  if (!input) { document.getElementById('app-input').focus(); return; }
+
+  const btn      = document.getElementById('expand-btn');
+  const output   = document.getElementById('app-output');
+  const errorDiv = document.getElementById('app-error');
+  const copyBtn  = document.getElementById('copy-output-btn');
+
+  btn.disabled = true;
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = '<span class="blink-cursor"></span>&nbsp; Expandindo...';
+  output.innerHTML = '<span class="output-loading"><span class="blink-cursor"></span> processando notação TokLang...</span>';
+  document.getElementById('app-stats').style.display = 'none';
+  errorDiv.innerHTML = '';
+  if (copyBtn) copyBtn.style.display = 'none';
+  resetPipeline();
+
+  const tokBefore = countTokens(input);
+  const ps = document.getElementById('pipe-status');
+  if (ps) { ps.textContent = 'processando'; ps.className = 'pill pill-amber'; }
+
+  setPipeStep(1, 'done', tokBefore + 'tk (comprimido)');
+  await sleep(100);
+  setPipeStep(2, 'active');
+
+  try {
+    if (typeof TokLangEngine === 'undefined') {
+      throw new Error('Mecanismo de expansão TokLang não foi carregado.');
+    }
+    const expanded = TokLangEngine.expand(input);
+    if (!expanded) {
+      throw new Error('Formato TokLang inválido ou vazio.');
+    }
+
+    lastCompressedText = expanded;
+    await sleep(100);
+    setPipeStep(2, 'done', 'estrutura mapeada');
+    await sleep(80);
+    setPipeStep(3, 'active');
+    await sleep(100);
+
+    const tokAfter = countTokens(expanded);
+    const expansionFactor = (tokAfter / Math.max(1, tokBefore)).toFixed(1);
+
+    setPipeStep(3, 'done', tokAfter + 'tk');
+    await sleep(60);
+    setPipeStep(4, 'done', '✓ expansão concluída');
+
+    if (ps) { ps.textContent = 'concluído'; ps.className = 'pill pill-green'; }
+
+    output.innerHTML = `<span class="output-text" style="color:var(--blue)">${escHtml(expanded)}</span>`;
+    document.getElementById('output-tok-count').textContent = tokAfter + ' tokens';
+    if (copyBtn) copyBtn.style.display = 'flex';
+
+    document.getElementById('stat-before').textContent = tokBefore;
+    document.getElementById('stat-after').textContent  = tokAfter;
+    document.getElementById('stat-pct').textContent    = '+' + Math.round((tokAfter/Math.max(1, tokBefore)-1)*100) + '%';
+    document.getElementById('stat-usd').textContent    = '×' + expansionFactor;
+
+    const items = document.querySelectorAll('.ss-lbl');
+    if (items.length >= 4) {
+      items[2].textContent = 'crescimento';
+      items[3].textContent = 'fator expansão';
+    }
+    document.getElementById('app-stats').style.display = 'flex';
+
+  } catch (err) {
+    lastCompressedText = '';
+    output.innerHTML = '<span class="output-placeholder">resultado aparecerá aqui...</span>';
+    setPipeStep(2, 'idle');
+    if (ps) { ps.textContent = 'erro'; ps.className = 'pill pill-gray'; }
+    errorDiv.innerHTML = `<div class="error-banner">
+      <strong>Erro ao expandir:</strong> ${escHtml(err.message)}<br>
+      <span style="font-size:10px;opacity:.7">Verifique se o prompt segue a notação TokLang (ex: ações como cr, ex, $py, @framework).</span>
+    </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
   }
 }
 

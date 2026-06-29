@@ -60,19 +60,31 @@ export default async function handler(req, res) {
     const aiData = await aiResponse.json();
     const compressed = aiData.content[0].text.trim();
 
+    const countTokens = (t) => {
+      if (!t || !t.trim()) return 0;
+      const words = t.trim().split(/\s+/).length;
+      const puncMatches = t.match(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g);
+      const puncCount = puncMatches ? puncMatches.length : 0;
+      return Math.max(1, Math.round(words * 1.25 + puncCount * 0.4));
+    };
+
+    const tokBefore = countTokens(prompt);
+    const tokAfter = countTokens(compressed);
+    const savingsPct = Math.round((1 - tokAfter / tokBefore) * 100);
+
     // 4. Logar uso no histórico
     await supabase.from('history').insert({
       user_id: profile.id,
       original_text: prompt,
       compressed_text: compressed,
-      tokens_before: prompt.split(/\s+/).length,
-      tokens_after: compressed.split(/\s+/).length,
-      savings_pct: Math.round((1 - compressed.split(/\s+/).length / prompt.split(/\s+/).length) * 100)
+      tokens_before: tokBefore,
+      tokens_after: tokAfter,
+      savings_pct: savingsPct
     });
 
     return res.status(200).json({
       compressed,
-      savings: Math.round((1 - compressed.split(/\s+/).length / prompt.split(/\s+/).length) * 100) + '%'
+      savings: savingsPct + '%'
     });
 
   } catch (error) {
