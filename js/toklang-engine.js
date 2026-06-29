@@ -26,22 +26,89 @@ const LANGUAGES = {
   java: "Java",
   rb: "Ruby",
   cs: "C#",
-  cpp: "C++"
+  cpp: "C++",
+  c: "C",
+  php: "PHP",
+  kt: "Kotlin",
+  swift: "Swift",
+  dart: "Dart",
+  r: "R",
+  lua: "Lua",
+  ex: "Elixir",
+  scala: "Scala",
+  zig: "Zig",
+  html: "HTML"
 };
 
 const FRAMEWORKS = {
   streamlit: "Streamlit",
   fastapi: "FastAPI",
   flask: "Flask",
+  django: "Django",
   pandas: "Pandas",
   plt: "Matplotlib / Plotly",
+  numpy: "NumPy",
+  scipy: "SciPy",
+  sklearn: "Scikit-learn",
+  tf: "TensorFlow",
+  torch: "PyTorch",
+  celery: "Celery",
+  sqlalchemy: "SQLAlchemy",
   react: "React",
   next: "Next.js",
+  vue: "Vue.js",
+  nuxt: "Nuxt.js",
+  angular: "Angular",
+  svelte: "Svelte",
+  remix: "Remix",
+  astro: "Astro",
   express: "Express.js",
+  nest: "NestJS",
+  fastify: "Fastify",
+  hono: "Hono",
   prisma: "Prisma ORM",
+  drizzle: "Drizzle ORM",
+  sequelize: "Sequelize",
+  typeorm: "TypeORM",
+  knex: "Knex.js",
+  mongoose: "Mongoose",
   pg: "PostgreSQL",
   mongo: "MongoDB",
-  jest: "Jest"
+  redis: "Redis",
+  mysql: "MySQL",
+  sqlite: "SQLite",
+  supabase: "Supabase",
+  firebase: "Firebase",
+  aws: "AWS",
+  gcp: "Google Cloud",
+  azure: "Azure",
+  docker: "Docker",
+  k8s: "Kubernetes",
+  jest: "Jest",
+  vitest: "Vitest",
+  cypress: "Cypress",
+  playwright: "Playwright",
+  tailwind: "Tailwind CSS",
+  bootstrap: "Bootstrap",
+  graphql: "GraphQL",
+  grpc: "gRPC",
+  swagger: "Swagger / OpenAPI",
+  vite: "Vite",
+  webpack: "Webpack",
+  spring: "Spring Boot",
+  laravel: "Laravel",
+  rails: "Ruby on Rails",
+  sinatra: "Sinatra",
+  gin: "Gin",
+  fiber: "Fiber",
+  actix: "Actix Web",
+  rocket: "Rocket",
+  flutter: "Flutter",
+  rn: "React Native",
+  electron: "Electron",
+  tauri: "Tauri",
+  kafka: "Kafka",
+  rabbitmq: "RabbitMQ"
 };
 
 const STRUCTURES = {
@@ -319,145 +386,390 @@ const TokLangEngine = {
     }
 
     // Replace definitions with keys in cleanText before heuristics
-    // Sort by definition length descending
     const sortedEntries = Object.entries(normalizedVocab).sort((a, b) => b[1].length - a[1].length);
     for (const [key, val] of sortedEntries) {
       if (typeof val === 'string' && val.length > 0) {
-        // Escape regex special chars in definition
         const escapedVal = val.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
         const regex = new RegExp(escapedVal, 'gi');
         cleanText = cleanText.replace(regex, key);
       }
     }
     
-    // Avoid local compression for long/complex prompts
-    if (cleanText.length > 250) return null;
+    // Phase 3: Increased limit from 250 to 800 chars
+    if (cleanText.length > 800) return null;
     
-    // Clean greetings and politeness
+    // ============================================================
+    // PHASE 1: Strip greetings, politeness, filler — AGGRESSIVELY
+    // ============================================================
     cleanText = cleanText
-      .replace(/^(por favor|bom dia|boa tarde|boa noite|ola|olá|obrigado|obrigada|favor|gentileza|gostaria de|preciso de|pode|consegue|fazer|criar)\b/gi, '')
+      // Full greeting sentences
+      .replace(/^(ol[aá]|oi|e a[ií]|fala|salve|hey|hi|hello)[!,.]?\s*/gi, '')
+      .replace(/^(bom dia|boa tarde|boa noite|good morning|good afternoon)[!,.]?\s*/gi, '')
+      .replace(/^(tudo bem\??|como vai\??|beleza\??)[,.]?\s*/gi, '')
+      // Politeness prefixes
+      .replace(/\b(por favor|por gentileza|se possível|se poss[ií]vel|please|pls)\b[,.]?\s*/gi, '')
+      .replace(/\b(obrigad[oa]|valeu|muito obrigad[oa]|thank you|thanks)\b[!,.]?\s*/gi, '')
+      .replace(/\b(seria (legal|bom|ótimo|otimo|interessante|massa|top|incrível|incrivel))\b[,.]?\s*/gi, '')
+      .replace(/\b(você pode|vc pode|voce pode|pode me|consegue|poderia|será que|sera que|gostaria que|queria que)\b\s*/gi, '')
+      .replace(/\b(me ajud[ea]r?\s*(a|com|em)?)\b\s*/gi, '')
       .trim();
 
-    // Heuristics for Action
-    let actionToken = null;
     const textLower = cleanText.toLowerCase();
     
-    if (/\b(cria|crie|faça|faca|criar|create|make|gerar|gere)\b/.test(textLower)) actionToken = 'cr';
-    else if (/\b(corrija|resolva|conserte|fix|debug|corrigir|resolver)\b/.test(textLower)) actionToken = 'fix';
-    else if (/\b(explique|ensine|entender|como funciona|explain|how does)\b/.test(textLower)) actionToken = 'ex';
-    else if (/\b(refatore|refatorar|refactor|limpar o código)\b/.test(textLower)) actionToken = 'rf';
-    else if (/\b(otimize|otimizar|optimize|performance|desempenho)\b/.test(textLower)) actionToken = 'op';
-    else if (/\b(teste|testes|testar|escreva testes|jest|tst|junit)\b/.test(textLower)) actionToken = 'tst';
-    else if (/\b(documente|escreva documentacao|escreva documentação|document)\b/.test(textLower)) actionToken = 'doc';
-    else if (/\b(converta|portar|convert|migrar|transformar)\b/.test(textLower)) actionToken = 'cv';
-    else if (/\b(revise|revisar|code review|review)\b/.test(textLower)) actionToken = 'rev';
-    else if (/\b(resuma|sumarize|resume|summarize)\b/.test(textLower)) actionToken = 'sum';
+    // ============================================================
+    // PHASE 1: Expanded action detection with 40+ synonyms
+    // ============================================================
+    let actionToken = null;
     
-    // If no action is detected, we fallback to LLM for safety
+    // Create/Build
+    if (/\b(cri[ae]r?|faça|faca|gerar?|gere|build|create|make|construa|construir|monta?r?|monte|desenvolv[ae]r?|implement[ae]r?|escrev[ae]r?|write|set up|setup|elabor[ae]r?|program[ae]r?|cod[ae]r?|design[ae]r?)\b/.test(textLower)) actionToken = 'cr';
+    // Fix/Debug
+    else if (/\b(corrij[ae]r?|resolv[ae]r?|consert[ae]r?|fix|debug|arrum[ae]r?|repair|patch|troubleshoot)\b/.test(textLower)) actionToken = 'fix';
+    // Explain
+    else if (/\b(expliqu?[ae]r?|ensin[ae]r?|entend[ae]r?|como funciona|explain|how does|how to|o que [eé]|what is|descrev[ae]r?|detalh[ae]r?)\b/.test(textLower)) actionToken = 'ex';
+    // Refactor
+    else if (/\b(refator[ae]r?|refactor|limpar?|clean up|reorganiz[ae]r?|reestrutur[ae]r?|melhor[ae]r? (o )?código)\b/.test(textLower)) actionToken = 'rf';
+    // Optimize
+    else if (/\b(otimiz[ae]r?|optimize|performance|desempenho|speed up|acelerar|faster|mais rápid[oa])\b/.test(textLower)) actionToken = 'op';
+    // Test
+    else if (/\b(test[ae]r?|testes?|escreva testes|write tests|unit test|e2e|integration test|junit|cobertura)\b/.test(textLower)) actionToken = 'tst';
+    // Document
+    else if (/\b(document[ae]r?|escreva documenta[cç][aã]o|jsdoc|docstring|readme|swagger doc)\b/.test(textLower)) actionToken = 'doc';
+    // Convert
+    else if (/\b(convert[ae]r?|port[ae]r?|migrar?|transform[ae]r?|transpil[ae]r?|traduz[ai]r?|translate)\b/.test(textLower)) actionToken = 'cv';
+    // Review
+    else if (/\b(revis[ae]r?|code review|review|analise|analis[ae]r?|avaliar?|audit[ae]r?)\b/.test(textLower)) actionToken = 'rev';
+    // Summarize
+    else if (/\b(resum[aiu]r?|sumariz[ae]r?|summarize|synopsis|sinopse|tldr|tl;dr)\b/.test(textLower)) actionToken = 'sum';
+
+    // ============================================================
+    // PHASE 1b: Context-based inference — if lang/framework present but no action, assume 'cr'
+    // ============================================================
+    const hasLangOrFramework = /\b(python|javascript|typescript|react|vue|angular|express|django|flask|fastapi|next|node|streamlit|spring|laravel|go|rust|java|ruby|php|kotlin|swift|dart|flutter|docker|aws|firebase|supabase)\b/i.test(textLower);
+    const hasNounTask = /\b(dashboard|crud|login|auth|api|app|website|site|página|pagina|painel|sistema|plataforma|bot|chatbot|scraping|crawler|parser|calculator|calculador|todo|kanban|chat|form|formulário|formulario|tabela|table|gráfico|grafico|chart|report|relatório|relatorio)\b/i.test(textLower);
+    
+    if (!actionToken && (hasLangOrFramework || hasNounTask)) {
+      // Infer action from context
+      if (/\b(scraping|crawler|extrai[ra]|extract|peg[ae]r dados|web scrap)\b/i.test(textLower)) actionToken = 'cr';
+      else if (hasLangOrFramework || hasNounTask) actionToken = 'cr'; // Default: if they mention tech, they want to create
+    }
+    
+    // Last resort: if still no action, fallback to LLM
     if (!actionToken) return null;
 
-    // Detect language
+    // ============================================================
+    // Detect language (expanded with Phase 4 languages)
+    // ============================================================
     let langToken = null;
-    if (/\b(python|py)\b/.test(textLower)) langToken = '$py';
-    else if (/\b(javascript|js|node|nodejs)\b/.test(textLower)) langToken = '$js';
-    else if (/\b(typescript|ts)\b/.test(textLower)) langToken = '$ts';
-    else if (/\b(sql|postgres|mysql|sqlite)\b/.test(textLower)) langToken = '$sql';
-    else if (/\b(golang|go)\b/.test(textLower)) langToken = '$go';
-    else if (/\b(rust|rs)\b/.test(textLower)) langToken = '$rs';
-    else if (/\b(shell|bash|sh)\b/.test(textLower)) langToken = '$sh';
-    else if (/\b(css)\b/.test(textLower)) langToken = '$css';
-    else if (/\b(java)\b/.test(textLower)) langToken = '$java';
-    else if (/\b(ruby|rb)\b/.test(textLower)) langToken = '$rb';
-    else if (/\b(c#|csharp)\b/.test(textLower)) langToken = '$cs';
-    else if (/\b(c\+\+|cpp)\b/.test(textLower)) langToken = '$cpp';
+    const langPatterns = [
+      [/\b(python|py)\b/i, '$py'],
+      [/\b(javascript|js)\b/i, '$js'],
+      [/\b(node\.?js|nodejs)\b/i, '$js'],
+      [/\b(typescript|ts)\b/i, '$ts'],
+      [/\bsql\b/i, '$sql'],
+      [/\b(golang|go\b(?!ogle))/i, '$go'],
+      [/\b(rust|\.rs)\b/i, '$rs'],
+      [/\b(shell|bash|\.sh)\b/i, '$sh'],
+      [/\bcss\b/i, '$css'],
+      [/\bjava\b(?!script)/i, '$java'],
+      [/\b(ruby|rb)\b/i, '$rb'],
+      [/\b(c#|csharp|c sharp)\b/i, '$cs'],
+      [/\b(c\+\+|cpp)\b/i, '$cpp'],
+      [/\bphp\b/i, '$php'],
+      [/\b(kotlin|kt)\b/i, '$kt'],
+      [/\bswift\b/i, '$swift'],
+      [/\b(dart)\b/i, '$dart'],
+      [/\b(elixir)\b/i, '$ex'],
+      [/\bscala\b/i, '$scala'],
+      [/\blua\b/i, '$lua'],
+      [/\bzig\b/i, '$zig'],
+      [/\bhtml\b/i, '$html'],
+    ];
+    for (const [pat, tok] of langPatterns) {
+      if (pat.test(textLower)) { langToken = tok; break; }
+    }
 
-    // Detect Framework
-    let frameworkToken = null;
-    if (/\bstreamlit\b/.test(textLower)) frameworkToken = '@streamlit';
-    else if (/\bfastapi\b/.test(textLower)) frameworkToken = '@fastapi';
-    else if (/\bflask\b/.test(textLower)) frameworkToken = '@flask';
-    else if (/\bpandas\b/.test(textLower)) frameworkToken = '@pandas';
-    else if (/\b(matplotlib|plotly)\b/.test(textLower)) frameworkToken = '@plt';
-    else if (/\breact\b/.test(textLower)) frameworkToken = '@react';
-    else if (/\bnext\b/.test(textLower)) frameworkToken = '@next';
-    else if (/\bexpress\b/.test(textLower)) frameworkToken = '@express';
-    else if (/\bprisma\b/.test(textLower)) frameworkToken = '@prisma';
-    else if (/\bpostgres\b/.test(textLower)) frameworkToken = '@pg';
-    else if (/\bmongo\b/.test(textLower)) frameworkToken = '@mongo';
-    else if (/\bjest\b/.test(textLower)) frameworkToken = '@jest';
+    // ============================================================
+    // Detect Framework (expanded with Phase 4 frameworks)
+    // ============================================================
+    let frameworkTokens = [];
+    const fwPatterns = [
+      [/\bstreamlit\b/i, '@streamlit'],
+      [/\bfastapi\b/i, '@fastapi'],
+      [/\bflask\b/i, '@flask'],
+      [/\bdjango\b/i, '@django'],
+      [/\bpandas\b/i, '@pandas'],
+      [/\b(matplotlib|plotly)\b/i, '@plt'],
+      [/\bnumpy\b/i, '@numpy'],
+      [/\b(scikit.?learn|sklearn)\b/i, '@sklearn'],
+      [/\b(tensorflow|tf)\b/i, '@tf'],
+      [/\b(pytorch|torch)\b/i, '@torch'],
+      [/\bsqlalchemy\b/i, '@sqlalchemy'],
+      [/\breact\b(?!\s*native)/i, '@react'],
+      [/\breact\s*native\b/i, '@rn'],
+      [/\bnext\.?js\b|\bnext\b/i, '@next'],
+      [/\bvue\.?js?\b|\bvue\b/i, '@vue'],
+      [/\bnuxt\.?js?\b|\bnuxt\b/i, '@nuxt'],
+      [/\bangular\b/i, '@angular'],
+      [/\bsvelte\b/i, '@svelte'],
+      [/\bremix\b/i, '@remix'],
+      [/\bastro\b/i, '@astro'],
+      [/\bexpress\.?js?\b|\bexpress\b/i, '@express'],
+      [/\bnestjs\b|\bnest\b/i, '@nest'],
+      [/\bfastify\b/i, '@fastify'],
+      [/\bhono\b/i, '@hono'],
+      [/\bprisma\b/i, '@prisma'],
+      [/\bdrizzle\b/i, '@drizzle'],
+      [/\bsequelize\b/i, '@sequelize'],
+      [/\btypeorm\b/i, '@typeorm'],
+      [/\bknex\b/i, '@knex'],
+      [/\bmongoose\b/i, '@mongoose'],
+      [/\b(postgres|postgresql)\b/i, '@pg'],
+      [/\bmongo(db)?\b/i, '@mongo'],
+      [/\bredis\b/i, '@redis'],
+      [/\bmysql\b/i, '@mysql'],
+      [/\bsqlite\b/i, '@sqlite'],
+      [/\bsupabase\b/i, '@supabase'],
+      [/\bfirebase\b/i, '@firebase'],
+      [/\baws\b/i, '@aws'],
+      [/\bdocker\b/i, '@docker'],
+      [/\bkubernetes\b|\bk8s\b/i, '@k8s'],
+      [/\bjest\b/i, '@jest'],
+      [/\bvitest\b/i, '@vitest'],
+      [/\bcypress\b/i, '@cypress'],
+      [/\bplaywright\b/i, '@playwright'],
+      [/\btailwind\b/i, '@tailwind'],
+      [/\bbootstrap\b/i, '@bootstrap'],
+      [/\bgraphql\b/i, '@graphql'],
+      [/\bgrpc\b/i, '@grpc'],
+      [/\bswagger\b|\bopenapi\b/i, '@swagger'],
+      [/\bvite\b/i, '@vite'],
+      [/\bwebpack\b/i, '@webpack'],
+      [/\bspring\b/i, '@spring'],
+      [/\blaravel\b/i, '@laravel'],
+      [/\brails\b/i, '@rails'],
+      [/\bgin\b/i, '@gin'],
+      [/\bfiber\b/i, '@fiber'],
+      [/\bflutter\b/i, '@flutter'],
+      [/\belectron\b/i, '@electron'],
+      [/\btauri\b/i, '@tauri'],
+      [/\bkafka\b/i, '@kafka'],
+      [/\b(rabbitmq|rabbit)\b/i, '@rabbitmq'],
+      [/\bjwt\b/i, '@jwt'],
+    ];
+    for (const [pat, tok] of fwPatterns) {
+      if (pat.test(textLower)) frameworkTokens.push(tok);
+    }
+    // Keep max 2 frameworks to stay concise
+    frameworkTokens = frameworkTokens.slice(0, 2);
 
+    // ============================================================
     // Detect Structure
+    // ============================================================
     let structureToken = null;
-    if (/\b(função|funcao|funcoes|function)\b/.test(textLower)) structureToken = '#fn';
+    if (/\b(fun[cç][aã]o|funcoes|fun[cç][oõ]es|function)\b/.test(textLower)) structureToken = '#fn';
     else if (/\b(classe|class)\b/.test(textLower)) structureToken = '#cls';
     else if (/\bscript\b/.test(textLower)) structureToken = '#scr';
-    else if (/\bapi\b/.test(textLower)) structureToken = '#api';
-    else if (/\bcomponente\b/.test(textLower)) structureToken = '#comp';
+    else if (/\b(api|rest|endpoint)\b/.test(textLower)) structureToken = '#api';
+    else if (/\b(componente|component)\b/.test(textLower)) structureToken = '#comp';
     else if (/\bhook\b/.test(textLower)) structureToken = '#hook';
-    else if (/\bmódulo|modulo\b/.test(textLower)) structureToken = '#mod';
+    else if (/\b(m[oó]dulo|module)\b/.test(textLower)) structureToken = '#mod';
     else if (/\bmiddleware\b/.test(textLower)) structureToken = '#mw';
 
-    // Build the first part
-    let part1 = actionToken;
-    if (langToken) part1 += ' ' + langToken;
-    if (frameworkToken) part1 += ' ' + frameworkToken;
-    if (structureToken) part1 += ' ' + structureToken;
-
-    // Modifiers detection - support masculine/feminine endings (o/a)
+    // ============================================================
+    // Modifiers detection (expanded)
+    // ============================================================
     const modifiersList = [];
-    if (/\b(bonito|bonita|visual|estilizado|estilizada|estiloso|estilosa|ui|lindo|linda)\b/.test(textLower)) modifiersList.push('ui+');
-    if (/\b(produção|producao|boas práticas|boas praticas|prd|robusto|robusta)\b/.test(textLower)) modifiersList.push('prd');
-    if (/\b(comentários|comentarios|comentado|comentada)\b/.test(textLower)) modifiersList.push('cm');
-    if (/\b(exemplos|exemplo|prático|prática|pratico|pratica)\b/.test(textLower)) modifiersList.push('dk');
-    if (/\b(tipagem|tipado|tipada|types|typescript type)\b/.test(textLower)) modifiersList.push('typ');
-    if (/\b(assíncrono|assíncrona|assincrono|assincrona|async)\b/.test(textLower)) modifiersList.push('async');
-    if (/\b(simples|mínimo|mínima|minimo|minima|minimalista|direto|direta)\b/.test(textLower)) modifiersList.push('min');
-    if (/\b(máxima qualidade|maxima qualidade|esmerado|esmerada|\*)\b/.test(textLower)) modifiersList.push('*');
+    if (/\b(bonit[oa]|visual|estilizad[oa]|estilos[oa]|ui|lind[oa]|interativ[oa]|responsiv[oa]|dark mode|beautiful|pretty|styled)\b/.test(textLower)) modifiersList.push('ui+');
+    if (/\b(produ[cç][aã]o|boas pr[aá]ticas|prd|robust[oa]|production|scalable|escal[aá]vel|solid[oa])\b/.test(textLower)) modifiersList.push('prd');
+    if (/\b(coment[aá]rios?|comentad[oa]|documented|well.?commented)\b/.test(textLower)) modifiersList.push('cm');
+    if (/\b(exemplos?|pr[aá]tic[oa]|did[aá]tic[oa]|tutorial|hands.?on)\b/.test(textLower)) modifiersList.push('dk');
+    if (/\b(tipagem|tipad[oa]|types?|typed|anota[cç][oõ]es? de tipo)\b/.test(textLower)) modifiersList.push('typ');
+    if (/\b(ass[ií]ncron[oa]|async|await|concurrent|paralel[oa])\b/.test(textLower)) modifiersList.push('async');
+    if (/\b(simples|m[ií]nim[oa]|minimalista|diret[oa]|b[aá]sic[oa]|minimal|basic|lightweight)\b/.test(textLower)) modifiersList.push('min');
+    if (/\b(m[aá]xima qualidade|qualidade m[aá]xima|esmerad[oa]|premium|best possible|completo|complet[oa])\b/.test(textLower)) modifiersList.push('*');
+    if (/\b(segur[oa]|security|secure|autenticad[oa]|autentica[cç][aã]o|auth|authenticated)\b/.test(textLower) && !frameworkTokens.includes('@jwt')) modifiersList.push('prd');
 
-    // Extract inputs/params if any
+    // ============================================================
+    // PHASE 5: Smart parameter extraction
+    // ============================================================
     let inputsPart = null;
-    const inMatch = textLower.match(/\b(parâmetros|parametros|campos|entradas|inputs|campos de entrada):\s*([a-zA-Z0-9,\s_]+)/);
-    if (inMatch) {
-      const candidates = inMatch[2].split(',').map(v => v.trim()).filter(Boolean);
-      const validVars = [];
-      for (const cand of candidates) {
-        if (/^[a-zA-Z0-9_]+$/.test(cand) && cand !== 'e' && cand !== 'ou') {
-          validVars.push(cand);
-        } else {
-          break; // Stop on first non-variable token
-        }
-      }
-      if (validVars.length > 0) {
-        inputsPart = `in[${validVars.join(',')}]`;
+    let outputsPart = null;
+    let errorsPart = null;
+
+    // Pattern 1: "campos/parâmetros: nome, email, role"
+    const fieldMatch = textLower.match(/\b(?:campos?|par[aâ]metros?|entradas?|inputs?|fields?|propriedades?|colunas?|atributos?)[\s:]+([a-zA-Z0-9áàãâéêíóôõúç_,\s]+?)(?:\.|;|$)/i);
+    if (fieldMatch) {
+      const fields = fieldMatch[1].split(/[,\s]+e\s+|,\s*/)
+        .map(f => f.trim().replace(/^(o|a|os|as|do|da|dos|das|de|em|são|sao)\s+/i, ''))
+        .filter(f => f && f.length > 1 && !/^(com|que|para|são|sao|e|ou|o|a)$/i.test(f));
+      if (fields.length > 0) inputsPart = `in[${fields.join(',')}]`;
+    }
+
+    // Pattern 2: "Os campos são nome, email e role"
+    if (!inputsPart) {
+      const fieldsAre = textLower.match(/(?:campos?|par[aâ]metros?)\s+(?:s[aã]o|são|include|incluem)\s+([a-zA-Z0-9áàãâéêíóôõúç_,\s]+?)(?:\.|;|$)/i);
+      if (fieldsAre) {
+        const fields = fieldsAre[1].split(/[,\s]+e\s+|,\s*/)
+          .map(f => f.trim().replace(/^(o|a|os|as|do|da|dos|das|de|em|são|sao)\s+/i, ''))
+          .filter(f => f && f.length > 1 && !/^(com|que|para|e|ou|o|a)$/i.test(f));
+        if (fields.length > 0) inputsPart = `in[${fields.join(',')}]`;
       }
     }
 
-    // Try to extract task description
-    // Replace all keyword tokens and stop words to clean up the task description
-    let taskClean = cleanText
-      .replace(new RegExp(`\\b(cria|crie|faça|faca|criar|create|make|gerar|gere|corrija|resolva|conserte|fix|debug|corrigir|resolver|explique|ensine|entender|como funciona|explain|how does|refatore|refatorar|refactor|limpar o código|otimize|otimizar|optimize|performance|desempenho|teste|testes|testar|escreva testes|jest|tst|junit|documente|escreva documentacao|escreva documentação|document|converta|portar|convert|migrar|transformar|revise|revisar|code review|review|resuma|sumarize|resume|summarize)\\b`, 'gi'), '')
-      .replace(new RegExp(`\\b(python|py|javascript|js|node|nodejs|typescript|ts|sql|postgres|mysql|sqlite|golang|go|rust|rs|shell|bash|sh|css|java|ruby|rb|c#|csharp|c\\+\\+|cpp)\\b`, 'gi'), '')
-      .replace(new RegExp(`\\b(streamlit|fastapi|flask|pandas|matplotlib|plotly|react|next|express|prisma|mongodb|mongo|jest)\\b`, 'gi'), '')
-      .replace(new RegExp(`\\b(função|funcao|funcoes|function|classe|class|script|api|componente|hook|módulo|modulo|middleware)\\b`, 'gi'), '')
-      .replace(new RegExp(`\\b(parâmetros|parametros|campos|entradas|inputs|campos de entrada):\\s*([a-zA-Z0-9,\\s_]+)`, 'gi'), '')
-      .replace(new RegExp(`\\b(bonito|bonita|visual|estilizado|estilizada|estiloso|estilosa|ui|lindo|linda|produção|producao|boas práticas|boas praticas|prd|robusto|robusta|comentários|comentarios|comentado|comentada|exemplos|exemplo|prático|prática|pratico|pratica|tipagem|tipado|tipada|types|typescript type|assíncrono|assíncrona|assincrono|assincrona|async|simples|mínimo|mínima|minimo|minima|minimalista|direto|direta|máxima qualidade|maxima qualidade|esmerado|esmerada)\\b`, 'gi'), '')
-      .replace(/\s+/g, ' ')
-      .trim();
+    // Pattern 3: CRUD detection → implicit params
+    if (/\bcrud\b/i.test(textLower)) {
+      if (!inputsPart) inputsPart = 'in[CRUD]';
+    }
 
-    // Clean up typical preposition/article leading stop words
-    taskClean = taskClean
-      .replace(/^(um|uma|para|de|com|como|usando|que|de forma|de modo a|em)\b/gi, '')
-      .replace(/^(um|uma|para|de|com|como|usando|que|de forma|de modo a|em)\b/gi, '') // double pass for consecutive ones
-      .trim();
+    // Error code detection: "erros 404 e 422" or "handle 500"
+    const errMatch = textLower.match(/\b(?:erros?|errors?|trate?|handle|status)\s+(?:codes?\s+)?(\d{3}(?:\s*[,e]\s*\d{3})*)/i);
+    if (errMatch) {
+      const codes = errMatch[1].match(/\d{3}/g);
+      if (codes && codes.length > 0) errorsPart = `err[${codes.join(',')}]`;
+    }
 
-    let taskPart = taskClean ? taskClean.substring(0, 80) : "tarefa principal";
-    taskPart = taskPart.replace(/^[,;.\-\s]+|[,;.\-\s]+$/g, '');
+    // ============================================================
+    // PHASE 2: Clean task description — extract only meaningful words
+    // ============================================================
+    
+    // Giant stop-word list for aggressive cleanup
+    const STOP_WORDS = new Set([
+      // PT articles, prepositions, pronouns, conjunctions, auxiliaries
+      'um','uma','uns','umas','o','a','os','as','de','do','da','dos','das',
+      'em','no','na','nos','nas','por','pelo','pela','pelos','pelas',
+      'para','pra','pro','com','sem','sobre','entre','até','ate','desde',
+      'que','qual','quais','como','onde','quando','quem',
+      'eu','tu','ele','ela','nós','nos','vós','vos','eles','elas',
+      'me','te','se','lhe','lhes','mim','ti','si','meu','minha','seu','sua',
+      'este','esta','esse','essa','aquele','aquela','isso','isto','aquilo',
+      'e','ou','mas','porém','porem','contudo','todavia','entretanto',
+      'se','caso','embora','porque','pois','logo','portanto',
+      'muito','mais','menos','bem','mal','já','ja','ainda','também','tambem',
+      'não','nao','nem','nunca','jamais','sempre','talvez',
+      'ser','estar','ter','haver','ir','poder','dever','querer','ficar',
+      'é','sou','são','sao','foi','era','será','sera','está','esta',
+      'tem','tinha','terá','tera','há','ha','houve',
+      'vai','vou','vamos','pode','deve','quer','fica',
+      'aqui','ali','aí','ai','lá','la','cá','ca',
+      'tudo','nada','algo','alguém','alguem','ninguém','ninguem',
+      'outro','outra','outros','outras','mesmo','mesma',
+      'cada','todo','toda','todos','todas',
+      'só','somente','apenas','bastante','demais',
+      'forma','modo','maneira','tipo','jeito',
+      'coisa','coisas','parte','partes','vez','vezes',
+      'dia','hora','tempo','momento',
+      'quero','preciso','gostaria','poderia','favor',
+      'ajuda','ajudar','ajude','ajuda',
+      'usar','usando','utilizar','utilizando','use',
+      'ter','tendo','tenho',
+      'ficar','ficando','fique',
+      'código','codigo','code',
+      'pedir','sua','completa','completo','web','frontend','backend','sistema','aplicação','aplicacao',
+      // EN stop words
+      'the','a','an','is','are','was','were','be','been','being',
+      'have','has','had','do','does','did','will','would','shall','should',
+      'may','might','must','can','could',
+      'i','you','he','she','it','we','they','me','him','her','us','them',
+      'my','your','his','its','our','their',
+      'this','that','these','those',
+      'in','on','at','to','for','with','from','by','about','into',
+      'through','during','before','after','above','below','between',
+      'of','up','out','off','over','under',
+      'and','but','or','nor','not','so','yet',
+      'if','then','else','when','where','while','how','what','which','who',
+      'very','really','just','also','too','more','most','some','any','all',
+      'here','there','now','then','always','never','often','sometimes',
+      'want','need','like','please','help','using','use',
+    ]);
 
-    if (!taskPart) taskPart = "tarefa principal";
+    // Words already captured by tokens (action, lang, framework, structure, modifier keywords)
+    const CAPTURED_WORDS = new Set([
+      // Actions
+      'criar','crie','cria','faça','faca','gerar','gere','build','create','make',
+      'construa','construir','montar','monte','desenvolver','desenvolva',
+      'implementar','implemente','escrever','escreva','write','setup',
+      'elaborar','elabore','programar','programe','codar','code',
+      'corrigir','corrija','resolver','resolva','consertar','conserte','fix','debug','arrumar','arrume',
+      'explicar','explique','ensinar','ensine','entender','explain',
+      'refatorar','refatore','refactor','limpar','reorganizar','reestruturar',
+      'otimizar','otimize','optimize','performance','desempenho','acelerar',
+      'testar','teste','testes','tst',
+      'documentar','documente','document',
+      'converter','converta','portar','migrar','transformar','translate',
+      'revisar','revise','review','analisar','analise','avaliar','auditar',
+      'resumir','resuma','summarize','sumarizar',
+      // Languages
+      'python','py','javascript','js','typescript','ts','sql','golang','go',
+      'rust','rs','shell','bash','sh','css','java','ruby','rb','csharp',
+      'cpp','php','kotlin','kt','swift','dart','elixir','scala','lua','zig','html','node','nodejs',
+      // Frameworks (all of them)
+      'streamlit','fastapi','flask','django','pandas','matplotlib','plotly',
+      'numpy','scipy','sklearn','tensorflow','pytorch','torch','sqlalchemy',
+      'react','next','nextjs','vue','vuejs','nuxt','nuxtjs','angular','svelte',
+      'remix','astro','express','expressjs','nestjs','nest','fastify','hono',
+      'prisma','drizzle','sequelize','typeorm','knex','mongoose',
+      'postgres','postgresql','mongodb','mongo','redis','mysql','sqlite',
+      'supabase','firebase','aws','docker','kubernetes','k8s',
+      'jest','vitest','cypress','playwright','tailwind','bootstrap',
+      'graphql','grpc','swagger','openapi','vite','webpack',
+      'spring','laravel','rails','sinatra','gin','fiber','actix','rocket',
+      'flutter','electron','tauri','kafka','rabbitmq','rabbit','jwt',
+      // Structures
+      'função','funcao','funcoes','function','classe','class','script',
+      'api','rest','endpoint','componente','component','hook','módulo','modulo','module','middleware',
+      // Modifiers
+      'bonito','bonita','visual','estilizado','estilizada','estiloso','estilosa',
+      'ui','lindo','linda','interativo','interativa','responsivo','responsiva',
+      'produção','producao','boas','práticas','praticas','prd','robusto','robusta',
+      'production','scalable','escalável','escalavel','sólido','solido',
+      'comentários','comentarios','comentado','comentada',
+      'exemplos','exemplo','prático','prática','pratico','pratica','didático','didatica',
+      'tipagem','tipado','tipada','types','typed',
+      'assíncrono','assíncrona','assincrono','assincrona','async','await',
+      'simples','mínimo','mínima','minimo','minima','minimalista','minimal','basic','lightweight',
+      'máxima','maxima','qualidade','esmerado','esmerada','premium','completo','completa',
+      'seguro','segura','security','secure','autenticação','autenticacao','auth',
+      // Greetings already stripped
+      'olá','ola','oi','bom','boa','dia','tarde','noite','tudo','bem',
+      'obrigado','obrigada','valeu','favor','gentileza','possível','possivel',
+    ]);
+
+    // Build task: split text into words, keep only meaningful ones
+    const words = cleanText.split(/\s+/);
+    const taskWords = [];
+    for (const word of words) {
+      const clean = word.replace(/^[^a-zA-Z0-9À-ÿ]+|[^a-zA-Z0-9À-ÿ]+$/g, '');
+      if (!clean || clean.length <= 1) continue;
+      const lw = clean.toLowerCase();
+      if (STOP_WORDS.has(lw)) continue;
+      if (CAPTURED_WORDS.has(lw)) continue;
+      taskWords.push(clean);
+    }
+
+    // Keep max 8 meaningful words for the task
+    let taskPart = taskWords.slice(0, 8).join(' ');
+    // Clean up remaining artifacts
+    taskPart = taskPart.replace(/^[,;.\-\s]+|[,;.\-\s]+$/g, '').trim();
+    if (!taskPart) taskPart = 'tarefa';
+
+    // ============================================================
+    // Build final TokLang notation
+    // ============================================================
+    let part1 = actionToken;
+    if (langToken) part1 += ' ' + langToken;
+    for (const fw of frameworkTokens) {
+      part1 += ' ' + fw;
+    }
+    if (structureToken) part1 += ' ' + structureToken;
+
+    const uniqueModifiers = [...new Set(modifiersList)];
 
     let result = part1 + '; ' + taskPart;
     if (inputsPart) result += '; ' + inputsPart;
-    if (modifiersList.length > 0) result += '; ' + modifiersList.join(' ');
+    if (outputsPart) result += '; ' + outputsPart;
+    if (errorsPart) result += '; ' + errorsPart;
+    if (uniqueModifiers.length > 0) result += '; ' + uniqueModifiers.join(' ');
 
     return result;
   }
