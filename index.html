@@ -125,6 +125,33 @@ function updateThemeIcons() {
     lightIcon.style.display = isLight ? 'block' : 'none';
   }
 }
+
+// Sync theme when another browser tab changes it
+window.addEventListener('storage', function(e) {
+  if (e.key === 'theme') {
+    if (e.newValue === 'light') {
+      document.documentElement.classList.add('light-theme');
+    } else {
+      document.documentElement.classList.remove('light-theme');
+    }
+    updateThemeIcons();
+  }
+});
+
+// Sync icons when the page becomes visible again (e.g. switching browser tabs)
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden) {
+    const savedTheme = localStorage.getItem('theme');
+    const hasLight = document.documentElement.classList.contains('light-theme');
+    if (savedTheme === 'light' && !hasLight) {
+      document.documentElement.classList.add('light-theme');
+    } else if (savedTheme !== 'light' && hasLight) {
+      document.documentElement.classList.remove('light-theme');
+    }
+    updateThemeIcons();
+  }
+});
+
 document.addEventListener('DOMContentLoaded', updateThemeIcons);
 </script>
 <script>
