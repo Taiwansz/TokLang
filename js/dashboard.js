@@ -289,8 +289,7 @@ async function initDashboard() {
   document.querySelectorAll('#dash-overview .metric-val').forEach((el, i) => {
     if (i === 0) el.textContent = totalUsed;
     if (i === 1) el.textContent = formatTokens(totalTokensSaved);
-    if (i === 2) el.textContent = '$' + dollarsSaved.toFixed(3);
-    if (i === 3) el.textContent = Math.max(0, 500 - totalUsed);
+    if (i === 2) el.textContent = Math.max(0, 500 - totalUsed);
   });
   
   const avgSavingsPct = totalUsed > 0 ? (dbHistory.reduce((acc, curr) => acc + curr.savings_pct, 0) / totalUsed).toFixed(0) : '0';
@@ -298,8 +297,8 @@ async function initDashboard() {
   if (deltaElements.length >= 2) {
     deltaElements[1].innerHTML = `↑ ${avgSavingsPct}% média`;
   }
-  if (deltaElements.length >= 4) {
-    deltaElements[3].textContent = `restantes de 500`;
+  if (deltaElements.length >= 3) {
+    deltaElements[2].textContent = `restantes de 500`;
   }
 
   const usageFill = document.querySelector('#dash-overview .usage-bar-fill');
