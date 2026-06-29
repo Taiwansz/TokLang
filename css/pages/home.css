@@ -11,7 +11,7 @@
 }
 .hero-badge{margin-bottom:30px;animation:fadeUp .6s ease both}
 h1.hero-title{
-  font-size:clamp(50px,8.5vw,100px);font-weight:800;
+  font-size:clamp(36px,8.5vw,100px);font-weight:800;
   line-height:.93;letter-spacing:-.04em;margin-bottom:22px;
   animation:fadeUp .7s .1s ease both;
 }

@@ -44,15 +44,25 @@ async function updateNavAuth() {
   const out = document.getElementById('nav-logged-out');
   const inn = document.getElementById('nav-logged-in');
   const av  = document.getElementById('nav-avatar');
+  
+  const outMob = document.getElementById('nav-logged-out-mobile');
+  const innMob = document.getElementById('nav-logged-in-mobile');
+  const avMob  = document.getElementById('nav-avatar-mobile-nav');
+
   if (u) {
     if (out) out.style.display = 'none';
     if (inn) inn.style.display = 'flex';
+    if (outMob) outMob.style.display = 'none';
+    if (innMob) innMob.style.display = 'flex';
     const initials = ((u.name||'').charAt(0) + (u.last||'').charAt(0)).toUpperCase() || 'TL';
     if (av) av.textContent = initials;
+    if (avMob) avMob.textContent = initials;
     syncDashUser(u);
   } else {
     if (out) out.style.display = 'flex';
     if (inn) inn.style.display = 'none';
+    if (outMob) outMob.style.display = 'flex';
+    if (innMob) innMob.style.display = 'none';
   }
 }
 

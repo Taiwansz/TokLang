@@ -20,4 +20,103 @@
   .cta-box{padding:36px 24px}
   .metrics-grid{grid-template-columns:1fr}
   .dash-main{padding:20px}
+  
+  /* Safe table wrapping on mobile viewports */
+  .token-table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* MOBILE SITE NAVIGATION DRAWER Styles */
+.mobile-nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 9, 13, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 990;
+  display: none;
+}
+html.light-theme .mobile-nav-overlay {
+  background: rgba(255, 255, 255, 0.5);
+}
+.mobile-nav-drawer {
+  position: fixed;
+  top: 0;
+  right: -280px;
+  width: 280px;
+  height: 100vh;
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  z-index: 1000;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: -10px 0 35px rgba(0,0,0,0.35);
+}
+.mobile-nav-drawer.open {
+  right: 0;
+}
+.mobile-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 36px;
+}
+.mobile-drawer-close {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 20px;
+  padding: 6px;
+  transition: color 0.15s;
+}
+.mobile-drawer-close:hover {
+  color: var(--text);
+}
+.mobile-drawer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-bottom: auto;
+}
+.mobile-drawer-links a {
+  font-family: var(--mono);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  cursor: pointer;
+  transition: color 0.2s;
+  display: block;
+  padding: 6px 0;
+}
+.mobile-drawer-links a:hover {
+  color: var(--text);
+}
+.mobile-drawer-auth {
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.mobile-drawer-auth .nav-auth-logged-out {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+.mobile-drawer-auth .nav-auth-logged-out button {
+  width: 100%;
+  text-align: center;
+}
+.mobile-drawer-auth .nav-auth-logged-in {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }

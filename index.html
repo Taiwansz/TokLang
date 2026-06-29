@@ -60,8 +60,33 @@
       <div class="nav-user-avatar" id="nav-avatar" onclick="navigate('dashboard')" title="Minha conta">TW</div>
     </div>
   </div>
-  <button class="nav-mobile-btn" onclick="navigate('app')">≡</button>
+  <button class="nav-mobile-btn" onclick="toggleMobileNav()" aria-label="Menu de navegação">≡</button>
 </nav>
+
+<!-- MOBILE SITE NAVIGATION DRAWER -->
+<div class="mobile-nav-overlay" id="mobile-nav-overlay" onclick="toggleMobileNav()"></div>
+<div class="mobile-nav-drawer" id="mobile-nav-drawer">
+  <div class="mobile-drawer-header">
+    <div class="nav-logo" onclick="navigate('home'); toggleMobileNav()">Tok<span>Lang</span></div>
+    <button class="mobile-drawer-close" onclick="toggleMobileNav()" aria-label="Fechar menu">✕</button>
+  </div>
+  <ul class="mobile-drawer-links">
+    <li><a onclick="navigate('home'); toggleMobileNav()">Início</a></li>
+    <li><a onclick="navigate('app'); toggleMobileNav()">App</a></li>
+    <li><a onclick="navigate('docs'); toggleMobileNav()">Docs</a></li>
+    <li><a onclick="navigate('pricing'); toggleMobileNav()">Preços</a></li>
+  </ul>
+  <div class="mobile-drawer-auth">
+    <div class="nav-auth-logged-out" id="nav-logged-out-mobile">
+      <button class="nav-link-login" onclick="navigate('login'); toggleMobileNav()">Entrar</button>
+      <button class="nav-cta" onclick="navigate('signup'); toggleMobileNav()">Criar conta</button>
+    </div>
+    <div class="nav-auth-logged-in" id="nav-logged-in-mobile" style="display:none">
+      <button class="btn btn-ghost" onclick="navigate('dashboard'); toggleMobileNav()" style="padding:7px 16px;font-size:11px">Dashboard</button>
+      <div class="nav-user-avatar" id="nav-avatar-mobile-nav" onclick="navigate('dashboard'); toggleMobileNav()" title="Minha conta">TW</div>
+    </div>
+  </div>
+</div>
 
 <!-- ============================================================ -->
 <!-- PAGES: loaded via includes below                              -->
@@ -110,6 +135,15 @@
 <script src="js/compressor.js"></script>
 
 <script>
+function toggleMobileNav() {
+  const drawer = document.getElementById('mobile-nav-drawer');
+  const overlay = document.getElementById('mobile-nav-overlay');
+  if (drawer && overlay) {
+    const isOpen = drawer.classList.toggle('open');
+    overlay.style.display = isOpen ? 'block' : 'none';
+  }
+}
+
 function toggleTheme() {
   const isLight = document.documentElement.classList.toggle('light-theme');
   localStorage.setItem('theme', isLight ? 'light' : 'dark');
