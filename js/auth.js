@@ -111,7 +111,7 @@ async function doLogin() {
 
   updateNavAuth();
   btn.disabled = false; btn.textContent = 'Entrar';
-  showToast('Bem-vindo de volta!', '👋');
+  showToast('Bem-vindo de volta!', '✓');
   navigate('dashboard');
 }
 
@@ -164,7 +164,7 @@ async function doSignup() {
   }
 
   btn.disabled = false; btn.textContent = 'Criar conta grátis';
-  showToast('Conta criada! Verifique seu e-mail.', '📧');
+  showToast('Conta criada! Verifique seu e-mail.', '✓');
   navigate('login');
 }
 
@@ -172,13 +172,13 @@ async function doLogout() {
   sessionStorage.removeItem('mock_user');
   if (window.supabase && !window.IS_DEMO) await window.supabase.auth.signOut();
   updateNavAuth();
-  showToast('Sessão encerrada.', '👋');
+  showToast('Sessão encerrada.', '✓');
   navigate('home');
 }
 
 async function oauthLogin(provider) {
   const { data, error } = await window.supabase.auth.signInWithOAuth({ provider });
-  if (error) showToast('Erro no login social: ' + error.message, '⚠');
+  if (error) showToast('Erro no login social: ' + error.message, '!');
 }
 
 async function doForgot() {
@@ -217,7 +217,7 @@ function checkPasswordStrength(val) {
   if (/[0-9]/.test(val)) score++;
   if (/[^A-Za-z0-9]/.test(val)) score++;
   const colors = ['', '#ff5e5e', '#f5a623', '#4d9fff', '#00ff88'];
-  const labels = ['', 'Muito fraca', 'Fraca', 'Boa', 'Forte 💪'];
+  const labels = ['', 'Muito fraca', 'Fraca', 'Boa', 'Forte'];
   if (bar) { bar.style.width = (score * 25) + '%'; bar.style.background = colors[score] || ''; }
   if (hint) { hint.textContent = labels[score] || 'Crie uma senha forte'; }
 }

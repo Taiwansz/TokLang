@@ -9,12 +9,12 @@
       <div class="dash-user-plan"><span class="pill pill-green" style="font-size:9px">Starter</span></div>
     </div>
     <ul class="dash-nav" id="dash-nav-mobile">
-      <li class="dash-nav-item active" onclick="showDashSection('overview',this);closeMobileMenu()"><span class="dash-nav-icon">⬛</span>Visão geral</li>
+      <li class="dash-nav-item active" onclick="showDashSection('overview',this);closeMobileMenu()"><span class="dash-nav-icon">■</span>Visão geral</li>
       <li class="dash-nav-item" onclick="showDashSection('history',this);closeMobileMenu()"><span class="dash-nav-icon">⟳</span>Histórico</li>
-      <li class="dash-nav-item" onclick="showDashSection('vocabulary',this);closeMobileMenu()"><span class="dash-nav-icon">📖</span>Vocabulário</li>
+      <li class="dash-nav-item" onclick="showDashSection('vocabulary',this);closeMobileMenu()"><span class="dash-nav-icon">◆</span>Vocabulário</li>
       <li class="dash-nav-item" onclick="showDashSection('api',this);closeMobileMenu()"><span class="dash-nav-icon">⌘</span>API &amp; SDK</li>
       <div class="dash-nav-section">Conta</div>
-      <li class="dash-nav-item" onclick="showDashSection('settings',this);closeMobileMenu()"><span class="dash-nav-icon">⚙</span>Configurações</li>
+      <li class="dash-nav-item" onclick="showDashSection('settings',this);closeMobileMenu()"><span class="dash-nav-icon">❖</span>Configurações</li>
       <li class="dash-nav-item" onclick="showDashSection('billing',this);closeMobileMenu()"><span class="dash-nav-icon">◈</span>Plano &amp; cobrança</li>
       <div style="height:1px;background:var(--border);margin:12px 16px"></div>
       <li class="dash-nav-item" onclick="navigate('app')"><span class="dash-nav-icon">↗</span>Abrir compressor</li>
@@ -37,12 +37,12 @@
         <div class="dash-user-plan"><span class="pill pill-green" style="font-size:9px">Starter</span></div>
       </div>
       <ul class="dash-nav">
-        <li class="dash-nav-item active" onclick="showDashSection('overview',this)"><span class="dash-nav-icon">⬛</span>Visão geral</li>
+        <li class="dash-nav-item active" onclick="showDashSection('overview',this)"><span class="dash-nav-icon">■</span>Visão geral</li>
         <li class="dash-nav-item" onclick="showDashSection('history',this)"><span class="dash-nav-icon">⟳</span>Histórico</li>
-        <li class="dash-nav-item" onclick="showDashSection('vocabulary',this)"><span class="dash-nav-icon">📖</span>Vocabulário</li>
+        <li class="dash-nav-item" onclick="showDashSection('vocabulary',this)"><span class="dash-nav-icon">◆</span>Vocabulário</li>
         <li class="dash-nav-item" onclick="showDashSection('api',this)"><span class="dash-nav-icon">⌘</span>API &amp; SDK</li>
         <div class="dash-nav-section">Conta</div>
-        <li class="dash-nav-item" onclick="showDashSection('settings',this)"><span class="dash-nav-icon">⚙</span>Configurações</li>
+        <li class="dash-nav-item" onclick="showDashSection('settings',this)"><span class="dash-nav-icon">❖</span>Configurações</li>
         <li class="dash-nav-item" onclick="showDashSection('billing',this)"><span class="dash-nav-icon">◈</span>Plano &amp; cobrança</li>
         <div style="height:1px;background:var(--border);margin:12px 16px"></div>
         <li class="dash-nav-item" onclick="navigate('app')"><span class="dash-nav-icon">↗</span>Abrir compressor</li>
@@ -59,7 +59,7 @@
         <div class="metrics-grid">
           <div class="metric-card"><div class="metric-label">Compressões</div><div class="metric-val">47</div><div class="metric-delta up">↑ 12 esta semana</div></div>
           <div class="metric-card"><div class="metric-label">Tokens economizados</div><div class="metric-val green">8.2K</div><div class="metric-delta up">↑ 76% média</div></div>
-          <div class="metric-card"><div class="metric-label">Economizado em $</div><div class="metric-val amber">$0.024</div><div class="metric-delta">estimativa GPT-4o</div></div>
+          <div class="metric-card"><div class="metric-label">Economizado em R$</div><div class="metric-val amber">R$ 0,12</div><div class="metric-delta">estimativa GPT-4o</div></div>
           <div class="metric-card"><div class="metric-label">Limite do plano</div><div class="metric-val">453</div><div class="metric-delta">restantes de 500</div></div>
         </div>
         <div class="usage-bar-wrap"><div class="usage-bar-label"><span>Uso mensal — Starter</span><span>47 / 500 compressões</span></div><div class="usage-bar-track"><div class="usage-bar-fill" style="width:9.4%"></div></div></div>
@@ -72,7 +72,7 @@
           <table class="history-table"><thead><tr><th>Prompt (resumo)</th><th>TokLang</th><th>Economia</th><th>Quando</th></tr></thead><tbody id="dash-recent-tbody"></tbody></table>
         </div>
         <div style="background:var(--gdim);border:1px solid rgba(0,255,136,.12);border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px">
-          <div><div style="font-size:14px;font-weight:700;margin-bottom:4px">Faça upgrade para Pro</div><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Compressões ilimitadas · API access · Analytics histórico · $19/mês</div></div>
+          <div><div style="font-size:14px;font-weight:700;margin-bottom:4px">Faça upgrade para Pro</div><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Compressões ilimitadas · API access · Analytics histórico · R$ 35/mês</div></div>
           <button class="btn btn-primary" style="white-space:nowrap;font-size:12px;padding:10px 20px" onclick="showDashSection('billing',null)">Upgrade agora →</button>
         </div>
       </div>
@@ -126,7 +126,7 @@
         <div style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Instalação rápida</div>
         <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:14px 18px;font-family:var(--mono);font-size:12px;margin-bottom:14px;line-height:1.8"><span style="color:var(--muted)"># npm</span><br><span style="color:var(--green)">npm install toklang</span><br><br><span style="color:var(--muted)"># pip</span><br><span style="color:var(--green)">pip install toklang</span></div>
         <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:14px 18px;font-family:var(--mono);font-size:12px;margin-bottom:24px;line-height:1.9"><span style="color:var(--blue)">import</span> { compress } <span style="color:var(--blue)">from</span> <span style="color:var(--green)">'toklang'</span><br><br><span style="color:var(--blue)">const</span> result = <span style="color:var(--blue)">await</span> compress(<span style="color:var(--green)">"Seu prompt aqui"</span>, {<br>&nbsp;&nbsp;apiKey: <span style="color:var(--green)">'<span id="api-key-code">tl_live_••••••••••••</span>'</span><br>})<br><br>console.log(result.compressed) <span style="color:var(--muted)">// notação TokLang</span><br>console.log(result.savings)    <span style="color:var(--muted)">// 0.74 → 74%</span></div>
-        <div style="background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius-sm);padding:12px 16px;font-family:var(--mono);font-size:11px;color:var(--amber);line-height:1.7">⚠ Plano Starter: acesso à API não incluso. <a onclick="showDashSection('billing',null)" style="cursor:pointer;text-decoration:underline">Faça upgrade para Pro</a> para habilitar acesso via API e SDK.</div>
+        <div style="background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius-sm);padding:12px 16px;font-family:var(--mono);font-size:11px;color:var(--amber);line-height:1.7">! Plano Starter: acesso à API não incluso. <a onclick="showDashSection('billing',null)" style="cursor:pointer;text-decoration:underline">Faça upgrade para Pro</a> para habilitar acesso via API e SDK.</div>
       </div>
 
       <!-- SETTINGS -->

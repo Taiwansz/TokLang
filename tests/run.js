@@ -2,10 +2,10 @@ const assert = require('assert');
 const TokLangEngine = require('../js/toklang-engine.js');
 const { TokLang, TokLangMiddleware } = require('../js/sdk-lib.js');
 
-console.log('🏁 Iniciando testes do TokLang...\n');
+console.log('[START] Iniciando testes do TokLang...\n');
 
 // 1. Testar Compilação Local (compressLocally)
-console.log('🧪 Testando Compilação Local...');
+console.log('[TEST] Testando Compilação Local...');
 try {
   // Teste 1: Prompt simples de criação em python com streamlit e visual bonito
   const p1 = "Cria um script python usando streamlit para calcular velocidade de forma bonita";
@@ -17,7 +17,7 @@ try {
   assert.ok(c1.includes('@streamlit'), 'Deve detectar streamlit (@streamlit)');
   assert.ok(c1.includes('#scr'), 'Deve detectar script (#scr)');
   assert.ok(c1.includes('ui+'), 'Deve conter modificador visual (ui+)');
-  console.log('   ✅ Teste 1 OK.');
+  console.log('   [OK] Teste 1 OK.');
 
   // Teste 2: Prompt simples de refatoração
   const p2 = "por favor consegue refatorar esse hook javascript?";
@@ -27,7 +27,7 @@ try {
   assert.ok(c2.includes('rf'), 'Deve conter ação de refatoração (rf)');
   assert.ok(c2.includes('$js'), 'Deve detectar javascript ($js)');
   assert.ok(c2.includes('#hook'), 'Deve detectar hook (#hook)');
-  console.log('   ✅ Teste 2 OK.');
+  console.log('   [OK] Teste 2 OK.');
 
   // Teste 3: Prompt com parâmetros de entrada
   const p3 = "Gere uma classe em TypeScript para gerenciar usuários. Parâmetros: nome, email, senha.";
@@ -38,20 +38,20 @@ try {
   assert.ok(c3.includes('$ts'), 'Deve detectar ts ($ts)');
   assert.ok(c3.includes('#cls'), 'Deve detectar classe (#cls)');
   assert.ok(c3.includes('in[nome,email,senha]'), 'Deve extrair os parâmetros de entrada');
-  console.log('   ✅ Teste 3 OK.');
+  console.log('   [OK] Teste 3 OK.');
 
   // Teste 4: Fallback para prompts muito longos / complexos
   const p4 = "A".repeat(300);
   const c4 = TokLangEngine.compressLocally(p4);
   assert.strictEqual(c4, null, 'Prompts longos devem retornar null (fallback para IA)');
-  console.log('   ✅ Teste 4 OK (fallback de prompts longos).');
+  console.log('   [OK] Teste 4 OK (fallback de prompts longos).');
 } catch (e) {
-  console.error('❌ Falha nos testes de Compilação Local:', e);
+  console.error('[FAIL] Falha nos testes de Compilação Local:', e);
   process.exit(1);
 }
 
 // 2. Testar Expansão Local (expand)
-console.log('\n🧪 Testando Expansão Local...');
+console.log('\n[TEST] Testando Expansão Local...');
 try {
   // Teste 5: Expansão simples
   const t5 = "cr $py @streamlit; calcular velocidade; in[distancia, tempo]; ui+";
@@ -64,7 +64,7 @@ try {
   assert.ok(e5.includes('calcular velocidade'), 'Deve reter a tarefa descritiva');
   assert.ok(e5.includes('Entradas: [distancia, tempo]'), 'Deve estruturar os parâmetros');
   assert.ok(e5.includes('com interface visual bonita e estilizada'), 'Deve expandir modificadores');
-  console.log('   ✅ Teste 5 OK.');
+  console.log('   [OK] Teste 5 OK.');
 
   // Teste 6: Expansão de refatoração e produção
   const t6 = "rf $js @express #mw; auth middleware; prd async cm";
@@ -78,7 +78,7 @@ try {
   assert.ok(e6.includes('pronto para produção'), 'Deve conter produção');
   assert.ok(e6.includes('com comentários explicativos'), 'Deve conter comentários');
   assert.ok(e6.includes('usando implementação assíncrona'), 'Deve conter async');
-  console.log('   ✅ Teste 6 OK.');
+  console.log('   [OK] Teste 6 OK.');
 
   // Teste 7: Expansão com customVocab (objeto)
   const t7 = "cr $myLang @myFW; task details; myTerm";
@@ -93,7 +93,7 @@ try {
   assert.ok(e7.includes('Minha Linguagem Especial'), 'Deve expandir linguagem customizada');
   assert.ok(e7.includes('Meu Framework Top'), 'Deve expandir framework customizado');
   assert.ok(e7.includes('definição customizada do termo'), 'Deve expandir termo customizado');
-  console.log('   ✅ Teste 7 OK.');
+  console.log('   [OK] Teste 7 OK.');
 
   // Teste 8: Compressão local com customVocab (objeto)
   const t8 = "Cria um script em Minha Linguagem Especial usando Meu Framework Top.";
@@ -103,14 +103,14 @@ try {
   assert.ok(c8.includes('cr'), 'Deve conter cr');
   assert.ok(c8.includes('$myLang'), 'Deve conter $myLang');
   assert.ok(c8.includes('@myFW'), 'Deve conter @myFW');
-  console.log('   ✅ Teste 8 OK.');
+  console.log('   [OK] Teste 8 OK.');
 } catch (e) {
-  console.error('❌ Falha nos testes de Expansão Local:', e);
+  console.error('[FAIL] Falha nos testes de Expansão Local:', e);
   process.exit(1);
 }
 
 // 3. Testar Middleware SDK
-console.log('\n🧪 Testando SDK Middleware (OpenAI)...');
+console.log('\n[TEST] Testando SDK Middleware (OpenAI)...');
 try {
   const middleware = new TokLangMiddleware({
     target: 'openai',
@@ -148,16 +148,16 @@ try {
   middleware.chat.completions.create(payload).then(response => {
     assert.strictEqual(response.choices[0].message.content, 'Mock response success');
     global.fetch = originalFetch; // restore
-    console.log('   ✅ Teste Middleware SDK OK.');
-    console.log('\n🚀 TODOS OS TESTES PASSARAM COM SUCESSO!');
+    console.log('   [OK] Teste Middleware SDK OK.');
+    console.log('\n[SUCCESS] TODOS OS TESTES PASSARAM COM SUCESSO!');
     process.exit(0);
   }).catch(e => {
     global.fetch = originalFetch;
-    console.error('❌ Falha no fluxo assíncrono do middleware:', e);
+    console.error('[FAIL] Falha no fluxo assíncrono do middleware:', e);
     process.exit(1);
   });
 
 } catch (e) {
-  console.error('❌ Falha no teste do SDK Middleware:', e);
+  console.error('[FAIL] Falha no teste do SDK Middleware:', e);
   process.exit(1);
 }

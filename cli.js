@@ -8,7 +8,7 @@ const args = process.argv.slice(2);
 
 function showHelp() {
   console.log(`
-🤖 TokLang CLI - Semantic Compression Engine
+[TokLang CLI - Semantic Compression Engine]
 
 Uso:
   toklang-cli <action> [input] [options]
@@ -38,13 +38,13 @@ const action = args[0];
 const inputArg = args[1];
 
 if (!['compress', 'expand', 'file'].includes(action)) {
-  console.error(`❌ Erro: Ação "${action}" desconhecida.`);
+  console.error(`[Erro] Ação "${action}" desconhecida.`);
   showHelp();
   process.exit(1);
 }
 
 if (!inputArg) {
-  console.error('❌ Erro: Entrada (texto ou caminho do arquivo) é obrigatória.');
+  console.error('[Erro] Entrada (texto ou caminho do arquivo) é obrigatória.');
   process.exit(1);
 }
 
@@ -56,9 +56,9 @@ if (vocabIndex !== -1 && args[vocabIndex + 1]) {
   try {
     const rawVocab = fs.readFileSync(vocabPath, 'utf8');
     customVocab = JSON.parse(rawVocab);
-    console.log(`💡 Vocabulário customizado carregado de: ${vocabPath}`);
+    console.log(`[Info] Vocabulário customizado carregado de: ${vocabPath}`);
   } catch (err) {
-    console.error(`❌ Erro ao ler o arquivo de vocabulário customizado: ${err.message}`);
+    console.error(`[Erro] Erro ao ler o arquivo de vocabulário customizado: ${err.message}`);
     process.exit(1);
   }
 }
@@ -76,10 +76,10 @@ if (action === 'compress') {
   const duration = Date.now() - start;
   
   if (res) {
-    console.log(`\n⚡ Comprimido em ${duration}ms:`);
+    console.log(`\n[OK] Comprimido em ${duration}ms:`);
     console.log(res);
   } else {
-    console.log('\n⚠️ A Engine local não pôde comprimir este prompt (tamanho ou falta de ação clara).');
+    console.log('\n[Aviso] A Engine local não pôde comprimir este prompt (tamanho ou falta de ação clara).');
   }
 } 
 else if (action === 'expand') {
@@ -87,19 +87,19 @@ else if (action === 'expand') {
   const res = TokLangEngine.expand(inputArg, customVocab);
   const duration = Date.now() - start;
   
-  console.log(`\n⚡ Expandido em ${duration}ms:`);
+  console.log(`\n[OK] Expandido em ${duration}ms:`);
   console.log(res);
 } 
 else if (action === 'file') {
   const filePath = path.resolve(inputArg);
   if (!fs.existsSync(filePath)) {
-    console.error(`❌ Erro: Arquivo não encontrado em: ${filePath}`);
+    console.error(`[Erro] Arquivo não encontrado em: ${filePath}`);
     process.exit(1);
   }
   
   try {
     const fileContent = fs.readFileSync(filePath, 'utf8');
-    console.log(`📖 Lendo arquivo: ${filePath} (${fileContent.length} caracteres)`);
+    console.log(`[Lendo] Lendo arquivo: ${filePath} (${fileContent.length} caracteres)`);
     
     const start = Date.now();
     const res = TokLangEngine.compressLocally(fileContent, customVocab);
@@ -108,16 +108,16 @@ else if (action === 'file') {
     if (res) {
       if (outputPath) {
         fs.writeFileSync(outputPath, res, 'utf8');
-        console.log(`✅ Salvo em: ${outputPath}`);
+        console.log(`[OK] Salvo em: ${outputPath}`);
       } else {
-        console.log(`\n⚡ Comprimido em ${duration}ms:`);
+        console.log(`\n[OK] Comprimido em ${duration}ms:`);
         console.log(res);
       }
     } else {
-      console.log('\n⚠️ A Engine local não pôde comprimir o conteúdo deste arquivo.');
+      console.log('\n[Aviso] A Engine local não pôde comprimir o conteúdo deste arquivo.');
     }
   } catch (err) {
-    console.error(`❌ Erro ao processar o arquivo: ${err.message}`);
+    console.error(`[Erro] Erro ao processar o arquivo: ${err.message}`);
     process.exit(1);
   }
 }
