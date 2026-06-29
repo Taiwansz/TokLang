@@ -145,6 +145,21 @@
           <div class="settings-row"><div><div class="settings-row-label">Notificações por e-mail</div><div class="settings-row-sub">Resumo semanal de uso</div></div><label class="toggle-switch"><input type="checkbox" onchange="showToast('Configuração salva','✓')"><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
           <div class="settings-row"><div><div class="settings-row-label">Alerta de limite</div><div class="settings-row-sub">Notificar ao atingir 80% do limite</div></div><label class="toggle-switch"><input type="checkbox" checked onchange="showToast('Configuração salva','✓')"><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
         </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Integrações (Plano Team)</div>
+        <div class="settings-group" style="margin-bottom:20px" id="settings-integrations-group">
+          <div class="settings-row"><div><div class="settings-row-label">Notificações Slack</div><div class="settings-row-sub">Enviar relatórios e alertas de limite para canal</div></div><label class="toggle-switch"><input type="checkbox" id="toggle-slack" onchange="toggleIntegration('Slack', this)"><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+          <div class="settings-row"><div><div class="settings-row-label">Sincronização Notion</div><div class="settings-row-sub">Salvar vocabulário compartilhado no Notion Workspace</div></div><label class="toggle-switch"><input type="checkbox" id="toggle-notion" onchange="toggleIntegration('Notion', this)"><div class="toggle-track"><div class="toggle-thumb"></div></div></label></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Webhook para Desenvolvedores (Plano Pro/Team)</div>
+        <div class="settings-group" style="margin-bottom:20px" id="settings-webhook-group">
+          <div style="padding:14px 18px;display:flex;flex-direction:column;gap:8px">
+            <label for="set-webhook-url" style="font-family:var(--mono);font-size:10px;color:var(--muted)">URL de Destino para Eventos (POST)</label>
+            <div style="display:flex;gap:8px">
+              <input type="url" id="set-webhook-url" placeholder="https://api.suaempresa.com/toklang-events" style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none">
+              <button class="btn btn-primary" onclick="saveWebhookUrl()" style="font-size:12px;padding:8px 14px">Salvar</button>
+            </div>
+          </div>
+        </div>
         <div class="danger-zone"><div class="danger-zone-title">// zona de perigo</div><div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn-danger" onclick="showToast('Dados exportados para seu e-mail','✓')">Exportar meus dados</button><button class="btn-danger" onclick="confirmDeleteAccount()">Excluir conta</button></div></div>
       </div>
 

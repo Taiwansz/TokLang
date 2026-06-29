@@ -68,6 +68,9 @@ test.describe('TokLang Web Application - E2E Tests', () => {
   });
 
   test('Billing upgrade button on dashboard triggers checkout flow', async ({ page }) => {
+    page.on('console', msg => console.log('BROWSER LOG:', msg.text()));
+    page.on('pageerror', exception => console.log('BROWSER EXCEPTION:', exception.toString()));
+
     // Let's mock a user in sessionStorage to behave as logged in
     await page.evaluate(() => {
       sessionStorage.setItem('mock_user', JSON.stringify({

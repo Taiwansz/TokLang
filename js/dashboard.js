@@ -228,6 +228,49 @@ async function initDashboard() {
   const u = await getUser();
   if (!u) { navigate('login'); return; }
 
+  // Sync integration checkboxes in settings
+  const isTeam = u && u.plan && u.plan.toLowerCase() === 'team';
+  const slackToggle = document.getElementById('toggle-slack');
+  const notionToggle = document.getElementById('toggle-notion');
+  if (slackToggle && notionToggle) {
+    slackToggle.disabled = !isTeam;
+    notionToggle.disabled = !isTeam;
+    
+    const activeIntegrations = u.integrations || {};
+    slackToggle.checked = !!activeIntegrations.slack;
+    notionToggle.checked = !!activeIntegrations.notion;
+
+    const wrapper = document.getElementById('settings-integrations-group');
+    if (wrapper) {
+      if (!isTeam) {
+        wrapper.style.opacity = '0.55';
+        wrapper.querySelectorAll('.toggle-switch').forEach(ts => ts.style.cursor = 'not-allowed');
+      } else {
+        wrapper.style.opacity = '1';
+        wrapper.querySelectorAll('.toggle-switch').forEach(ts => ts.style.cursor = 'pointer');
+      }
+    }
+  }
+
+  // Sync developer webhook in settings
+  const isStarter = !u || !u.plan || u.plan.toLowerCase() === 'starter';
+  const webhookInput = document.getElementById('set-webhook-url');
+  const webhookGroup = document.getElementById('settings-webhook-group');
+  if (webhookInput && webhookGroup) {
+    webhookInput.disabled = isStarter;
+    webhookInput.value = u.webhook_url || '';
+    const saveBtn = webhookGroup.querySelector('button');
+    if (isStarter) {
+      webhookGroup.style.opacity = '0.55';
+      webhookInput.style.cursor = 'not-allowed';
+      if (saveBtn) saveBtn.disabled = true;
+    } else {
+      webhookGroup.style.opacity = '1';
+      webhookInput.style.cursor = 'text';
+      if (saveBtn) saveBtn.disabled = false;
+    }
+  }
+
   const tbody = document.getElementById('dash-recent-tbody');
   const fh = document.getElementById('dash-full-history');
 
@@ -285,8 +328,6 @@ async function initDashboard() {
   };
 
   const avgSavingsPct = totalUsed > 0 ? (dbHistory.reduce((acc, curr) => acc + curr.savings_pct, 0) / totalUsed).toFixed(0) : '0';
-
-  const isStarter = !u || !u.plan || u.plan.toLowerCase() === 'starter';
 
   document.querySelectorAll('#dash-overview .metric-val').forEach((el, i) => {
     if (i === 0) el.textContent = totalUsed;
@@ -538,4 +579,60 @@ function openMobileMenu() {
 function closeMobileMenu() {
   document.getElementById('dash-drawer').classList.remove('open');
   document.getElementById('dash-overlay').style.display = 'none';
+}
+
+async function toggleIntegration(name, el) {
+  const u = await getUser();
+  const isTeam = u && u.plan && u.plan.toLowerCase() === 'team';
+  if (!isTeam) {
+    el.checked = false;
+    showToast('Disponível apenas no plano Team', '!');
+    return;
+  }
+  
+  const enabled = el.checked;
+  showToast(`${name} ${enabled ? 'conectado' : 'desconectado'} com sucesso!`, '✓');
+  
+  if (window.supabase && !window.IS_DEMO) {
+    const integrations = u.integrations || {};
+    integrations[name.toLowerCase()] = enabled;
+    await window.supabase.from('profiles').update({
+      integrations: integrations
+    }).eq('id', u.id);
+  } else {
+    let mock = JSON.parse(sessionStorage.getItem('mock_user') || '{}');
+    mock.integrations = mock.integrations || {};
+    mock.integrations[name.toLowerCase()] = enabled;
+    sessionStorage.setItem('mock_user', JSON.stringify(mock));
+  }
+}
+
+async function saveWebhookUrl() {
+  const u = await getUser();
+  const isStarter = !u || !u.plan || u.plan.toLowerCase() === 'starter';
+  if (isStarter) {
+    showToast('Disponível apenas nos planos Pro e Team', '!');
+    return;
+  }
+  
+  const urlEl = document.getElementById('set-webhook-url');
+  const url = urlEl ? urlEl.value.trim() : '';
+  
+  if (url && !/^https?:\/\/[^\s$.?#].[^\s]*$/i.test(url)) {
+    showToast('Insira uma URL válida', '!');
+    return;
+  }
+
+  showToast('Webhook salvo com sucesso!', '✓');
+
+  if (window.supabase && !window.IS_DEMO) {
+    await window.supabase.from('profiles').update({
+      webhook_url: url
+    }).eq('id', u.id);
+    u.webhook_url = url;
+  } else {
+    let mock = JSON.parse(sessionStorage.getItem('mock_user') || '{}');
+    mock.webhook_url = url;
+    sessionStorage.setItem('mock_user', JSON.stringify(mock));
+  }
 }

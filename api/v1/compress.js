@@ -114,6 +114,23 @@ export default async function handler(req, res) {
       savings_pct: savingsPct
     });
 
+    // 4.5 Se o usuário tiver cadastrado uma URL de Webhook, disparar o evento de forma assíncrona
+    if (profile.webhook_url) {
+      fetch(profile.webhook_url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'prompt.compressed',
+          user_id: profile.id,
+          original_text: prompt,
+          compressed_text: compressed,
+          tokens_before: tokBefore,
+          tokens_after: tokAfter,
+          savings_pct: savingsPct
+        })
+      }).catch(e => console.error('Erro ao disparar webhook do usuário:', e.message));
+    }
+
     return res.status(200).json({
       compressed,
       savings: savingsPct + '%'
