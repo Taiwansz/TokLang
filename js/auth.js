@@ -17,7 +17,8 @@ async function getUser() {
     last: u.user_metadata.last || '',
     email: u.email,
     plan: u.user_metadata.plan || 'starter',
-    apiKey: u.user_metadata.apiKey || 'tl_live_...'
+    apiKey: u.user_metadata.apiKey || 'tl_live_...',
+    avatarUrl: u.user_metadata.avatar_url || u.user_metadata.picture || null
   };
 }
 
@@ -39,6 +40,22 @@ function updateUsageUI() {
 }
 
 /* ===== NAV AUTH STATE ===== */
+function updateAvatarElement(el, initials, avatarUrl) {
+  if (!el) return;
+  if (avatarUrl) {
+    el.textContent = '';
+    el.style.backgroundImage = `url(${avatarUrl})`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+  } else {
+    el.textContent = initials;
+    el.style.backgroundImage = '';
+    el.style.backgroundSize = '';
+    el.style.backgroundPosition = '';
+  }
+}
+
+/* ===== NAV AUTH STATE ===== */
 async function updateNavAuth() {
   const u = await getUser();
   const out = document.getElementById('nav-logged-out');
@@ -55,21 +72,24 @@ async function updateNavAuth() {
     if (outMob) outMob.style.display = 'none';
     if (innMob) innMob.style.display = 'flex';
     const initials = ((u.name||'').charAt(0) + (u.last||'').charAt(0)).toUpperCase() || 'TL';
-    if (av) av.textContent = initials;
-    if (avMob) avMob.textContent = initials;
+    updateAvatarElement(av, initials, u.avatarUrl);
+    updateAvatarElement(avMob, initials, u.avatarUrl);
     syncDashUser(u);
   } else {
     if (out) out.style.display = 'flex';
     if (inn) inn.style.display = 'none';
     if (outMob) outMob.style.display = 'flex';
     if (innMob) innMob.style.display = 'none';
+    updateAvatarElement(av, '', null);
+    updateAvatarElement(avMob, '', null);
   }
 }
 
 function syncDashUser(u) {
   const initials = ((u.name||'').charAt(0) + (u.last||'').charAt(0)).toUpperCase() || 'TL';
   ['dash-avatar-txt','dash-avatar-mobile'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.textContent = initials;
+    const el = document.getElementById(id);
+    updateAvatarElement(el, initials, u.avatarUrl);
   });
   ['dash-user-name','dash-user-name-mobile'].forEach(id => {
     const el = document.getElementById(id); if (el) el.textContent = u.name || 'Usuário';
