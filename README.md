@@ -21,9 +21,12 @@
 
 ## O que é TokLang?
 
-TokLang é um **middleware de compressão semântica** que atua como intermediário invisível entre o usuário e qualquer modelo de linguagem — GPT, Claude, Gemini. Você escreve naturalmente; ele comprime automaticamente.
+TokLang é o **esbuild da compressão de prompts**. Um middleware de compressão semântica de latência zero que atua como intermediário invisível entre o usuário e qualquer modelo de linguagem (GPT, Claude, Gemini). Você escreve naturalmente; ele comprime automaticamente em tempo de execução.
 
-> O usuário nunca vê ou toca na notação comprimida. Ela opera completamente em segundo plano.
+* ⚡ **Latência Zero (<5ms):** Motor de compressão heurística local rodando inteiramente offline no cliente. Sem chamadas extras de IA.
+* 📦 **Zero Dependências:** Código 100% vanilla JavaScript, sem frameworks, com menos de 10KB de tamanho total.
+* 🔒 **Privacidade Absoluta:** O motor funciona offline. Nenhum prompt de usuário é enviado a servidores de terceiros para compactação.
+* 🔌 **Integração Invisível:** Acopla-se de forma transparente sobre os SDKs oficiais (`OpenAI`, `Anthropic`), sem que o usuário precise ver a notação.
 
 <br>
 
