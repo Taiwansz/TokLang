@@ -110,8 +110,13 @@ async function doCompress() {
   if (!u) {
     const anonymousUsage = parseInt(sessionStorage.getItem('anonymous_usage') || '0', 10);
     if (anonymousUsage >= 1) {
-      showToast('Limite de 1 compressão gratuita para visitantes atingido. Cadastre-se para continuar!', '!');
-      setTimeout(() => navigate('signup'), 1500);
+      const modal = document.getElementById('visitor-limit-modal');
+      if (modal) {
+        modal.style.display = 'flex';
+      } else {
+        showToast('Limite de 1 compressão gratuita para visitantes atingido. Cadastre-se para continuar!', '!');
+        setTimeout(() => navigate('signup'), 1500);
+      }
       return;
     }
   }
@@ -426,3 +431,10 @@ async function renderHistory() {
       </div>
     </div>`).join('');
 }
+
+window.closeVisitorModal = function() {
+  const modal = document.getElementById('visitor-limit-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+};
