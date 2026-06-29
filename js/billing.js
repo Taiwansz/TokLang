@@ -3,8 +3,8 @@
 // Mapeamento de planos para IDs de Preço do Stripe
 // VOCÊ DEVE SUBSTITUIR ESSES IDS PELOS SEUS NO PAINEL DO STRIPE
 const STRIPE_PRICES = {
-  pro: 'price_1TYyeH238tVr1DQSmKDrWSd5',
-  enterprise: 'price_1TYydo238tVr1DQSJuuDPcZ3'
+  pro: 'price_1TncHw238tVr1DQSsxeUAEOu',
+  enterprise: 'price_1TncHx238tVr1DQSOX9zHT8I'
 };
 
 async function subscribe(planName) {
