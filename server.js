@@ -84,6 +84,45 @@ app.post('/api/compress', async (req, res) => {
   const { prompt, userId } = req.body;
   if (!prompt) return res.status(400).json({ error: 'Prompt is required' });
 
+  // Enforce plan limits if Supabase admin client is initialized
+  if (supabaseAdmin && userId) {
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('plan')
+        .eq('id', userId)
+        .single();
+      
+      if (profile) {
+        const plan = (profile.plan || 'free').toLowerCase();
+        if (plan === 'free') {
+          const startOfToday = new Date();
+          startOfToday.setUTCHours(0, 0, 0, 0);
+          const { count } = await supabaseAdmin
+            .from('history')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId)
+            .gte('created_at', startOfToday.toISOString());
+          
+          if (count >= 5) {
+            return res.status(402).json({ error: 'Limite diário de 5 compressões atingido para o Plano Free. Por favor, faça um upgrade.' });
+          }
+        } else if (plan === 'starter') {
+          const { count } = await supabaseAdmin
+            .from('history')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId);
+          
+          if (count >= 500) {
+            return res.status(402).json({ error: 'Limite mensal de 500 compressões atingido para o Plano Starter. Por favor, faça um upgrade.' });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Erro ao verificar limite no banco local:', e);
+    }
+  }
+
   const targetUserId = userId || 'mock-user-id';
   const userVocab = mockVocabulary.filter(v => v.user_id === targetUserId);
 

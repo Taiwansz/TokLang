@@ -16,7 +16,7 @@ async function getUser() {
     name: u.user_metadata.name || u.email.split('@')[0],
     last: u.user_metadata.last || '',
     email: u.email,
-    plan: u.user_metadata.plan || 'starter',
+    plan: u.user_metadata.plan || 'free',
     apiKey: u.user_metadata.apiKey || 'tl_live_...',
     avatarUrl: u.user_metadata.avatar_url || u.user_metadata.picture || null
   };
@@ -26,16 +26,44 @@ async function getUser() {
 function getUsage() { return parseInt(sessionStorage.getItem(USAGE_KEY) || '0', 10); }
 function incUsage()  { const v = getUsage() + 1; sessionStorage.setItem(USAGE_KEY, v); return v; }
 
-function updateUsageUI() {
+async function updateUsageUI() {
+  const u = await getUser();
+  const plan = (u?.plan || 'free').toLowerCase();
+  
   const used = getUsage();
-  const limit = 500;
-  const pct = Math.min((used / limit) * 100, 100);
+  let limit = 500;
+  let labelSuffix = ' compressões';
+  
+  if (plan === 'free') {
+    limit = 5;
+    labelSuffix = ' compressões diárias';
+  } else if (plan === 'starter') {
+    limit = 500;
+    labelSuffix = ' compressões';
+  } else {
+    limit = Infinity;
+  }
+  
+  const pct = limit === Infinity ? 100 : Math.min((used / limit) * 100, 100);
   const el = document.getElementById('uc-used');
   const fill = document.getElementById('uc-fill');
-  if (el) el.textContent = used;
+  
+  if (el) {
+    if (limit === Infinity) {
+      el.textContent = used + ' (Ilimitado)';
+    } else {
+      el.textContent = used + ' / ' + limit + labelSuffix;
+    }
+  }
+  
   if (fill) {
-    fill.style.width = pct + '%';
-    fill.className = 'uc-fill' + (pct >= 100 ? ' full' : pct >= 80 ? ' warn' : '');
+    if (limit === Infinity) {
+      fill.style.width = '100%';
+      fill.className = 'uc-fill';
+    } else {
+      fill.style.width = pct + '%';
+      fill.className = 'uc-fill' + (pct >= 100 ? ' full' : pct >= 80 ? ' warn' : '');
+    }
   }
 }
 

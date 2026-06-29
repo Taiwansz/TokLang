@@ -253,14 +253,15 @@ async function initDashboard() {
   }
 
   // Sync developer webhook in settings
-  const isStarter = !u || !u.plan || u.plan.toLowerCase() === 'starter';
+  const plan = (u?.plan || 'free').toLowerCase();
+  const isRestricted = plan === 'free' || plan === 'starter';
   const webhookInput = document.getElementById('set-webhook-url');
   const webhookGroup = document.getElementById('settings-webhook-group');
   if (webhookInput && webhookGroup) {
-    webhookInput.disabled = isStarter;
+    webhookInput.disabled = isRestricted;
     webhookInput.value = u.webhook_url || '';
     const saveBtn = webhookGroup.querySelector('button');
-    if (isStarter) {
+    if (isRestricted) {
       webhookGroup.style.opacity = '0.55';
       webhookInput.style.cursor = 'not-allowed';
       if (saveBtn) saveBtn.disabled = true;
@@ -322,6 +323,14 @@ async function initDashboard() {
   const totalUsed = count || 0;
   const totalTokensSaved = dbHistory ? dbHistory.reduce((acc, curr) => acc + Math.max(0, curr.tokens_before - curr.tokens_after), 0) : 0;
   
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const dailyUsed = dbHistory ? dbHistory.filter(h => h.created_at.slice(0, 10) === todayStr).length : 0;
+
+  const planLower = (u?.plan || 'free').toLowerCase();
+  const isFreePlan = planLower === 'free';
+  const isStarterPlan = planLower === 'starter';
+  const isLimited = isFreePlan || isStarterPlan;
+
   const formatTokens = (v) => {
     if (v >= 1000) return (v / 1000).toFixed(1) + 'K';
     return v.toString();
@@ -333,7 +342,11 @@ async function initDashboard() {
     if (i === 0) el.textContent = totalUsed;
     if (i === 1) el.textContent = formatTokens(totalTokensSaved);
     if (i === 2) el.textContent = avgSavingsPct + '%';
-    if (i === 3) el.textContent = isStarter ? Math.max(0, 500 - totalUsed) : 'Ilimitado';
+    if (i === 3) {
+      if (isFreePlan) el.textContent = Math.max(0, 5 - dailyUsed);
+      else if (isStarterPlan) el.textContent = Math.max(0, 500 - totalUsed);
+      else el.textContent = 'Ilimitado';
+    }
   });
   
   const deltaElements = document.querySelectorAll('#dash-overview .metric-delta');
@@ -341,17 +354,23 @@ async function initDashboard() {
     deltaElements[1].innerHTML = `↑ ${avgSavingsPct}% média`;
   }
   if (deltaElements.length >= 4) {
-    deltaElements[3].textContent = isStarter ? `restantes de 500` : `plano ${u.plan.toUpperCase()}`;
+    if (isFreePlan) deltaElements[3].textContent = `restantes hoje (de 5)`;
+    else if (isStarterPlan) deltaElements[3].textContent = `restantes de 500`;
+    else deltaElements[3].textContent = `plano ${u.plan.toUpperCase()}`;
   }
 
   const usageFill = document.querySelector('#dash-overview .usage-bar-fill');
   const usageLabel = document.querySelector('#dash-overview .usage-bar-label span:last-child');
   const usageTitle = document.querySelector('#dash-overview .usage-bar-label span:first-child');
   
-  if (isStarter) {
-    if (usageFill) usageFill.style.width = Math.min(100, (totalUsed/500)*100).toFixed(1) + '%';
+  if (isFreePlan) {
+    if (usageFill) usageFill.style.width = Math.min(100, (dailyUsed / 5) * 100).toFixed(1) + '%';
+    if (usageLabel) usageLabel.textContent = dailyUsed + ' / 5 compressões diárias';
+    if (usageTitle) usageTitle.textContent = `Uso diário — Plano Free`;
+  } else if (isStarterPlan) {
+    if (usageFill) usageFill.style.width = Math.min(100, (totalUsed / 500) * 100).toFixed(1) + '%';
     if (usageLabel) usageLabel.textContent = totalUsed + ' / 500 compressões';
-    if (usageTitle) usageTitle.textContent = `Uso mensal — ${u?.plan ? u.plan.charAt(0).toUpperCase() + u.plan.slice(1) : 'Starter'}`;
+    if (usageTitle) usageTitle.textContent = `Uso mensal — Plano Starter`;
   } else {
     if (usageFill) usageFill.style.width = '100%';
     if (usageLabel) usageLabel.textContent = totalUsed + ' compressões';
@@ -609,8 +628,9 @@ async function toggleIntegration(name, el) {
 
 async function saveWebhookUrl() {
   const u = await getUser();
-  const isStarter = !u || !u.plan || u.plan.toLowerCase() === 'starter';
-  if (isStarter) {
+  const plan = (u?.plan || 'free').toLowerCase();
+  const isRestricted = plan === 'free' || plan === 'starter';
+  if (isRestricted) {
     showToast('Disponível apenas nos planos Pro e Team', '!');
     return;
   }

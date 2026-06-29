@@ -49,8 +49,21 @@ export default async function handler(req, res) {
       return res.status(403).json({ error: 'Invalid API Key' });
     }
 
-    // 2. Verificar Quota (Exemplo simples: Starter tem limite)
-    if (profile.plan === 'starter') {
+    // 2. Verificar Quota (Free/Starter têm limite)
+    const plan = (profile.plan || 'free').toLowerCase();
+    if (plan === 'free') {
+      const startOfToday = new Date();
+      startOfToday.setUTCHours(0, 0, 0, 0);
+      const { count } = await supabase
+        .from('history')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', profile.id)
+        .gte('created_at', startOfToday.toISOString());
+      
+      if (count >= 5) {
+        return res.status(402).json({ error: 'Daily quota of 5 compressions exceeded for Free plan. Please upgrade.' });
+      }
+    } else if (plan === 'starter') {
       const { count } = await supabase
         .from('history')
         .select('*', { count: 'exact', head: true })

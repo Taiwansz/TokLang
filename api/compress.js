@@ -1,3 +1,10 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 const SYSTEM_PROMPT = `Você é o motor de compressão do TokLang. Converta prompts em linguagem natural para notação TokLang comprimida.
 
 GRAMÁTICA TOKLANG:
@@ -31,6 +38,45 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Prompt is required' });
   }
 
+  // Quota enforcement based on user plan
+  const authHeader = req.headers.authorization;
+  let user = null;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
+      const token = authHeader.split(' ')[1];
+      const { data: { user: supabaseUser } } = await supabase.auth.getUser(token);
+      user = supabaseUser;
+    } catch (e) {
+      console.warn('Could not verify user token:', e.message);
+    }
+  }
+
+  if (user) {
+    const plan = (user.user_metadata?.plan || 'free').toLowerCase();
+    if (plan === 'free') {
+      const startOfToday = new Date();
+      startOfToday.setUTCHours(0, 0, 0, 0);
+      const { count } = await supabase
+        .from('history')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .gte('created_at', startOfToday.toISOString());
+      
+      if (count >= 5) {
+        return res.status(402).json({ error: 'Limite diário de 5 compressões atingido para o Plano Free. Por favor, faça um upgrade.' });
+      }
+    } else if (plan === 'starter') {
+      const { count } = await supabase
+        .from('history')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+      
+      if (count >= 500) {
+        return res.status(402).json({ error: 'Limite mensal de 500 compressões atingido para o Plano Starter. Por favor, faça um upgrade.' });
+      }
+    }
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey) {
@@ -46,7 +92,7 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307', // Using Haiku for faster/cheaper compression
+        model: 'claude-3-haiku-20240307',
         max_tokens: 120,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: prompt }]
