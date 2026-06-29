@@ -28,33 +28,40 @@ function incUsage()  { const v = getUsage() + 1; sessionStorage.setItem(USAGE_KE
 
 async function updateUsageUI() {
   const u = await getUser();
-  const plan = (u?.plan || 'free').toLowerCase();
+  const plan = u ? (u.plan || 'free').toLowerCase() : 'anonymous';
   
   const used = getUsage();
   let limit = 500;
-  let labelSuffix = ' compressões';
+  let labelText = 'Uso mensal (Starter):';
+  let valueText = '0 / 500';
   
-  if (plan === 'free') {
+  if (plan === 'anonymous') {
+    limit = 1;
+    labelText = 'Uso como Visitante:';
+    valueText = `${used} / 1`;
+  } else if (plan === 'free') {
     limit = 5;
-    labelSuffix = ' compressões diárias';
+    labelText = 'Uso diário (Free):';
+    valueText = `${used} / 5`;
   } else if (plan === 'starter') {
     limit = 500;
-    labelSuffix = ' compressões';
+    labelText = 'Uso mensal (Starter):';
+    valueText = `${used} / 500`;
   } else {
     limit = Infinity;
+    labelText = `Uso mensal (${plan.toUpperCase()}):`;
+    valueText = `${used} (Ilimitado)`;
   }
   
   const pct = limit === Infinity ? 100 : Math.min((used / limit) * 100, 100);
-  const el = document.getElementById('uc-used');
-  const fill = document.getElementById('uc-fill');
   
-  if (el) {
-    if (limit === Infinity) {
-      el.textContent = used + ' (Ilimitado)';
-    } else {
-      el.textContent = used + ' / ' + limit + labelSuffix;
-    }
-  }
+  const labelEl = document.getElementById('uc-label');
+  const valueEl = document.getElementById('uc-value');
+  const fill = document.getElementById('uc-fill');
+  const upgradeEl = document.getElementById('uc-upgrade');
+  
+  if (labelEl) labelEl.textContent = labelText;
+  if (valueEl) valueEl.textContent = valueText;
   
   if (fill) {
     if (limit === Infinity) {
@@ -63,6 +70,14 @@ async function updateUsageUI() {
     } else {
       fill.style.width = pct + '%';
       fill.className = 'uc-fill' + (pct >= 100 ? ' full' : pct >= 80 ? ' warn' : '');
+    }
+  }
+
+  if (upgradeEl) {
+    if (limit === Infinity || plan === 'anonymous') {
+      upgradeEl.style.display = 'none';
+    } else {
+      upgradeEl.style.display = 'inline-block';
     }
   }
 }

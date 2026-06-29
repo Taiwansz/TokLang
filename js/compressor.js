@@ -107,6 +107,15 @@ async function doCompress() {
   if (input.length > 16000) { showToast('Prompt muito longo. Máximo 16.000 caracteres.', '!'); return; }
 
   const u = await getUser();
+  if (!u) {
+    const anonymousUsage = parseInt(sessionStorage.getItem('anonymous_usage') || '0', 10);
+    if (anonymousUsage >= 1) {
+      showToast('Limite de 1 compressão gratuita para visitantes atingido. Cadastre-se para continuar!', '!');
+      setTimeout(() => navigate('signup'), 1500);
+      return;
+    }
+  }
+
   if (typeof loadActiveVocabulary === 'function') {
     await loadActiveVocabulary();
   }
@@ -175,6 +184,10 @@ async function doCompress() {
         time: now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
         original: input.substring(0,60)
       });
+      if (!u) {
+        const usage = parseInt(sessionStorage.getItem('anonymous_usage') || '0', 10);
+        sessionStorage.setItem('anonymous_usage', usage + 1);
+      }
       renderHistory();
       updateUsageUI();
       
@@ -262,6 +275,10 @@ async function doCompress() {
       original: input.substring(0,60)
     });
 
+    if (!u) {
+      const usage = parseInt(sessionStorage.getItem('anonymous_usage') || '0', 10);
+      sessionStorage.setItem('anonymous_usage', usage + 1);
+    }
     renderHistory();
     updateUsageUI();
 
