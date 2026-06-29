@@ -199,8 +199,15 @@ async function doCompress() {
       body: JSON.stringify({ prompt: input, userId: u ? u.id : null })
     });
     if (!res.ok) {
-      const errData = await res.json();
-      throw new Error(errData.error || 'Erro no servidor');
+      let errMsg = 'Erro no servidor';
+      try {
+        const text = await res.text();
+        const errData = JSON.parse(text);
+        errMsg = errData.error || errMsg;
+      } catch (e) {
+        errMsg = `Erro no servidor (Status ${res.status})`;
+      }
+      throw new Error(errMsg);
     }
     const data = await res.json();
     const compressed = data.compressed;
