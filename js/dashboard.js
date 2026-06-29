@@ -85,7 +85,7 @@ async function handleSaveVocab(e) {
   const definition = document.getElementById('vocab-def').value.trim();
   
   if (!term || !definition) {
-    showToast('Termo e definição são obrigatórios', '⚠');
+    showToast('Termo e definição são obrigatórios', '!');
     return;
   }
   
@@ -138,11 +138,11 @@ async function handleSaveVocab(e) {
       clearVocabForm();
       await renderVocabulary();
     } else {
-      showToast('Erro ao salvar termo: ' + errorMsg, '⚠');
+      showToast('Erro ao salvar termo: ' + errorMsg, '!');
     }
   } catch(err) {
     console.error('Save vocab error:', err);
-    showToast('Erro ao salvar termo', '⚠');
+    showToast('Erro ao salvar termo', '!');
   } finally {
     submitBtn.disabled = false;
     submitBtn.textContent = originalText;
@@ -205,10 +205,10 @@ async function deleteVocab(id) {
     }
     
     if (success) {
-      showToast('Termo excluído!', '🗑');
+      showToast('Termo excluído!', '✓');
       await renderVocabulary();
     } else {
-      showToast('Erro ao excluir termo: ' + errorMsg, '⚠');
+      showToast('Erro ao excluir termo: ' + errorMsg, '!');
       if (cardEl) {
         cardEl.style.opacity = '1';
         cardEl.style.transform = 'none';
@@ -216,7 +216,7 @@ async function deleteVocab(id) {
     }
   } catch(err) {
     console.error('Delete vocab error:', err);
-    showToast('Erro ao excluir termo', '⚠');
+    showToast('Erro ao excluir termo', '!');
     if (cardEl) {
       cardEl.style.opacity = '1';
       cardEl.style.transform = 'none';
@@ -443,7 +443,7 @@ async function toggleApiKey() {
 async function copyApiKey() {
   const u = await getUser(); if (!u) return;
   navigator.clipboard.writeText(u.apiKey).catch(()=>{});
-  showToast('Chave de API copiada!', '📋');
+  showToast('Chave de API copiada!', '✓');
 }
 
 async function rotateApiKey() {
@@ -475,14 +475,14 @@ async function rotateApiKey() {
   }
 
   if (error) {
-    showToast('Erro ao rotacionar chave: ' + error.message, '⚠');
+    showToast('Erro ao rotacionar chave: ' + error.message, '!');
     return;
   }
 
   u.apiKey = newKey;
   apiRevealed = false;
   document.getElementById('api-key-display').textContent = newKey.substring(0,8) + '••••••••••••••••••••••';
-  showToast('Chave de API rotacionada!', '🔄');
+  showToast('Chave de API rotacionada!', '✓');
 }
 
 async function editName() {
@@ -503,7 +503,7 @@ async function editName() {
     sessionStorage.setItem('mock_user', JSON.stringify(mock));
   }
     if (error) {
-      showToast('Erro ao atualizar nome: ' + error.message, '⚠');
+      showToast('Erro ao atualizar nome: ' + error.message, '!');
       return;
     }
     updateNavAuth();
@@ -516,7 +516,7 @@ async function confirmDeleteAccount() {
     // Nota: Exclusão de conta via SDK requer Edge Functions ou Admin API. 
     // Por segurança, apenas deslogamos e orientamos o usuário.
     await doLogout();
-    showToast('Para excluir permanentemente, contate o suporte.', '🗑');
+    showToast('Para excluir permanentemente, contate o suporte.', '!');
   }
 }
 

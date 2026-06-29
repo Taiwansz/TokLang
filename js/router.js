@@ -44,7 +44,7 @@ async function navigate(page) {
     return;
   }
   if (page === 'dashboard' && !(await getUser())) {
-    showToast('Faça login para acessar o dashboard', '🔒');
+    showToast('Faça login para acessar o dashboard', '!');
     navigate('login');
     return;
   }
