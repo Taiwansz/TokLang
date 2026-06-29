@@ -180,9 +180,17 @@ async function doCompress() {
   }
 
   try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (window.supabase) {
+      const { data: { session } } = await window.supabase.auth.getSession();
+      if (session && session.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+    }
+
     const res = await fetch('/api/compress', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers,
       body: JSON.stringify({ prompt: input })
     });
     if (!res.ok) {
