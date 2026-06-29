@@ -18,3 +18,10 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.local-browsers/
+
+# Environments & private configurations
+.env
+.env.local
+.env.*.local
+*.env
+
