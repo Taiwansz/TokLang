@@ -18,6 +18,14 @@ let mockVocabulary = [
   { id: 'vocab-2', user_id: 'mock-user-id', term: 'usr_db', definition: 'tabela de usuários no postgres com campos id, nome, email', created_at: new Date().toISOString() }
 ];
 
+// Config endpoint for dynamic client credentials loading
+app.get('/api/config', (req, res) => {
+  res.status(200).json({
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL || null,
+    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || null
+  });
+});
+
 // Vocabulary endpoints for local development
 app.get('/api/vocabulary', (req, res) => {
   const { userId } = req.query;

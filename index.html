@@ -191,15 +191,21 @@ document.addEventListener('DOMContentLoaded', updateThemeIcons);
 <script>
 let pagesLoaded = false;
 async function loadPages() {
+  const configPromise = typeof syncProductionConfig === 'function' ? syncProductionConfig() : Promise.resolve();
   const pages = ['home','app','docs','pricing','login','signup','forgot','dashboard'];
-  await Promise.all(pages.map(async p => {
-    try {
-      const res = await fetch('pages/' + p + '.html');
-      if (res.ok) {
-        document.getElementById('page-' + p).innerHTML = await res.text();
-      }
-    } catch(e) { console.warn('Could not load page: ' + p, e); }
-  }));
+  
+  await Promise.all([
+    configPromise,
+    ...pages.map(async p => {
+      try {
+        const res = await fetch('pages/' + p + '.html');
+        if (res.ok) {
+          document.getElementById('page-' + p).innerHTML = await res.text();
+        }
+      } catch(e) { console.warn('Could not load page: ' + p, e); }
+    })
+  ]);
+  
   pagesLoaded = true;
   // Init after all pages loaded
   initRouter();
