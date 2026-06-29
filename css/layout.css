@@ -55,9 +55,9 @@
 .nav-mobile-btn{display:none;background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px}
 
 /* ===== PAGE SYSTEM ===== */
-.page{display:none;position:relative;z-index:10;animation:pgIn .35s ease both}
+.page{display:none;position:relative;z-index:10;animation:pgIn .7s cubic-bezier(0.215, 0.61, 0.355, 1) both}
 .page.active{display:block}
-@keyframes pgIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes pgIn{from{opacity:0;transform:translateY(32px) scale(0.99)}to{opacity:1;transform:none}}
 
 /* ===== FOOTER ===== */
 footer{position:relative;z-index:10;border-top:1px solid var(--border);padding:44px 48px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}

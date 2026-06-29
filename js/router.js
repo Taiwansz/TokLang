@@ -24,6 +24,14 @@ function initReveal() {
   }, { threshold: 0.08 });
   setTimeout(() => {
     document.querySelectorAll('.reveal:not(.visible)').forEach(el => revealObserver.observe(el));
+    
+    // Animação de entrada dos blocos de texto (estilo Penguin Capital)
+    const activePage = document.querySelector('.page.active');
+    if (activePage) {
+      activePage.querySelectorAll('.text-slide-up-inner').forEach((el, idx) => {
+        setTimeout(() => el.classList.add('visible'), 100 + (idx * 150));
+      });
+    }
   }, 100);
 }
 

@@ -3,9 +3,38 @@
 @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes cursor-blink{0%,100%{opacity:1}50%{opacity:0}}
 
-/* ===== REVEAL ANIMATIONS ===== */
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .55s ease,transform .55s ease}
-.reveal.visible{opacity:1;transform:none}
-.reveal-d1{transition-delay:.08s}
-.reveal-d2{transition-delay:.16s}
-.reveal-d3{transition-delay:.24s}
+/* ===== REVEAL ANIMATIONS (PENGUIN CAPITAL STYLE) ===== */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px) scale(0.99);
+  transition: opacity 0.85s cubic-bezier(0.215, 0.61, 0.355, 1), transform 0.85s cubic-bezier(0.215, 0.61, 0.355, 1);
+  will-change: transform, opacity;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: none;
+}
+.reveal-d1 { transition-delay: .06s; }
+.reveal-d2 { transition-delay: .12s; }
+.reveal-d3 { transition-delay: .18s; }
+.reveal-d4 { transition-delay: .24s; }
+.reveal-d5 { transition-delay: .30s; }
+
+/* ===== TEXT SLIDE REVEAL ===== */
+.text-slide-up {
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: bottom;
+}
+.text-slide-up-inner {
+  display: inline-block;
+  transform: translateY(102%);
+  opacity: 0;
+  transition: transform 0.95s cubic-bezier(0.215, 0.61, 0.355, 1), opacity 0.95s cubic-bezier(0.215, 0.61, 0.355, 1);
+  will-change: transform, opacity;
+}
+.visible .text-slide-up-inner,
+.text-slide-up-inner.visible {
+  transform: translateY(0);
+  opacity: 1;
+}
