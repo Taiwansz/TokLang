@@ -198,9 +198,12 @@ async function loadPages() {
     configPromise,
     ...pages.map(async p => {
       try {
-        const res = await fetch('pages/' + p + '.html');
-        if (res.ok) {
-          document.getElementById('page-' + p).innerHTML = await res.text();
+        const container = document.getElementById('page-' + p);
+        if (container && container.innerHTML.trim() === '') {
+          const res = await fetch('pages/' + p + '.html');
+          if (res.ok) {
+            container.innerHTML = await res.text();
+          }
         }
       } catch(e) { console.warn('Could not load page: ' + p, e); }
     })

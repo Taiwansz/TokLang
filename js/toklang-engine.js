@@ -542,6 +542,81 @@ const TokLangEngine = {
       }
     }
 
+    // ============================================================
+    // PRESERVATION PHASE: Extract blocks to keep intact
+    // ============================================================
+    let preserveIndex = 0;
+    const preserves = [];
+
+    // 1. Extract Few-Shot examples (e.g. Input: ... Output: ... or Entrada: ... Saída: ...)
+    cleanText = cleanText.replace(/(?:(?:Exemplo|Example|Ex|Eg|Input|Entrada|Prompt)\b[\s\S]*?(?:Output|Response|Saída|Saida|Resultado)\b[\s\S]*?)(?=(?:\n\n|\r?\n\r?\n|$))/gi, (match) => {
+      const placeholder = `__TL_PRESERVE_${preserveIndex++}__`;
+      preserves.push(match);
+      return placeholder;
+    });
+
+    // 2. Extract Code Blocks (triple backticks and inline single backticks)
+    cleanText = cleanText.replace(/(```[\s\S]*?```|`[^`\n]+`)/g, (match) => {
+      const placeholder = `__TL_PRESERVE_${preserveIndex++}__`;
+      preserves.push(match);
+      return placeholder;
+    });
+
+    // 3. Extract JSON Blocks (brace-matching parser)
+    let bIdx = 0;
+    while (bIdx < cleanText.length) {
+      if (cleanText[bIdx] === '{' || cleanText[bIdx] === '[') {
+        const startToken = cleanText[bIdx];
+        const endToken = startToken === '{' ? '}' : ']';
+        let braceCount = 1;
+        let j = bIdx + 1;
+        let inString = false;
+        let stringChar = '';
+        
+        while (j < cleanText.length && braceCount > 0) {
+          const char = cleanText[j];
+          if (inString) {
+            if (char === stringChar && cleanText[j-1] !== '\\') {
+              inString = false;
+            }
+          } else {
+            if (char === '"' || char === "'" || char === '`') {
+              inString = true;
+              stringChar = char;
+            } else if (char === startToken) {
+              braceCount++;
+            } else if (char === endToken) {
+              braceCount--;
+            }
+          }
+          j++;
+        }
+        
+        if (braceCount === 0) {
+          const matchedBlock = cleanText.substring(bIdx, j);
+          const isStructured = matchedBlock.includes(':') || matchedBlock.includes('"') || matchedBlock.includes('\n') || (startToken === '[' && matchedBlock.includes(','));
+          const isTokLangParam = /^(in|out|err)\[/.test(cleanText.substring(Math.max(0, bIdx-4), bIdx+1));
+          if (isStructured && !isTokLangParam) {
+            const placeholder = `__TL_PRESERVE_${preserveIndex++}__`;
+            preserves.push(matchedBlock);
+            cleanText = cleanText.substring(0, bIdx) + placeholder + cleanText.substring(j);
+            bIdx += placeholder.length - 1;
+          }
+        }
+      }
+      bIdx++;
+    }
+
+    // 4. Extract Strings between quotes (longer than 2 characters)
+    cleanText = cleanText.replace(/(["'`])(?:\\.|[^\\])*?\1/g, (match) => {
+      if (match.length > 2) {
+        const placeholder = `__TL_PRESERVE_${preserveIndex++}__`;
+        preserves.push(match);
+        return placeholder;
+      }
+      return match;
+    });
+
     // Replace definitions with keys in cleanText before heuristics
     const sortedEntries = Object.entries(normalizedVocab).sort((a, b) => b[1].length - a[1].length);
     for (const [key, val] of sortedEntries) {
@@ -552,7 +627,7 @@ const TokLangEngine = {
       }
     }
     
-    // Phase 3: Increased limit from 250 to 800 chars
+    // Phase 3: Increased limit from 250 to 800 chars for the template text
     if (cleanText.length > 800) return null;
     
     // ============================================================
@@ -622,33 +697,33 @@ const TokLangEngine = {
     if (customLangMatch) {
       langToken = customLangMatch[0];
     } else {
-    const langPatterns = [
-      [/\b(python|py)\b/i, '$py'],
-      [/\b(javascript|js)\b/i, '$js'],
-      [/\b(node\.?js|nodejs)\b/i, '$js'],
-      [/\b(typescript|ts)\b/i, '$ts'],
-      [/\bsql\b/i, '$sql'],
-      [/\b(golang|go\b(?!ogle))/i, '$go'],
-      [/\b(rust|\.rs)\b/i, '$rs'],
-      [/\b(shell|bash|\.sh)\b/i, '$sh'],
-      [/\bcss\b/i, '$css'],
-      [/\bjava\b(?!script)/i, '$java'],
-      [/\b(ruby|rb)\b/i, '$rb'],
-      [/\b(c#|csharp|c sharp)\b/i, '$cs'],
-      [/\b(c\+\+|cpp)\b/i, '$cpp'],
-      [/\bphp\b/i, '$php'],
-      [/\b(kotlin|kt)\b/i, '$kt'],
-      [/\bswift\b/i, '$swift'],
-      [/\b(dart)\b/i, '$dart'],
-      [/\b(elixir)\b/i, '$ex'],
-      [/\bscala\b/i, '$scala'],
-      [/\blua\b/i, '$lua'],
-      [/\bzig\b/i, '$zig'],
-      [/\bhtml\b/i, '$html'],
-    ];
-    for (const [pat, tok] of langPatterns) {
-      if (pat.test(textLower)) { langToken = tok; break; }
-    }
+      const langPatterns = [
+        [/\b(python|py)\b/i, '$py'],
+        [/\b(javascript|js)\b/i, '$js'],
+        [/\b(node\.?js|nodejs)\b/i, '$js'],
+        [/\b(typescript|ts)\b/i, '$ts'],
+        [/\bsql\b/i, '$sql'],
+        [/\b(golang|go\b(?!ogle))/i, '$go'],
+        [/\b(rust|\.rs)\b/i, '$rs'],
+        [/\b(shell|bash|\.sh)\b/i, '$sh'],
+        [/\bcss\b/i, '$css'],
+        [/\bjava\b(?!script)/i, '$java'],
+        [/\b(ruby|rb)\b/i, '$rb'],
+        [/\b(c#|csharp|c sharp)\b/i, '$cs'],
+        [/\b(c\+\+|cpp)\b/i, '$cpp'],
+        [/\bphp\b/i, '$php'],
+        [/\b(kotlin|kt)\b/i, '$kt'],
+        [/\bswift\b/i, '$swift'],
+        [/\b(dart)\b/i, '$dart'],
+        [/\b(elixir)\b/i, '$ex'],
+        [/\bscala\b/i, '$scala'],
+        [/\blua\b/i, '$lua'],
+        [/\bzig\b/i, '$zig'],
+        [/\bhtml\b/i, '$html'],
+      ];
+      for (const [pat, tok] of langPatterns) {
+        if (pat.test(textLower)) { langToken = tok; break; }
+      }
     }
 
     // ============================================================
@@ -740,13 +815,13 @@ const TokLangEngine = {
       structureToken = customStructMatch[0];
     } else {
       if (/\b(fun[cç][aã]o|funcoes|fun[cç][oõ]es|function)\b/.test(textLower)) structureToken = '#fn';
-    else if (/\b(classe|class)\b/.test(textLower)) structureToken = '#cls';
-    else if (/\bscript\b/.test(textLower)) structureToken = '#scr';
-    else if (/\b(api|rest|endpoint)\b/.test(textLower)) structureToken = '#api';
-    else if (/\b(componente|component)\b/.test(textLower)) structureToken = '#comp';
-    else if (/\bhook\b/.test(textLower)) structureToken = '#hook';
-    else if (/\b(m[oó]dulo|module)\b/.test(textLower)) structureToken = '#mod';
-    else if (/\bmiddleware\b/.test(textLower)) structureToken = '#mw';
+      else if (/\b(classe|class)\b/.test(textLower)) structureToken = '#cls';
+      else if (/\bscript\b/.test(textLower)) structureToken = '#scr';
+      else if (/\b(api|rest|endpoint)\b/.test(textLower)) structureToken = '#api';
+      else if (/\b(componente|component)\b/.test(textLower)) structureToken = '#comp';
+      else if (/\bhook\b/.test(textLower)) structureToken = '#hook';
+      else if (/\b(m[oó]dulo|module)\b/.test(textLower)) structureToken = '#mod';
+      else if (/\bmiddleware\b/.test(textLower)) structureToken = '#mw';
     }
 
     // ============================================================
@@ -912,6 +987,11 @@ const TokLangEngine = {
     const words = cleanText.split(/\s+/);
     const taskWords = [];
     for (const word of words) {
+      if (word.includes('__TL_PRESERVE_')) {
+        taskWords.push(word);
+        continue;
+      }
+
       // Skip technical tokens starting with $, @, or #
       if (/^[^a-zA-Z0-9À-ÿ]*[\$@#]/.test(word)) continue;
       
@@ -923,8 +1003,19 @@ const TokLangEngine = {
       taskWords.push(abbreviateWord(clean));
     }
 
-    // Keep max 8 meaningful words for the task
-    let taskPart = taskWords.slice(0, 8).join(' ');
+    // Keep all __TL_PRESERVE_ placeholders intact, but limit normal words to 8
+    let nonPreserveCount = 0;
+    const finalTaskWords = [];
+    for (const w of taskWords) {
+      if (w.includes('__TL_PRESERVE_')) {
+        finalTaskWords.push(w);
+      } else if (nonPreserveCount < 8) {
+        finalTaskWords.push(w);
+        nonPreserveCount++;
+      }
+    }
+    
+    let taskPart = finalTaskWords.join(' ');
     // Clean up remaining artifacts
     taskPart = taskPart.replace(/^[,;.\-\s]+|[,;.\-\s]+$/g, '').trim();
     if (!taskPart) taskPart = 'tarefa';
@@ -946,6 +1037,11 @@ const TokLangEngine = {
     if (outputsPart) result += '; ' + outputsPart;
     if (errorsPart) result += '; ' + errorsPart;
     if (uniqueModifiers.length > 0) result += '; ' + uniqueModifiers.join(' ');
+
+    // Restore preserved blocks
+    for (let pIdx = 0; pIdx < preserves.length; pIdx++) {
+      result = result.replace(`__TL_PRESERVE_${pIdx}__`, preserves[pIdx]);
+    }
 
     return result;
   }

@@ -32,6 +32,14 @@ test.describe('TokLang Engine - Unit Tests', () => {
     expect(compressed).toContain('in[nome,email,senha]');
   });
 
+  test('compressLocally - preserves code, JSON, and strings intact', () => {
+    const prompt = 'Cria uma função em python:\n```python\ndef add(x, y):\n    return x + y\n```\ncom o JSON {"status": "ok"} e a string "minha_tag".';
+    const compressed = TokLangEngine.compressLocally(prompt);
+    expect(compressed).toContain('def add(x, y):');
+    expect(compressed).toContain('{"status": "ok"}');
+    expect(compressed).toContain('"minha_tag"');
+  });
+
   test('expand - simple TokLang shorthand', () => {
     const shorthand = "cr $py @streamlit; calcular velocidade; in[distancia, tempo]; ui+";
     const expanded = TokLangEngine.expand(shorthand);

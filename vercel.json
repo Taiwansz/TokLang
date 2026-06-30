@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/css/(.*)", "destination": "/css/$1" },
+    { "source": "/js/(.*)", "destination": "/js/$1" },
+    { "source": "/assets/(.*)", "destination": "/assets/$1" },
+    { "source": "/pages/(.*)", "destination": "/pages/$1" },
+    { "source": "/home", "destination": "/api/render" },
+    { "source": "/app", "destination": "/api/render" },
+    { "source": "/docs", "destination": "/api/render" },
+    { "source": "/pricing", "destination": "/api/render" },
+    { "source": "/login", "destination": "/api/render" },
+    { "source": "/signup", "destination": "/api/render" },
+    { "source": "/forgot", "destination": "/api/render" },
+    { "source": "/dashboard", "destination": "/api/render" },
+    { "source": "/", "destination": "/api/render" }
+  ]
+}

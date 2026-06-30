@@ -17,8 +17,96 @@ const PORT = process.env.PORT || 5500;
 app.use(cors());
 app.use(express.json());
 
+const fs = require('fs');
+
 // Serve static files
 app.use(express.static(path.join(__dirname, '.')));
+
+// Server-Side Rendering (SSR) for SEO-friendly pages
+const METADATA = {
+  home: {
+    title: 'TokLang — Comprima. Comunique. Economize.',
+    description: 'Middleware inteligente que comprime seus prompts de IA automaticamente. Escreva normalmente em português ou inglês e economize até 85% em tokens.',
+  },
+  app: {
+    title: 'TokLang — Área do Compressor',
+    description: 'Comprima seus prompts de IA e converta-os em notação compacta de forma rápida. Otimize seus custos de API com GPT-4, Claude e Gemini.',
+  },
+  docs: {
+    title: 'Documentação do TokLang — Guia e Referência',
+    description: 'Aprenda a usar a gramática TokLang, integrar nossa API e SDKs (Python, JS) em seu pipeline e economizar no consumo de tokens.',
+  },
+  pricing: {
+    title: 'Nossos Planos e Preços — TokLang',
+    description: 'Planos flexíveis a partir de R$ 10. Economize em suas chamadas de LLM com compressão de prompts TokLang.',
+  },
+  login: {
+    title: 'Entrar — TokLang',
+    description: 'Acesse sua conta do TokLang para gerenciar seus planos, chaves de API e visualizar suas métricas de consumo.',
+  },
+  signup: {
+    title: 'Criar Conta — TokLang',
+    description: 'Cadastre-se gratuitamente no TokLang e comece a economizar até 85% de tokens em suas chamadas de inteligência artificial.',
+  },
+  forgot: {
+    title: 'Recuperar Senha — TokLang',
+    description: 'Recupere o acesso à sua conta do TokLang de forma rápida e segura.',
+  },
+  dashboard: {
+    title: 'Dashboard — TokLang',
+    description: 'Visualize suas estatísticas de uso de compressão de prompts, gerencie sua assinatura e configure integrações.',
+  }
+};
+
+const ssrRoutes = ['/', '/home', '/app', '/docs', '/pricing', '/login', '/signup', '/forgot', '/dashboard'];
+
+app.get(ssrRoutes, (req, res) => {
+  let pageName = req.path.replace(/^\//, '').toLowerCase() || 'home';
+  if (!METADATA[pageName]) {
+    pageName = 'home';
+  }
+  
+  try {
+    const indexPath = path.join(__dirname, 'index.html');
+    let indexHtml = fs.readFileSync(indexPath, 'utf8');
+
+    const pages = ['home', 'app', 'docs', 'pricing', 'login', 'signup', 'forgot', 'dashboard'];
+    for (const p of pages) {
+      const pagePath = path.join(__dirname, 'pages', `${p}.html`);
+      if (fs.existsSync(pagePath)) {
+        const pageHtml = fs.readFileSync(pagePath, 'utf8');
+        const placeholder = `<div id="page-${p}" class="page"></div>`;
+        const activeClass = p === pageName ? ' active' : '';
+        const replacement = `<div id="page-${p}" class="page${activeClass}">${pageHtml}</div>`;
+        indexHtml = indexHtml.replace(placeholder, replacement);
+      }
+    }
+
+    const meta = METADATA[pageName];
+    indexHtml = indexHtml.replace(/<title>.*?<\/title>/gi, `<title>${meta.title}</title>`);
+    indexHtml = indexHtml.replace(/<meta\s+name="description"\s+content=".*?"\s*\/?>/gi, `<meta name="description" content="${meta.description}">`);
+    indexHtml = indexHtml.replace(/<meta\s+property="og:title"\s+content=".*?"\s*\/?>/gi, `<meta property="og:title" content="${meta.title}">`);
+    indexHtml = indexHtml.replace(/<meta\s+property="og:description"\s+content=".*?"\s*\/?>/gi, `<meta property="og:description" content="${meta.description}">`);
+
+    const scriptSyncHash = `
+    <script>
+      (function() {
+        window.__SSR_PAGE__ = "${pageName}";
+        if (window.location.hash.replace('#','') !== "${pageName}") {
+          window.location.hash = "${pageName}";
+        }
+      })();
+    </script>
+    `;
+    indexHtml = indexHtml.replace('</body>', `${scriptSyncHash}</body>`);
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(indexHtml);
+  } catch (err) {
+    console.error('Local SSR Error:', err);
+    res.status(500).send('Error rendering page: ' + err.message);
+  }
+});
 
 // Local mock database for custom vocabulary
 let mockVocabulary = [
@@ -202,6 +290,33 @@ RETORNE APENAS a notação TokLang em uma única linha. Sem explicação, sem ma
     return res.status(200).json({ compressed: data.content[0].text.trim() });
   } catch (err) {
     return res.status(500).json({ error: err.message });
+  }
+});
+
+// Endpoint for official token counting
+app.post('/api/tokenize', (req, res) => {
+  const { prompt, model } = req.body;
+  if (!prompt) return res.status(200).json({ tokens: 0 });
+
+  let encodingName = "cl100k_base";
+  if (model === 'gpt-4o') {
+    encodingName = "o200k_base";
+  } else if (model === 'claude' || model === 'gemini') {
+    encodingName = "cl100k_base";
+  } else if (model === 'llama' || model === 'deepseek') {
+    // Llama 3/DeepSeek BPE is very close to cl100k_base/o200k_base in length
+    encodingName = "cl100k_base";
+  }
+
+  try {
+    const { getEncoding } = require("js-tiktoken");
+    const enc = getEncoding(encodingName);
+    const tokens = enc.encode(prompt).length;
+    return res.status(200).json({ tokens });
+  } catch (e) {
+    console.error("Tokenization error:", e.message);
+    const fallbackTokens = Math.max(1, Math.round(prompt.length / 4));
+    return res.status(200).json({ tokens: fallbackTokens });
   }
 });
 

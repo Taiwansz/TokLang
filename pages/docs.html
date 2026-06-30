@@ -7,6 +7,7 @@
         <a class="dns-link active" href="#doc-intro" onclick="scrollToDoc('doc-intro',this)">O que é TokLang</a>
         <a class="dns-link" href="#doc-quickstart" onclick="scrollToDoc('doc-quickstart',this)">Quickstart</a>
         <a class="dns-link" href="#doc-how" onclick="scrollToDoc('doc-how',this)">Como funciona</a>
+        <a class="dns-link" href="#doc-caching" onclick="scrollToDoc('doc-caching',this)">vs. Prompt Caching</a>
       </div>
       <div class="docs-nav-section">
         <div class="dns-title">Gramática</div>
@@ -46,6 +47,46 @@
         <p>O pipeline completo tem quatro etapas:</p>
         <div class="code-block"><span class="c-muted">1.</span> <span class="c-green">INPUT</span>   → prompt natural do usuário<br><span class="c-muted">2.</span> <span class="c-amber">COMPRESS</span> → motor TokLang → notação comprimida<br><span class="c-muted">3.</span> <span class="c-blue">EXPAND</span>  → expansor → linguagem natural limpa<br><span class="c-muted">4.</span> <span class="c-green">OUTPUT</span>  → enviado ao modelo de destino</div>
         <p>A etapa 3 garante que o modelo nunca receba a notação TokLang — apenas um prompt limpo e preciso em linguagem natural.</p>
+      </div>
+
+      <div id="doc-caching">
+        <h2>TokLang vs. Prompt Caching</h2>
+        <p>Provedores de LLM como Anthropic (Claude), OpenAI e Google (Gemini) já oferecem <em>Prompt Caching</em> nativo para reduzir custos de prompts repetidos. Então, quando o TokLang realmente compensa?</p>
+        
+        <div class="callout" style="border-left-color: var(--blue);">
+          <strong>Diferença fundamental:</strong> Prompt Caching otimiza a <em>repetição exata</em> do contexto (estático). O TokLang otimiza o <em>conteúdo variável</em> (dinâmico) de cada chamada individual.
+        </div>
+
+        <table class="token-table">
+          <tr><th>Recurso</th><th>Prompt Caching Nativo</th><th>TokLang Middleware</th></tr>
+          <tr>
+            <td><strong>Escopo da Otimização</strong></td>
+            <td>Apenas prefixos estáticos idênticos (ex: system prompt longo, base de conhecimento).</td>
+            <td>Qualquer prompt individual dinâmico, independente de ser inédito ou repetido.</td>
+          </tr>
+          <tr>
+            <td><strong>Tamanho Mínimo</strong></td>
+            <td>Exige prompts muito longos para ativar (geralmente &gt; 1024 ou 2048 tokens).</td>
+            <td>Sem tamanho mínimo. Funciona e economiza mesmo em prompts de 15 tokens.</td>
+          </tr>
+          <tr>
+            <td><strong>TTL / Expiração</strong></td>
+            <td>O cache expira rapidamente (5 a 10 minutos de inatividade) e você paga o preço cheio na recriação.</td>
+            <td>Permanente. A economia é aplicada diretamente na transmissão, sem depender de estado ou tempo.</td>
+          </tr>
+          <tr>
+            <td><strong>Agnóstico a Provedores</strong></td>
+            <td>Não. Cada provedor tem sua regra, sintaxe de cabeçalho e limites de API diferentes.</td>
+            <td>Sim. A compressão acontece no seu backend antes de ir para qualquer provedor (OpenAI, Claude, etc).</td>
+          </tr>
+        </table>
+
+        <h3>Quando usar cada um?</h3>
+        <ul>
+          <li><strong>Use Prompt Caching Nativo quando:</strong> você tem uma base de dados de contexto estática enorme (ex: um livro de 100k tokens ou documentação completa da empresa) que é enviada repetidamente por vários usuários seguidos a cada poucos minutos.</li>
+          <li><strong>Use TokLang quando:</strong> seus usuários enviam perguntas dinâmicas e variadas de tamanhos pequeno a médio, onde cada chamada possui instruções, saudações, códigos específicos e termos variados, ou quando você deseja economizar em 100% das requisições de forma constante e previsível.</li>
+          <li><strong>Use Ambos combinados:</strong> O TokLang pode comprimir o system prompt estático (que é armazenado em cache no provedor pelo menor preço possível) E comprimir o input variável de cada usuário, proporcionando a <strong>máxima eficiência de custo possível</strong> na arquitetura de IA.</li>
+        </ul>
       </div>
 
       <div id="doc-syntax">

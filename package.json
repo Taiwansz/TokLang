@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "NODE_ENV=test node tests/run.js && NODE_ENV=test npx playwright test"
+    "test": "NODE_ENV=test node tests/run.js && NODE_ENV=test npx playwright test",
+    "compare": "node tests/compare_quality.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.20.0",
@@ -16,6 +17,7 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "js-tiktoken": "^1.0.21",
     "resend": "^6.16.0",
     "stripe": "^14.0.0",
     "ws": "^8.21.0"

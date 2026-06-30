@@ -45,6 +45,16 @@ try {
   const c4 = TokLangEngine.compressLocally(p4);
   assert.strictEqual(c4, null, 'Prompts longos devem retornar null (fallback para IA)');
   console.log('   [OK] Teste 4 OK (fallback de prompts longos).');
+
+  // Teste 4b: Preservação de blocos de código, JSON e strings
+  const p4b = 'Cria uma função em python:\n```python\ndef add(x, y):\n    return x + y\n```\ncom o JSON {"status": "ok"} e a string "minha_tag".';
+  const c4b = TokLangEngine.compressLocally(p4b);
+  console.log('   Input: ', p4b);
+  console.log('   Output:', c4b);
+  assert.ok(c4b.includes('def add(x, y):'), 'Deve preservar o bloco de código python intacto');
+  assert.ok(c4b.includes('{"status": "ok"}'), 'Deve preservar o JSON intacto');
+  assert.ok(c4b.includes('"minha_tag"'), 'Deve preservar a string intacta');
+  console.log('   [OK] Teste 4b OK (preservação de blocos).');
 } catch (e) {
   console.error('[FAIL] Falha nos testes de Compilação Local:', e);
   process.exit(1);
