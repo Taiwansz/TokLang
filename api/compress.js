@@ -1,5 +1,31 @@
 import { createClient } from '@supabase/supabase-js';
 
+// ── Helper: dispara notificação por e-mail (fire-and-forget) ─────────────────
+async function fireEmailAlert({ type, user, used, limit }) {
+  try {
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000';
+    await fetch(`${baseUrl}/api/send-email`, {
+      method:  'POST',
+      headers: {
+        'Content-Type':         'application/json',
+        'x-toklang-internal':   process.env.INTERNAL_API_SECRET || '',
+      },
+      body: JSON.stringify({
+        type,
+        to:    user.email,
+        name:  user.user_metadata?.name || user.email.split('@')[0],
+        plan:  (user.user_metadata?.plan || 'free').toLowerCase(),
+        used,
+        limit,
+      }),
+    });
+  } catch (e) {
+    console.warn('[compress] Email alert failed (non-blocking):', e.message);
+  }
+}
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -53,6 +79,7 @@ export default async function handler(req, res) {
 
   if (user) {
     const plan = (user.user_metadata?.plan || 'free').toLowerCase();
+
     if (plan === 'free') {
       const startOfToday = new Date();
       startOfToday.setUTCHours(0, 0, 0, 0);
@@ -61,18 +88,32 @@ export default async function handler(req, res) {
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
         .gte('created_at', startOfToday.toISOString());
-      
-      if (count >= 5) {
+
+      const LIMIT = 5;
+      if (count >= LIMIT) {
+        // Alerta de 100% atingido
+        fireEmailAlert({ type: 'usage_alert', user, used: count, limit: LIMIT });
         return res.status(402).json({ error: 'Limite diário de 5 compressões atingido para o Plano Free. Por favor, faça um upgrade.' });
       }
+      // Alerta de 80% (dispara na 4ª compressão de 5)
+      if (count + 1 >= Math.floor(LIMIT * 0.8)) {
+        fireEmailAlert({ type: 'usage_alert', user, used: count + 1, limit: LIMIT });
+      }
+
     } else if (plan === 'starter') {
       const { count } = await supabase
         .from('history')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id);
-      
-      if (count >= 500) {
+
+      const LIMIT = 500;
+      if (count >= LIMIT) {
+        fireEmailAlert({ type: 'usage_alert', user, used: count, limit: LIMIT });
         return res.status(402).json({ error: 'Limite mensal de 500 compressões atingido para o Plano Starter. Por favor, faça um upgrade.' });
+      }
+      // Alerta de 80% (na 400ª compressão)
+      if (count + 1 >= Math.floor(LIMIT * 0.8)) {
+        fireEmailAlert({ type: 'usage_alert', user, used: count + 1, limit: LIMIT });
       }
     }
   }
