@@ -257,8 +257,9 @@ export default async function handler(req, res) {
   }
 
   try {
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'TokLang <notificacoes@toklang.dev>';
     const { data, error } = await resend.emails.send({
-      from:    'TokLang <notificacoes@toklang.dev>',
+      from:    fromEmail,
       to:      [to],
       subject: template.subject,
       html:    template.html,
