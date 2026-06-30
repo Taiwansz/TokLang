@@ -118,35 +118,38 @@ export default async function handler(req, res) {
     }
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.NVIDIA_API_KEY;
 
   if (!apiKey) {
-    return res.status(500).json({ error: 'Anthropic API Key not configured on server' });
+    return res.status(500).json({ error: 'NVIDIA API Key not configured on server' });
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 120,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: prompt }]
+        model:       'deepseek-ai/deepseek-v4-flash',
+        max_tokens:  150,
+        temperature: 0.1,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user',   content: prompt }
+        ]
       })
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error?.message || 'Error from Anthropic API');
+      throw new Error(errorData.detail || errorData.message || 'Error from NVIDIA API');
     }
 
     const data = await response.json();
-    const compressed = data.content[0].text.trim();
+    const compressed = (data.choices?.[0]?.message?.content || '').trim()
+      .replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 
     return res.status(200).json({ compressed });
   } catch (error) {

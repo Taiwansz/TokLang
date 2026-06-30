@@ -86,24 +86,27 @@ export default async function handler(req, res) {
       systemPrompt += `\n\nVocê também tem acesso ao seguinte VOCABULÁRIO CUSTOMIZADO do usuário. Sempre que o prompt se referir a uma destas definições, substitua-a pelo respectivo termo comprimido correspondente:\n${vocabString}`;
     }
 
-    // 3. Chamar a IA (Anthropic)
-    const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    // 3. Chamar a IA (NVIDIA DeepSeek)
+    const aiResponse = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 120,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: prompt }]
+        model:       'deepseek-ai/deepseek-v4-flash',
+        max_tokens:  150,
+        temperature: 0.1,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: prompt }
+        ]
       })
     });
 
     const aiData = await aiResponse.json();
-    const compressed = aiData.content[0].text.trim();
+    const compressed = ((aiData.choices?.[0]?.message?.content) || '').trim()
+      .replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
 
     const countTokens = (t) => {
       if (!t || !t.trim()) return 0;
