@@ -20,7 +20,6 @@
   .cta-box{padding:36px 24px}
   .metrics-grid{grid-template-columns:1fr}
   .dash-main{padding:20px}
-  .demo-grid{grid-template-columns:1fr !important}
   
   /* Safe table wrapping on mobile viewports */
   .token-table {
