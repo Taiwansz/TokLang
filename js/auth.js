@@ -245,9 +245,22 @@ async function doSignup() {
     return;
   }
 
-  btn.disabled = false; btn.textContent = 'Criar conta grátis';
-  showToast('Conta criada! Verifique seu e-mail.', '✓');
-  navigate('login');
+  btn.disabled = false; btn.textContent = 'Criar conta';
+
+  // Show email verification panel instead of redirecting to login
+  const formStep    = document.getElementById('signup-form-step');
+  const successStep = document.getElementById('signup-success-step');
+  const emailText   = document.getElementById('success-email-text');
+
+  if (successStep) {
+    if (emailText) emailText.textContent = email;
+    if (formStep) formStep.style.display = 'none';
+    successStep.style.display = 'block';
+  } else {
+    // Fallback: redirect to login if HTML panel not found
+    showToast('Conta criada! Verifique seu e-mail.', '✓');
+    navigate('login');
+  }
 }
 
 async function doLogout() {
