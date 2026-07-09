@@ -1,300 +1,201 @@
-<p align="center">
-  <img src="assets/banner.svg" alt="TokLang Banner" width="100%"/>
-</p>
+# TokLang
 
-<p align="center">
-  <img src="https://img.shields.io/badge/status-beta-00ff88?style=flat-square&labelColor=0d1117" alt="Status"/>
-  <img src="https://img.shields.io/badge/tokens_saved-85%25-00ff88?style=flat-square&labelColor=0d1117" alt="Savings"/>
-  <img src="https://img.shields.io/badge/dependencies-zero-00ff88?style=flat-square&labelColor=0d1117" alt="Dependencies"/>
-  <img src="https://img.shields.io/badge/license-MIT-666?style=flat-square&labelColor=0d1117" alt="License"/>
-</p>
-
-<p align="center">
-  <code>prompt natural → motor TokLang → até 85% menos tokens → mesma qualidade</code>
-</p>
-
-<br>
+> **The Semantic Prompt Compression Middleware for the AI Era**
+> *Reduce LLM token consumption by up to 85% with zero dependencies, zero latency, and absolute privacy.*
 
 ---
 
-<br>
-
-## O que é TokLang?
-
-TokLang é o **esbuild da compressão de prompts**. Um middleware de compressão semântica de latência zero que atua como intermediário invisível entre o usuário e qualquer modelo de linguagem (GPT, Claude, Gemini). Você escreve naturalmente; ele comprime automaticamente em tempo de execução.
-
-* ⚡ **Latência Zero (<5ms):** Motor de compressão heurística local rodando inteiramente offline no cliente. Sem chamadas extras de IA.
-* 📦 **Zero Dependências:** Código 100% vanilla JavaScript, sem frameworks, com menos de 10KB de tamanho total.
-* 🔒 **Privacidade Absoluta:** O motor funciona offline. Nenhum prompt de usuário é enviado a servidores de terceiros para compactação.
-* 🔌 **Integração Invisível:** Acopla-se de forma transparente sobre os SDKs oficiais (`OpenAI`, `Anthropic`), sem que o usuário precise ver a notação.
-
-<br>
-
-<p align="center">
-  <img src="assets/preview.png" alt="TokLang Preview" width="90%" style="border-radius: 12px;"/>
-</p>
-
-<br>
+[![Status: Active Development](https://img.shields.io/badge/Status-Active%20Development-brightgreen.svg?style=flat-square&labelColor=0d1117)]()
+[![Version: 0.2.0-beta](https://img.shields.io/badge/Version-0.2.0--beta-orange.svg?style=flat-square&labelColor=0d1117)]()
+[![Philosophy: Zero-Dependencies](https://img.shields.io/badge/Philosophy-Zero--Dependencies-purple.svg?style=flat-square&labelColor=0d1117)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square&labelColor=0d1117)](LICENSE)
 
 ---
 
-<br>
+## What is TokLang?
 
-## Como funciona
+TokLang is a semantic prompt compression middleware designed to run locally with zero latency. It acts as an intermediary layer between human input and Large Language Models, compressing natural language prompts into high-density tokens in real time. 
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                                                                     │
-│   ANTES (34 tokens)                                                 │
-│   "Bom dia! Por favor faça um código python que use streamlit       │
-│    como interface para calcular a velocidade de um objeto"          │
-│                                                                     │
-│                          ┌──────────┐                               │
-│                          │ TokLang  │                               │
-│                          │  Engine  │                               │
-│                          └────┬─────┘                               │
-│                               │                                     │
-│                               ▼                                     │
-│                                                                     │
-│   DEPOIS (8 tokens)                                                 │
-│   cr $py @streamlit; calc velocidade; in[dist,t,a]; ui+             │
-│                                                                     │
-│   ─────────────────────────────────────────────────────             │
-│   ▸ economia: 76%  ▸  26 tokens eliminados por chamada              │
-│   ▸ em 10K chamadas/dia = ~260K tokens/dia economizados             │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
-```
-
-### Pipeline completo
-
-```
-  ① INPUT          ② COMPRESS         ③ EXPAND           ④ OUTPUT
-╭──────────╮    ╭──────────────╮    ╭──────────────╮    ╭──────────╮
-│  Prompt  │ ─→ │   Motor      │ ─→ │  Expansor    │ ─→ │  Modelo  │
-│  natural │    │   TokLang    │    │  → NL limpo  │    │  de IA   │
-╰──────────╯    ╰──────────────╯    ╰──────────────╯    ╰──────────╯
-```
-
-<br>
+Where other compression tools rely on external APIs or heavy machine learning models, TokLang uses a lightweight, client-side heuristic engine. It processes prompts in less than 5 milliseconds, preserving full semantic meaning while stripping away redundant linguistic structures.
 
 ---
 
-<br>
+## The Problem TokLang Solves
 
-## Gramática TokLang
+Modern AI-native applications suffer from token inflation. Natural language prompts are highly redundant, containing up to 80% filler words that do not contribute to the model output. This redundancy increases API costs, limits the context window available for actual data, and increases response latency.
 
-```
-AÇÃO  $LANG  @FRAMEWORK  #ESTRUTURA;  tarefa;  in[params];  modificadores
-```
+TokLang optimizes this process by applying semantic compression rules at the client level:
 
-<table>
-  <tr>
-    <td>
-
-**Ações**
-| Token | Significado |
-|-------|------------|
-| `cr` | Criar |
-| `fix` | Corrigir bug |
-| `ex` | Explicar |
-| `rf` | Refatorar |
-| `op` | Otimizar |
-| `tst` | Testes |
-| `doc` | Documentar |
-| `cv` | Converter |
-
-</td>
-<td>
-
-**Linguagens** `$`
-| Token | Linguagem |
-|-------|-----------|
-| `$py` | Python |
-| `$js` | JavaScript |
-| `$ts` | TypeScript |
-| `$go` | Go |
-| `$rs` | Rust |
-| `$sql` | SQL |
-| `$sh` | Shell |
-| `$java` | Java |
-
-</td>
-<td>
-
-**Frameworks** `@`
-| Token | Framework |
-|-------|-----------|
-| `@streamlit` | Streamlit |
-| `@fastapi` | FastAPI |
-| `@react` | React |
-| `@next` | Next.js |
-| `@express` | Express |
-| `@prisma` | Prisma |
-| `@pandas` | Pandas |
-| `@jest` | Jest |
-
-</td>
-  </tr>
-</table>
-
-**Modificadores:** `ui+` visual bonito · `prd` produção · `cm` comentários · `typ` tipagem · `async` assíncrono · `*` máxima qualidade
-
-<br>
+| Problem | Consequence | TokLang Solution |
+|---------|-------------|------------------|
+| **Redundant Language** | High API token consumption and increased bills | Strips grammatical noise to reduce context size by up to 85% |
+| **Network Latency** | External compression APIs add hundreds of milliseconds | Local execution engine compiles prompts in under 5ms |
+| **Data Leakage** | Sending prompts to third-party compressors compromises privacy | 100% offline client-side compression prevents data exposure |
+| **Integration Overhead** | Complex code updates are required to modify prompt pipelines | Transparent middleware wrapper attaches directly to official SDKs |
 
 ---
 
-<br>
+## Architecture Overview
 
-## Exemplos reais
+The following diagram illustrates how TokLang processes, compresses, and delivers prompts without external round-trips:
 
-```diff
-# Exemplo 1 — App Python com UI
-- "Bom dia! Por favor faça um código python que use streamlit como interface
--  para ficar bonitinho podendo calcular a velocidade de um objeto"
-+ cr $py @streamlit; calc velocidade; in[dist,t,a]; ui+
-# 34 tokens → 8 tokens (−76%)
+```mermaid
+flowchart TD
+    classDef layerFill fill:#0f0f0f,stroke:#00ff88,stroke-width:2px,color:#fff;
+    classDef nodeFill fill:#1a1a1a,stroke:#333,stroke-width:1px,color:#ddd;
+    classDef highlight fill:#1f1f1f,stroke:#10B981,stroke-width:2px,color:#fff;
 
-# Exemplo 2 — API REST completa
-- "Preciso de uma API REST completa em Node.js com Express para gerenciar
--  usuários, com operações CRUD. Os campos são nome, email e role.
--  Trate os erros 404 e 422. Código pronto para produção."
-+ cr $js @express; #api CRUD users; in[name,email,role]; err[404,422]; prd
-# 47 tokens → 14 tokens (−71%)
+    subgraph InputLayer ["INPUT LAYER"]
+        UserPrompt["Natural Language Prompt"]
+        SDKWrapper["SDK Wrapper (OpenAI / Anthropic)"]
+    end
 
-# Exemplo 3 — Explicação didática
-- "Você pode me explicar o conceito de closures em JavaScript de forma
--  bem didática? Seria ótimo ter exemplos práticos também"
-+ ex $js; closures; dk cm
-# 28 tokens → 5 tokens (−82%)
+    subgraph CompressionLayer ["COMPRESSION ENGINE"]
+        TokenParser["Lexical Tokenizer"]
+        HeuristicRules["Heuristic Compression Rules"]
+        SemanticMapper["Semantic Code Generator"]
+    end
+
+    subgraph StorageLayer ["LOCAL STATE & PERSISTENCE"]
+        LocalCache["Local Storage Cache"]
+        CustomGrammar["User Ruleset"]
+    end
+
+    subgraph DeliveryLayer ["DELIVERY LAYER"]
+        CompressedPrompt["Compressed Token Prompt"]
+        LLMAPI["LLM Endpoint (GPT, Claude, Gemini)"]
+    end
+
+    %% Flows
+    UserPrompt --> SDKWrapper
+    SDKWrapper --> TokenParser
+    TokenParser --> HeuristicRules
+    HeuristicRules --> SemanticMapper
+    CustomGrammar --> HeuristicRules
+    SemanticMapper --> LocalCache
+    SemanticMapper --> CompressedPrompt
+    CompressedPrompt --> LLMAPI
+
+    %% Styles
+    class InputLayer,CompressionLayer,StorageLayer,DeliveryLayer layerFill;
+    class UserPrompt,SDKWrapper,TokenParser,HeuristicRules,SemanticMapper,LocalCache,CustomGrammar,CompressedPrompt,LLMAPI nodeFill;
+    class HeuristicRules,SemanticMapper highlight;
 ```
-
-<br>
 
 ---
 
-<br>
+## Core Capabilities
 
-## Executar localmente
+TokLang operates through four key modules:
 
-```bash
-# Clonar
-git clone https://github.com/Taiwansz/TokLang.git
-cd TokLang
+### 1. Lexical Tokenizer
+The entry point of the compression engine. It parses natural language inputs, identifies key actions, target programming languages, framework keywords, and extracts parameters.
 
-# Iniciar servidor local
-python -m http.server 5500
+### 2. Heuristic Rules Engine
+The core compiler. It applies semantic compression rules to translate identified keywords into shortcodes. It translates standard verbs like "create an app in Python using Streamlit" into compressed semantic instructions (`cr $py @streamlit`), eliminating grammatical overhead.
 
-# Abrir no navegador → http://localhost:5500
-```
+### 3. Local Cache Manager
+The persistence layer. It stores compression ratios, execution metrics, and history in local storage. This allows users to track token savings and analyze compression performance over time.
 
-> **Por que um servidor?** O projeto usa `fetch()` para carregar páginas como partials. Navegadores bloqueiam `fetch()` em `file://` por CORS.
-
-<br>
+### 4. Custom Grammar Compiler
+Allows developers to extend TokLang's default vocabulary. You can define custom shortcodes, mapping company-specific frameworks, databases, or API structures to lightweight tokens.
 
 ---
 
-<br>
+## Technology Philosophy
 
-## Estrutura do projeto
+The architecture of TokLang rests on three commitments:
+
+### 1. Zero Dependency Mandate
+TokLang is built with vanilla JavaScript. It uses no external frameworks or libraries, keeping the bundle size under 10KB. This ensures it can be integrated into any web app, serverless function, or browser extension without bloated dependencies.
+
+### 2. Client-Side Sovereignty
+Data privacy is absolute. The compression engine runs locally in the client browser or application process. No prompts are ever sent to external servers for compression, guaranteeing zero data exposure.
+
+### 3. Latency Minimization
+Execution time must be negligible. By utilizing fast heuristic mapping rather than neural networks for prompt reduction, TokLang achieves compression times under 5ms, ensuring it does not become a bottleneck in the application lifecycle.
+
+---
+
+## Repository Structure
 
 ```
 TokLang/
-│
-├── index.html                  ← Shell SPA (carrega partials via fetch)
-│
-├── css/
-│   ├── variables.css           ← Design tokens
-│   ├── animations.css          ← Keyframes e scroll reveal
-│   ├── layout.css              ← Nav, footer, page system
-│   ├── components.css          ← Badges, buttons, toasts
-│   ├── responsive.css          ← Media queries
-│   └── pages/                  ← Estilos por página
+├── index.html                  # Single Page Application entry point
+├── vercel.json                 # Vercel deployment configuration
+├── css/                        # Modular style sheets
+│   ├── variables.css           # Design tokens and theme colors
+│   ├── animations.css          # Keyframes and scroll transitions
+│   ├── layout.css              # Structural styles (navigation, footer)
+│   ├── components.css          # UI components (buttons, badges)
+│   ├── responsive.css          # Mobile responsiveness
+│   └── pages/                  # Page-specific styles
 │       ├── home.css
 │       ├── app.css
-│       ├── docs.css
-│       ├── pricing.css
-│       ├── auth.css
 │       └── dashboard.css
-│
-├── js/
-│   ├── router.js               ← SPA router + scroll reveal
-│   ├── auth.js                 ← Autenticação e sessão
-│   ├── compressor.js           ← Motor de compressão + API
-│   ├── dashboard.js            ← Métricas + charts
-│   └── init.js                 ← Bootstrap
-│
-└── pages/                      ← HTML partials
-    ├── home.html               ← Landing
-    ├── app.html                ← Compressor
-    ├── docs.html               ← Documentação
-    ├── pricing.html            ← Planos
-    ├── login.html              ← Login
-    ├── signup.html             ← Cadastro
-    ├── forgot.html             ← Recuperar senha
-    └── dashboard.html          ← Painel
+├── js/                         # Logic files
+│   ├── router.js               # Client-side router
+│   ├── auth.js                 # Authentication and session state
+│   ├── compressor.js           # Core compression engine
+│   ├── dashboard.js            # Metrics and statistics charts
+│   └── init.js                 # App bootloader
+└── pages/                      # HTML templates
+    ├── home.html               # Landing page view
+    ├── app.html                # Interative compressor view
+    ├── docs.html               # Developer documentation
+    └── dashboard.html          # Performance analytics view
 ```
 
-<br>
-
 ---
 
-<br>
+## Getting Started
 
-## Stack
+To install and run TokLang locally:
 
-<table>
-  <tr>
-    <td align="center" width="140">
-      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" width="40"/><br>
-      <sub><b>HTML5</b></sub><br>
-      <sub>Semântico</sub>
-    </td>
-    <td align="center" width="140">
-      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/css3/css3-original.svg" width="40"/><br>
-      <sub><b>CSS3</b></sub><br>
-      <sub>Custom Props · Grid</sub>
-    </td>
-    <td align="center" width="140">
-      <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/javascript/javascript-original.svg" width="40"/><br>
-      <sub><b>JavaScript</b></sub><br>
-      <sub>ES6+ · Fetch API</sub>
-    </td>
-    <td align="center" width="140">
-      <strong>0</strong><br>
-      <sub><b>Dependências</b></sub><br>
-      <sub>Zero frameworks</sub>
-    </td>
-  </tr>
-</table>
+### 1. Clone the repository
+```bash
+git clone https://github.com/Taiwansz/TokLang.git
+cd TokLang
+```
 
-<br>
+### 2. Start a local server
+Because TokLang loads HTML pages dynamically using the Fetch API, a local web server is required to avoid CORS blocking on `file://` URLs.
+```bash
+python -m http.server 5500
+```
+
+### 3. Access the application
+Open your web browser and navigate to:
+```
+http://localhost:5500
+```
 
 ---
-
-<br>
 
 ## Roadmap
 
-| Status | Feature | Descrição |
-|--------|---------|-----------|
-| ✅ | Motor de compressão | Compressão semântica via NLP com economia de 65–85% |
-| ✅ | Interface web | SPA completa com compressor, docs, pricing e dashboard |
-| ✅ | Dashboard analytics | Métricas de uso, histórico e gerenciamento de API keys |
-| 🔧 | Backend API | Servidor proxy para chamadas seguras ao modelo |
-| 🔧 | Autenticação | JWT + bcrypt + verificação de e-mail |
-| 🔧 | Persistência | Prisma + PostgreSQL para dados de usuário |
-| 📋 | SDK npm | `npm install toklang` — integração programática |
-| 📋 | Extensão de navegador | Compressão automática em ChatGPT, Claude, etc. |
-| 📋 | CI/CD | Pipeline de deploy com Vite + testes automatizados |
-
-<br>
+| Milestone | Target | Description |
+|-----------|--------|-------------|
+| **Core Engine** | Completed | NLP compression engine with 65-85% token reduction |
+| **Web Interface** | Completed | SPA with interactive compressor, docs, and dashboard |
+| **Analytics Panel** | Completed | Usage charts, savings tracking, and API key management |
+| **Backend Proxy** | In Progress | Secure proxy server for routing model requests |
+| **Auth System** | In Progress | JWT authentication with email validation |
+| **Database Sync** | In Progress | PostgreSQL integration via Prisma |
+| **NPM SDK** | Planned | Programmatic integration via `npm install toklang` |
+| **Browser Extension** | Planned | Auto-compression extension for ChatGPT, Claude, and Gemini |
 
 ---
 
-<br>
+## Research Foundation
 
-<p align="center">
-  <sub>Feito com obsessão por tokens</sub><br>
-  <sub>MIT © 2026 TokLang</sub>
-</p>
+TokLang is built upon concepts in information theory and tokenization optimization:
+
+* **Entropy of Language:** Natural language has high redundancy. Claude Shannon's research indicates that English prose is over 50% redundant, a factor that TokLang exploits to strip syntactic noise.
+* **Prompt Engineering Limits:** Modern LLMs allocate attention based on token position and frequency. Compressing prompts increases the density of key directives, improving focus and reducing the likelihood of hallucination on long instructions.
+
+---
+
+## License
+
+Released under the [MIT License](LICENSE).
