@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" fill="none">
+  <defs>
+    <style>
+      .mono-kicker {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 14px;
+        letter-spacing: 3px;
+        fill: #D8B46A;
+        font-weight: 600;
+      }
+      .brand-title {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-size: 64px;
+        font-weight: 800;
+        fill: #F5F1E8;
+        letter-spacing: -0.5px;
+      }
+      .brand-desc {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-size: 22px;
+        fill: #8E929E;
+        line-height: 32px;
+      }
+      .spec-label {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 13px;
+        fill: #D8B46A;
+        letter-spacing: 1.5px;
+        font-weight: 600;
+      }
+      .spec-val {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-size: 15px;
+        fill: #F5F1E8;
+        font-weight: 500;
+      }
+      .chip-text {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 13px;
+        fill: #C2C6D1;
+      }
+    </style>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="1280" height="640" fill="#0D0E12" />
+  <rect x="1" y="1" width="1278" height="638" stroke="#1D2028" stroke-width="2" />
+
+  <!-- Accent Vertical Pillar -->
+  <rect x="80" y="90" width="4" height="460" rx="2" fill="#D8B46A" />
+
+  <!-- Monogram Mark (Top Right) -->
+  <g transform="translate(1120, 90)">
+    <rect width="80" height="80" rx="8" fill="#14161E" stroke="#252936" stroke-width="1.5" />
+    <text x="40" y="54" font-family="-apple-system, sans-serif" font-size="28" fill="#D8B46A" font-weight="800" text-anchor="middle">TL</text>
+  </g>
+
+  <!-- Content Block -->
+  <g transform="translate(115, 140)">
+    <!-- Kicker -->
+    <text x="0" y="0" class="mono-kicker">MIDDLEWARE DE COMPRESSÃO SEMÂNTICA // LLM TOKEN OPTIMIZATION</text>
+
+    <!-- Title -->
+    <text x="0" y="65" class="brand-title">TOKLANG</text>
+
+    <!-- Description -->
+    <text x="0" y="115" class="brand-desc">Compressor heurístico de contexto para LLMs. Elimina redundâncias gramaticais</text>
+    <text x="0" y="148" class="brand-desc">no client-side com latência sub-5ms antes do envio para APIs de inferência.</text>
+
+    <!-- Technical Specs Box -->
+    <g transform="translate(0, 195)">
+      <rect width="820" height="85" rx="6" fill="#13151D" stroke="#222633" stroke-width="1" />
+      <text x="24" y="34" class="spec-label">EFICIÊNCIA DE RUNTIME &amp; CONTRATO SEMÂNTICO</text>
+      <text x="24" y="62" class="spec-val">Otimização de custos de inferência com preservação invariante de intenção e parâmetros.</text>
+    </g>
+
+    <!-- Tech Stack Chips -->
+    <g transform="translate(0, 315)">
+      <text x="0" y="24" class="chip-text">STACK: JavaScript &#183; Node.js &#183; VS Code Extension &#183; Python SDK &#183; Vercel</text>
+    </g>
+  </g>
+</svg>
