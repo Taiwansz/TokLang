@@ -2,160 +2,73 @@ const { test, expect } = require('@playwright/test');
 const TokLangEngine = require('../js/toklang-engine.js');
 const { TokLang, TokLangMiddleware } = require('../js/sdk-lib.js');
 
-test.describe('TokLang Engine - Unit Tests', () => {
-  
-  test('compressLocally - simple prompt', () => {
-    const prompt = "Cria um script python usando streamlit para calcular velocidade de forma bonita";
-    const compressed = TokLangEngine.compressLocally(prompt);
-    expect(compressed).toContain('cr');
-    expect(compressed).toContain('$py');
-    expect(compressed).toContain('@streamlit');
-    expect(compressed).toContain('#scr');
-    expect(compressed).toContain('ui+');
+test.describe('TokLang v2 Engine & SDK - Unit Tests', () => {
+  test('compile balanced preserves negations and never emits consonant skeletons', () => {
+    const prompt = 'Bom dia! Por favor cria um script python usando streamlit para calcular velocidade sem banco de dados.';
+    const res = TokLangEngine.compile(prompt, { mode: 'balanced' });
+    expect(res.tokensAfter).toBeLessThanOrEqual(res.tokensBefore);
+    expect(res.text.toLowerCase()).toContain('velocidade');
+    expect(res.text.toLowerCase()).toContain('sem');
+    expect(res.audit.negationsPreservedRatio).toBe(1);
   });
 
-  test('compressLocally - fallback for long prompts', () => {
-    const longPrompt = 'A'.repeat(300);
-    const compressed = TokLangEngine.compressLocally(longPrompt);
-    expect(compressed).toBeNull();
+  test('compile notation keeps clean words and preserves negations', () => {
+    const prompt = 'Cria um script python usando streamlit para calcular velocidade sem ORM de forma bonita';
+    const res = TokLangEngine.compile(prompt, { mode: 'notation' });
+    expect(res.text).toContain('cr');
+    expect(res.text).toContain('$py');
+    expect(res.text).toContain('@streamlit');
+    expect(res.text).toContain('velocidade');
+    expect(res.text.toLowerCase()).toContain('sem');
   });
 
-  test('compressLocally - empty/invalid inputs', () => {
-    expect(TokLangEngine.compressLocally('')).toBe('');
-    expect(TokLangEngine.compressLocally(null)).toBe('');
-    expect(TokLangEngine.compressLocally(undefined)).toBe('');
+  test('long RAG documents compile offline under hard BPE budget', () => {
+    const longPrompt = Array.from({ length: 12 }, (_, i) => `Nota ${i}: controle administrativo generico.`).join('\n\n')
+      + '\n\nRegra critica Raft: quorum exige floor(N/2)+1 nos e nunca permite escrita sem lider.';
+    const res = TokLangEngine.compile(longPrompt, { mode: 'balanced', query: 'quorum Raft', maxTokens: 80 });
+    expect(res.tokensAfter).toBeLessThanOrEqual(80);
+    expect(res.text).toContain('floor(N/2)+1');
   });
 
-  test('compressLocally - extraction of parameters', () => {
-    const prompt = "Gere uma classe em TypeScript para gerenciar usuários. Parâmetros: nome, email, senha.";
-    const compressed = TokLangEngine.compressLocally(prompt);
-    expect(compressed).toContain('in[nome,email,senha]');
-  });
-
-  test('compressLocally - preserves code, JSON, and strings intact', () => {
-    const prompt = 'Cria uma função em python:\n```python\ndef add(x, y):\n    return x + y\n```\ncom o JSON {"status": "ok"} e a string "minha_tag".';
-    const compressed = TokLangEngine.compressLocally(prompt);
-    expect(compressed).toContain('def add(x, y):');
-    expect(compressed).toContain('{"status": "ok"}');
-    expect(compressed).toContain('"minha_tag"');
-  });
-
-  test('expand - simple TokLang shorthand', () => {
-    const shorthand = "cr $py @streamlit; calcular velocidade; in[distancia, tempo]; ui+";
-    const expanded = TokLangEngine.expand(shorthand);
-    expect(expanded).toContain('Crie');
-    expect(expanded).toContain('Python');
-    expect(expanded).toContain('Streamlit');
-    expect(expanded).toContain('calcular velocidade');
-    expect(expanded).toContain('Entradas: [distancia, tempo]');
-    expect(expanded).toContain('com interface visual bonita e estilizada');
-  });
-
-  test('expand - empty/invalid inputs', () => {
-    expect(TokLangEngine.expand('')).toBe('');
-    expect(TokLangEngine.expand(null)).toBe('');
-    expect(TokLangEngine.expand(undefined)).toBe('');
-  });
-
-  test('expand - with customVocab object mapping', () => {
-    const shorthand = "cr $myLang @myFW; task details; myTerm";
-    const customVocab = {
-      "$myLang": "Minha Linguagem Especial",
-      "@myFW": "Meu Framework Top",
-      "myTerm": "definição customizada do termo"
-    };
-    const expanded = TokLangEngine.expand(shorthand, customVocab);
-    expect(expanded).toContain('Crie');
-    expect(expanded).toContain('Minha Linguagem Especial');
-    expect(expanded).toContain('Meu Framework Top');
-    expect(expanded).toContain('definição customizada do termo');
-  });
-
-  test('expand - with customVocab array mapping', () => {
-    const shorthand = "cr $myLang @myFW; task details; myTerm";
-    const customVocab = [
-      { key: "$myLang", value: "Minha Linguagem Especial" },
-      { term: "@myFW", definition: "Meu Framework Top" },
-      { word: "myTerm", expanded: "definição customizada do termo" }
-    ];
-    const expanded = TokLangEngine.expand(shorthand, customVocab);
-    expect(expanded).toContain('Crie');
-    expect(expanded).toContain('Minha Linguagem Especial');
-    expect(expanded).toContain('Meu Framework Top');
-    expect(expanded).toContain('definição customizada do termo');
-  });
-
-  test('compressLocally - with customVocab definitions', () => {
-    const prompt = "Cria um script em Minha Linguagem Especial usando Meu Framework Top.";
-    const customVocab = {
-      "$myLang": "Minha Linguagem Especial",
-      "@myFW": "Meu Framework Top"
-    };
-    const compressed = TokLangEngine.compressLocally(prompt, customVocab);
-    expect(compressed).toContain('cr');
-    expect(compressed).toContain('$myLang');
-    expect(compressed).toContain('@myFW');
-  });
-});
-
-test.describe('TokLang SDK & Middleware - Unit Tests', () => {
-
-  test('TokLang client - throws without API key', () => {
-    expect(() => new TokLang()).toThrow('TokLang API Key is required');
-  });
-
-  test('TokLang client - offline compress falls back to local engine', async () => {
-    const client = new TokLang('mock-key');
-    const prompt = "Cria um script python usando streamlit para calcular velocidade de forma bonita";
-    const result = await client.compress(prompt);
-    expect(result.compressed).toContain('cr');
-    expect(result.savings).toBeDefined();
-  });
-
-  test('TokLang client - expand using customVocab', () => {
-    const client = new TokLang('mock-key', {
-      customVocab: { "$myLang": "Minha Linguagem Especial" }
-    });
-    const expanded = client.expand("cr $myLang");
-    expect(expanded).toContain('Minha Linguagem Especial');
-  });
-
-  test('TokLangMiddleware - intercepts OpenAI request and compresses content', async () => {
-    const middleware = new TokLangMiddleware({
-      target: 'openai',
-      apiKey: 'mock-key',
-      tokLangKey: 'mock-tok-key'
-    });
-
+  test('lossless tabular codec roundtrips bit-for-bit', () => {
     const payload = {
-      model: 'gpt-4o',
-      messages: [
-        { role: 'user', content: 'Cria uma função em python de forma bonita.' }
-      ]
+      users: [
+        { id: 1, name: 'Alice', role: 'admin', active: true },
+        { id: 2, name: 'Bob', role: 'user', active: false },
+        { id: 3, name: 'Carol', role: 'staff', active: true },
+      ],
     };
+    const encoded = TokLangEngine.encodeStructured(payload);
+    expect(encoded).toContain('@table users[3]{');
+    expect(TokLangEngine.decodeStructured(encoded)).toEqual(payload);
+  });
 
+  test('CAPC middleware preserves static prefix hash and compresses dynamic turns', async () => {
+    const middleware = new TokLangMiddleware({ target: 'openai', apiKey: 'mock-key', mode: 'balanced' });
     const originalFetch = global.fetch;
-    let interceptedPrompt = null;
+    let intercepted = null;
     global.fetch = async (url, options) => {
-      if (url === 'https://api.openai.com/v1/chat/completions') {
-        const body = JSON.parse(options.body);
-        interceptedPrompt = body.messages[0].content;
-        return {
-          ok: true,
-          json: async () => ({ choices: [{ message: { role: 'assistant', content: 'Mock response success' } }] })
-        };
-      }
-      return { ok: false };
+      intercepted = JSON.parse(options.body);
+      return { ok: true, json: async () => ({ choices: [{ message: { role: 'assistant', content: 'ok' } }] }) };
     };
-
     try {
-      const response = await middleware.chat.completions.create(payload);
-      expect(response.choices[0].message.content).toBe('Mock response success');
-      expect(interceptedPrompt).toContain('cr');
-      expect(interceptedPrompt).toContain('$py');
-      expect(interceptedPrompt).toContain('ui+');
+      await middleware.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          { role: 'system', content: 'Regras de seguranca: nunca exponha chaves.' },
+          { role: 'user', content: 'Ola! Por favor gere uma funcao Python sem dependencias.' },
+        ],
+      });
+      expect(intercepted.messages[1].content.toLowerCase()).toContain('sem');
+      expect(middleware.lastReport.cache.prefixHash.length).toBe(64);
     } finally {
       global.fetch = originalFetch;
     }
+  });
+
+  test('TokLang client requires API key only when remote or requireApiKey is enabled', () => {
+    expect(() => new TokLang(null, { requireApiKey: true })).toThrow('TokLang API Key is required');
+    const localClient = new TokLang();
+    expect(localClient.expand('cr $py @streamlit; calcular velocidade; ui+')).toContain('Python');
   });
 });

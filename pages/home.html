@@ -1,309 +1,306 @@
-<!-- PAGE: HOME -->
-
-  <!-- HERO -->
-  <div class="hero">
-    <div class="badge hero-badge">
-      <div class="badge-dot"></div>Acesso antecipado — beta aberto
+<!-- PAGE: HOME — TOKLANG v2.0 INDUSTRIAL POP SWISS LAB -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="eyebrow-meta hero-eyebrow">
+      <span class="eyebrow-dot"></span>
+      <span>TokLang v2.0 &middot; BPE-Verified &middot; CAPC Architecture</span>
     </div>
     <h1 class="hero-title">
-      <span class="text-slide-up"><span class="text-slide-up-inner" style="transition-delay: 0.1s">Fale mais.</span></span><br>
-      <span class="text-slide-up"><span class="text-slide-up-inner" style="transition-delay: 0.25s">Gaste <em>menos</em>.</span></span>
+      Comprima contexto.<br>
+      Preserve <em>lógica e cache</em>.
     </h1>
     <p class="hero-sub">
-      TokLang é um <strong>middleware invisível</strong> entre você e qualquer IA.<br>
-      Você escreve naturalmente. Ele comprime automaticamente.<br>
-      Até 85% menos tokens. Zero mudança de comportamento.
+      Compilador determinístico para pipelines de LLMs. Compacta payloads <strong>JSON/MCP em tabelas lossless reversíveis</strong>, poda contextos RAG por relevância BM25 e protege prefixos estáticos de <strong>Prompt Caching</strong> sem chamar modelos externos.
     </p>
-
-    <div class="terminal">
-      <div class="term-bar">
-        <div class="term-dot td-r"></div>
-        <div class="term-dot td-y"></div>
-        <div class="term-dot td-g"></div>
-        <span class="term-title">toklang · compression engine v1.0</span>
-      </div>
-      <div class="term-body">
-        <div class="tl"><span class="tp">input</span><span class="tc" style="color:var(--muted)">"Bom dia! Por favor
-            faça um código python que use streamlit como interface para calcular a velocidade de um objeto"</span></div>
-        <div class="tsp"></div>
-        <div class="tl"><span class="to">→ removendo saudações e cortesias...</span></div>
-        <div class="tl"><span class="to">→ identificando linguagem: Python · framework: Streamlit...</span></div>
-        <div class="tl"><span class="to">→ extraindo tarefa e parâmetros...</span></div>
-        <div class="tsp"></div>
-        <div class="tl"><span class="tp">✓</span><span class="tc" style="color:var(--green);font-weight:700">cr $py
-            @streamlit; calc velocidade; ui+</span></div>
-        <div class="tsp"></div>
-        <div class="tl"><span class="ts-amber"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:4px;"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> 34 tokens → 8 tokens · economia de 76%</span></div>
-      </div>
-    </div>
     <div class="hero-ctas">
-      <button class="btn btn-primary btn-lg" onclick="navigate('app')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="4 14 10 14 10 20" />
-          <polyline points="20 10 14 10 14 4" />
-          <line x1="14" y1="10" x2="21" y2="3" />
-          <line x1="3" y1="21" x2="10" y2="14" />
-        </svg>
-        Testar agora — grátis
-      </button>
-      <button class="btn btn-ghost btn-lg" onclick="navigate('docs')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-        </svg>
-        Ver documentação
-      </button>
+      <button class="btn btn-primary btn-lg" onclick="navigate('app')">Abrir Workbench v2</button>
+      <button class="btn btn-ghost btn-lg" onclick="navigate('docs')">Ler Especificação</button>
+    </div>
+    <div class="hero-invariants">
+      <span class="inv-item"><span class="inv-mark"></span>Monotonicidade BPE 100%</span>
+      <span class="inv-item"><span class="inv-mark"></span>Polarity &amp; Negation Lock</span>
+      <span class="inv-item"><span class="inv-mark"></span>Offline em p95 6,35 ms</span>
     </div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-bar">
-    <div class="stat-block reveal">
-      <div class="stat-num" id="stat-1">85%</div>
-      <div class="stat-lbl">menos tokens</div>
+  <div class="hero-instrument">
+    <div class="inst-bar">
+      <span class="inst-title">toklang compile --mode lossless --encoding o200k_base</span>
+      <span class="inst-tag">Reversível 100%</span>
     </div>
-    <div class="stat-block reveal reveal-d1">
-      <div class="stat-num" id="stat-2">3×</div>
-      <div class="stat-lbl">mais rápido</div>
+    <div class="inst-body">
+      <div class="inst-block">
+        <div class="inst-block-head">
+          <span>Entrada bruta (JSON / Tool output, 25 registros)</span>
+          <span class="tabular">1.610 tokens BPE</span>
+        </div>
+        <div class="inst-code">{
+  "users": [
+    { "id": 1001, "name": "Engineer_1", "team": "ml-platform", "role": "staff", "active": true },
+    { "id": 1002, "name": "Engineer_2", "team": "core-infra", "role": "senior", "active": true }
+  ]
+}</div>
+      </div>
+      <div class="inst-block after">
+        <div class="inst-block-head">
+          <span>Saída TokLang v2 (@table schema-hoisted)</span>
+          <span class="tabular">645 tokens BPE (-59,9%)</span>
+        </div>
+        <div class="inst-code">@table users[25]{id,name,email,team,role,active,monthly_tokens}:
+1001|Engineer_1|eng1@acme.dev|ml-platform|staff|true|120000
+1002|Engineer_2|eng2@acme.dev|core-infra|senior|true|127500</div>
+      </div>
     </div>
-    <div class="stat-block reveal reveal-d2">
-      <div class="stat-num" style="font-size:14px;padding-top:6px">GPT · Claude · Gemini</div>
-      <div class="stat-lbl">compatível com</div>
-    </div>
-    <div class="stat-block reveal reveal-d3">
-      <div class="stat-num">&lt;10ms</div>
-      <div class="stat-lbl">latência adicionada</div>
+    <div class="inst-footer">
+      <div class="inst-metric">
+        <div class="inst-m-val">-59,9%</div>
+        <div class="inst-m-lbl">Tokens o200k_base</div>
+      </div>
+      <div class="inst-metric">
+        <div class="inst-m-val petrol">-84,0%</div>
+        <div class="inst-m-lbl">FLOPs Prefill O(n2)</div>
+      </div>
+      <div class="inst-metric">
+        <div class="inst-m-val ok">100%</div>
+        <div class="inst-m-lbl">Roundtrip Lossless</div>
+      </div>
     </div>
   </div>
+</section>
 
-  <!-- HOW IT WORKS -->
-  <section class="hiw-section">
-    <div class="reveal">
-      <div class="section-tag">como funciona</div>
-      <h2 class="section-title">Três passos.<br><em>Zero fricção.</em></h2>
-      <p class="section-sub">Sem treinamento. Sem configuração. Funciona com a IA que você já usa hoje.</p>
+<!-- MEASURED TELEMETRY STRIP -->
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stat-block">
+      <div class="stat-num accent">-59,9%</div>
+      <div class="stat-lbl">Corte BPE real em payloads JSON/MCP uniformes</div>
     </div>
-    <div class="steps-grid reveal">
-      <div class="step">
-        <div class="step-num">01 ///</div>
-        <div class="step-title">Você escreve normalmente</div>
-        <div class="step-desc">Escreva como sempre escreveu. Com saudações, "por favor", redundâncias — tudo normal.
-        </div>
-        <div class="step-code">
-          <div class="sc-in">→ input do usuário:</div>
-          <div class="sc-out" style="color:var(--muted);font-size:11px">"Bom dia! Pode me fazer uma API em Node com
-            autenticação JWT?"</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">02 ///</div>
-        <div class="step-title">TokLang comprime</div>
-        <div class="step-desc">O motor analisa, remove redundâncias e comprime para notação densa em milissegundos.
-        </div>
-        <div class="step-code">
-          <div class="sc-in">→ TokLang comprimido:</div>
-          <div class="sc-out">cr $js @express; #api auth jwt; prd</div>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">03 ///</div>
-        <div class="step-title">IA responde normalmente</div>
-        <div class="step-desc">O prompt expandido chega limpo ao modelo. Resposta normal. Seu custo reduzido
-          drasticamente.</div>
-        <div class="step-code">
-          <div class="sc-in">→ economia real:</div>
-          <div class="sc-out">input −72% · custo −72%</div>
-        </div>
-      </div>
+    <div class="stat-block">
+      <div class="stat-num petrol">-71,1%</div>
+      <div class="stat-lbl">Custo total CAPC (Anthropic, 85% cache hit)</div>
     </div>
+    <div class="stat-block">
+      <div class="stat-num ok">100%</div>
+      <div class="stat-lbl">Retenção de negações e prefixo estático SHA-256</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-num">3,2 ms</div>
+      <div class="stat-lbl">Latência mediana offline (p95 6,35 ms, zero LLM)</div>
+    </div>
+  </div>
+</div>
 
-    <div class="compare-grid reveal">
-      <div class="compare-col bad">
-        <div class="compare-head">✗ — sem TokLang</div>
-        <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Prompts longos consomem contexto
-            valioso</span></div>
-        <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Custo de API cresce com volume</span></div>
-        <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Saudações e cortesias pagam token</span>
-        </div>
-        <div class="ci"><span class="ci-icon">✗</span><span class="ci-text">Difícil auditar e otimizar em prod</span>
-        </div>
-      </div>
-      <div class="compare-col good">
-        <div class="compare-head">✓ — com TokLang</div>
-        <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Prompts até 85% menores, mesmo
-            resultado</span></div>
-        <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Custo previsível e drasticamente
-            menor</span></div>
-        <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Zero mudança no fluxo de trabalho</span>
-        </div>
-        <div class="ci"><span class="ci-icon">✓</span><span class="ci-text">Dashboard de analytics em tempo real</span>
-        </div>
-      </div>
-    </div>
-  </section>
+<!-- ASYMMETRIC ARCHITECTURE BENTO (7/5 + 4/8) -->
+<section class="hiw-section">
+  <div class="section-tag">Arquitetura v2.0</div>
+  <h2 class="section-title">Quatro garantias contra <em>compressão ingênua</em>.</h2>
+  <p class="section-sub">
+    Compressores v1 baseados em abreviações consonantais estilhaçam o BPE, apagam negações e quebram o Prompt Caching. O TokLang v2 substitui heurísticas frágeis por engenharia determinística auditável.
+  </p>
 
-  <!-- SOCIAL PROOF -->
-  <section class="social-section">
-    <div class="reveal">
-      <div class="section-tag">quem usa</div>
-      <h2 class="section-title">Devs que <em>pagam menos</em>.</h2>
-    </div>
-    <div class="quotes-grid reveal">
-      <div class="quote-card">
-        <p class="quote-text">"Integrei o TokLang na nossa pipeline em 20 minutos. Primeiro mês economizamos R$1.400 em
-          créditos de API sem alterar nenhum prompt."</p>
-        <div class="quote-author">
-          <div class="qa-avatar">JO</div>
-          <div>
-            <div class="qa-name">Juan Oliveira</div>
-            <div class="qa-role">Senior Engineer · Fintech</div>
-          </div>
-        </div>
+  <div class="bento-arch">
+    <article class="bento-card col-span-7">
+      <div>
+        <div class="bento-kicker">01 &middot; Codec Estrutural Lossless</div>
+        <h3 class="bento-title">Schema Hoisting estilo TOON para JSON, APIs e MCP</h3>
+        <p class="bento-desc">
+          Retornos de ferramentas e consultas SQL repetem chaves, aspas e delimitadores centenas de vezes. O codec v2 declara o schema uma única vez em <code>@table</code> ou <code>@struct</code>, com decodificação <code>decodeStructured()</code> bit-a-bit exata e verificação automática em tokens BPE.
+        </p>
       </div>
-      <div class="quote-card">
-        <p class="quote-text">"Antes eu revisava cada prompt manualmente pra cortar tokens. Agora o TokLang faz isso
-          automaticamente e eu nem percebo que está lá."</p>
-        <div class="quote-author">
-          <div class="qa-avatar">LC</div>
-          <div>
-            <div class="qa-name">Luiz Chiavini</div>
-            <div class="qa-role">Product Manager · SaaS</div>
-          </div>
-        </div>
-      </div>
-      <div class="quote-card">
-        <p class="quote-text">"Com 50k chamadas por dia o custo de tokens era absurdo. TokLang cortou 68% disso. ROI no
-          primeiro dia de uso."</p>
-        <div class="quote-author">
-          <div class="qa-avatar">FP</div>
-          <div>
-            <div class="qa-name">Felipe Pinete</div>
-            <div class="qa-role">CTO · AI Startup</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+      <div class="step-code">@struct{
+@kv currency: "BRL"
+@table orders[20]{order_id,sku,qty,unit_price,status}:
+ORD-5000|SKU-200|1|89.9|shipped
+}</div>
+    </article>
 
-  <!-- PRICING PREVIEW -->
-  <section class="pricing-section">
-    <div class="reveal">
-      <div class="section-tag">preços</div>
-      <h2 class="section-title">Simples.<br><em>Previsível.</em></h2>
-      <p class="section-sub">Comece grátis. Escale quando precisar.</p>
-    </div>
-    <div class="pricing-grid reveal">
-      <div class="plan">
-        <div class="plan-name">Starter</div>
-        <div class="plan-price">R$ 10<span>/mês</span></div>
-        <div class="plan-desc">Para explorar e aprender TokLang.</div>
-        <ul class="plan-features">
-          <li>500 compressões/mês</li>
-          <li>Vocabulário base</li>
-          <li>Dashboard básico</li>
-          <li>Suporte via comunidade</li>
-        </ul>
-        <button class="plan-btn" onclick="navigate('app')">Começar agora</button>
+    <article class="bento-card col-span-5 petrol-surface">
+      <div>
+        <div class="bento-kicker">02 &middot; CAPC (Cache-Aware)</div>
+        <h3 class="bento-title">Estabilidade de Prefixo KV-Cache</h3>
+        <p class="bento-desc">
+          Separa o contexto em Tier 0 (sistema e schemas comprimidos de forma 100% query-agnostic com hash SHA-256 imutável e <code>cache_control</code>) e Tier 2 (RAG, logs e tool outputs comprimidos por turno). Economia acumulada sobre o Prompt Caching nativo.
+        </p>
       </div>
-      <div class="plan featured">
-        <div class="plan-badge">Popular</div>
-        <div class="plan-name">Pro</div>
-        <div class="plan-price">R$ 35<span>/mês</span></div>
-        <div class="plan-desc">Para devs que querem máxima economia.</div>
-        <ul class="plan-features">
-          <li>Ilimitado</li>
-          <li>API access + SDK</li>
-          <li>Vocabulário expandido</li>
-          <li>Analytics de economia</li>
-          <li>Vocabulário customizado</li>
-          <li>Suporte prioritário</li>
-        </ul>
-        <button class="plan-btn" onclick="navigate('pricing')">Começar — 14 dias grátis</button>
-      </div>
-      <div class="plan">
-        <div class="plan-name">Team</div>
-        <div class="plan-price">R$ 80<span>/mês</span></div>
-        <div class="plan-desc">Para equipes em produção em escala.</div>
-        <ul class="plan-features">
-          <li>Até 10 membros</li>
-          <li>Vocabulário compartilhado</li>
-          <li>Dashboard de equipe</li>
-          <li>Slack + Notion</li>
-          <li>SSO / SAML</li>
-        </ul>
-        <button class="plan-btn" onclick="navigate('pricing')">Começar — 14 dias grátis</button>
-      </div>
-    </div>
-  </section>
+      <div class="step-code">Tier 0 SHA-256: idêntico entre turnos
+Anthropic: -40,6% além do cache nativo
+OpenAI:    -30,6% além do cache nativo</div>
+    </article>
 
-  <!-- CTA FINAL -->
-  <section class="cta-final">
-    <div class="cta-box reveal">
-      <div class="section-tag" style="justify-content:center;display:flex;margin-bottom:14px">comece agora</div>
-      <h2>Pronto para <em>parar</em><br>de desperdiçar tokens?</h2>
-      <p>Configure em menos de 5 minutos. Sem cartão de crédito.</p>
-      <button class="btn btn-primary btn-lg" onclick="navigate('app')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="4 14 10 14 10 20" />
-          <polyline points="20 10 14 10 14 4" />
-          <line x1="14" y1="10" x2="21" y2="3" />
-          <line x1="3" y1="21" x2="10" y2="14" />
-        </svg>
-        Comprimir agora — grátis
-      </button>
-    </div>
-  </section>
+    <article class="bento-card col-span-4">
+      <div>
+        <div class="bento-kicker">03 &middot; Polarity Lock</div>
+        <h3 class="bento-title">Zero inversão semântica</h3>
+        <p class="bento-desc">
+          Operadores lógicos e negações (<code>não</code>, <code>sem</code>, <code>nunca</code>, <code>exceto</code>, <code>not</code>, <code>never</code>, <code>!=</code>), blocos de código e identificadores técnicos recebem trava inviolável. O motor jamais gera esqueletos consonantais fora do vocabulário BPE.
+        </p>
+      </div>
+    </article>
 
-  <!-- FAQ -->
-  <section class="faq-section">
-    <div class="reveal">
-      <div class="section-tag">dúvidas</div>
-      <h2 class="section-title">Perguntas<br><em>frequentes.</em></h2>
-    </div>
-    <div class="faq-list reveal">
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Preciso mudar como escrevo meus prompts? <span
-            class="faq-icon">+</span></div>
-        <div class="faq-a">Não. Esse é o ponto central do TokLang — você escreve exatamente como sempre escreveu. O
-          motor de compressão opera em segundo plano e é completamente invisível.</div>
+    <article class="bento-card col-span-8">
+      <div>
+        <div class="bento-kicker">04 &middot; Guarda de Monotonicidade BPE + BM25 Extrativo</div>
+        <h3 class="bento-title">Se não economizar tokens BPE reais, faz rollback automático</h3>
+        <p class="bento-desc">
+          Em documentos RAG extensos, o motor deduplica shingles quase idênticos, dobra rajadas de logs repetitivos (<code>[x28]</code>) e ranqueia sentenças por BM25 + densidade informacional sob orçamento estrito <code>maxTokens</code>. Em entradas curtas, a guarda de monotonicidade impede qualquer inflação de sub-tokens.
+        </p>
       </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Funciona com qualquer modelo de IA? <span class="faq-icon">+</span>
-        </div>
-        <div class="faq-a">Sim. TokLang é agnóstico ao modelo. Funciona com OpenAI, Anthropic Claude, Google Gemini,
-          Mistral, ou qualquer modelo via API. A compressão acontece antes da chamada.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">A qualidade das respostas cai? <span class="faq-icon">+</span>
-        </div>
-        <div class="faq-a">Não. O TokLang comprime sem perder intenção semântica. O modelo recebe um prompt limpo e
-          completo — apenas sem verbosidade desnecessária. Em muitos casos a resposta melhora por ser mais precisa.
-        </div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Como é calculada a economia de tokens? <span
-            class="faq-icon">+</span></div>
-        <div class="faq-a">Comparamos o token count do prompt original com o prompt comprimido antes de enviar ao
-          modelo. O dashboard mostra em tempo real quanto você economizou em tokens e em dólares.</div>
-      </div>
-      <div class="faq-item">
-        <div class="faq-q" onclick="toggleFaq(this)">Meus prompts ficam armazenados? <span class="faq-icon">+</span>
-        </div>
-        <div class="faq-a">No plano Starter, os prompts são processados e descartados. Nos planos Pro e Team você pode
-          ativar analytics histórico, sempre com opt-in explícito e dados criptografados em repouso.</div>
-      </div>
-    </div>
-  </section>
+      <div class="step-code">Invariante formal: countTokens(output, "o200k_base") &lt;= countTokens(input, "o200k_base")</div>
+    </article>
+  </div>
+</section>
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-logo">Tok<span>Lang</span></div>
-    <div class="footer-copy">© 2025 TokLang · Feito com obsessão por tokens</div>
-    <ul class="footer-links">
-      <li><a onclick="navigate('docs')">Docs</a></li>
-      <li><a onclick="navigate('pricing')">API</a></li>
-      <li><a>Privacidade</a></li>
-      <li><a>Status</a></li>
-      <li><a>GitHub</a></li>
-    </ul>
-  </footer>
+<!-- REPRODUCIBLE BENCHMARK TABLE -->
+<section class="bench-section">
+  <div class="section-tag">Evidência Empírica</div>
+  <h2 class="section-title">Benchmark reproduzível em <em>o200k_base</em>.</h2>
+  <p class="section-sub">
+    Resultados gerados localmente por <code>node scripts/benchmark_v2.js</code> usando <code>js-tiktoken</code> real, sem estimativas heurísticas e com gate de falseabilidade automático.
+  </p>
+
+  <div class="bench-table-wrap">
+    <table class="bench-table">
+      <thead>
+        <tr>
+          <th>Caso</th>
+          <th>Workload Real</th>
+          <th style="text-align:right">BPE Antes</th>
+          <th style="text-align:right">BPE Depois</th>
+          <th style="text-align:right">Corte BPE</th>
+          <th style="text-align:right">FLOPs Prefill</th>
+          <th>Invariante Auditada</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>W1</td>
+          <td>JSON / MCP Uniforme (25 registros)</td>
+          <td class="num">1.610</td>
+          <td class="num">645</td>
+          <td class="save">-59,9%</td>
+          <td class="num">-84,0%</td>
+          <td class="ok-cell">Roundtrip lossless 100%</td>
+        </tr>
+        <tr>
+          <td>W2</td>
+          <td>Payload Híbrido Tool Call (@struct + 20 pedidos)</td>
+          <td class="num">1.002</td>
+          <td class="num">395</td>
+          <td class="save">-60,6%</td>
+          <td class="num">-84,5%</td>
+          <td class="ok-cell">Roundtrip lossless 100%</td>
+        </tr>
+        <tr>
+          <td>W3</td>
+          <td>RAG Longo (Consenso Raft, budget 220 tokens)</td>
+          <td class="num">664</td>
+          <td class="num">86</td>
+          <td class="save">-87,0%</td>
+          <td class="num">-98,3%</td>
+          <td class="ok-cell">Quórum + negação preservados</td>
+        </tr>
+        <tr>
+          <td>W4</td>
+          <td>SQL DDL + Bloco de Código + JSON embutido</td>
+          <td class="num">445</td>
+          <td class="num">234</td>
+          <td class="save">-47,4%</td>
+          <td class="num">-72,3%</td>
+          <td class="ok-cell">SQL verbatim + @table</td>
+        </tr>
+        <tr>
+          <td>W5</td>
+          <td>Auditoria Regulatória LGPD (negações densas)</td>
+          <td class="num">128</td>
+          <td class="num">80</td>
+          <td class="save">-37,5%</td>
+          <td class="num">-60,9%</td>
+          <td class="ok-cell">Negações únicas 100%</td>
+        </tr>
+        <tr>
+          <td>W6</td>
+          <td>Logs Repetitivos de Produção (60 linhas)</td>
+          <td class="num">1.297</td>
+          <td class="num">134</td>
+          <td class="save">-89,7%</td>
+          <td class="num">-98,9%</td>
+          <td class="ok-cell">Dobramento [x28] e [x20]</td>
+        </tr>
+        <tr>
+          <td>W7</td>
+          <td>Prompt Curto Técnico (com negações)</td>
+          <td class="num">52</td>
+          <td class="num">42</td>
+          <td class="save">-19,2%</td>
+          <td class="num">-34,8%</td>
+          <td class="ok-cell">Zero esqueleto consonantal</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="capc-callout">
+    <div>
+      <div class="bento-kicker" style="color:var(--petrol);margin-bottom:6px">W8 &middot; Simulação Econômica CAPC (1.000 requisições, 85% cache hit)</div>
+      <h3 style="font-size:20px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px">Comprimir sem destruir o cache vence Prompt Caching isolado.</h3>
+      <p style="font-size:13.5px;color:var(--muted);line-height:1.6">
+        System prompt multi-tenant (&gt;1.024 tokens) mantido em prefixo SHA-256 estável entre turnos diferentes enquanto o payload JSON dinâmico é compilado para <code>@table</code>.
+      </p>
+    </div>
+    <div class="capc-nums">
+      <div class="capc-stat">
+        <div class="capc-stat-v">$8,87</div>
+        <div class="capc-stat-l">Anthropic Raw</div>
+      </div>
+      <div class="capc-stat">
+        <div class="capc-stat-v">$4,31</div>
+        <div class="capc-stat-l">Só Prompt Cache</div>
+      </div>
+      <div class="capc-stat">
+        <div class="capc-stat-v win">$2,56</div>
+        <div class="capc-stat-l">TokLang CAPC (-40,6%)</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-final">
+  <div class="cta-box">
+    <div>
+      <h2>Audite seus próprios prompts em BPE real.</h2>
+      <p>Cole um payload JSON, um dump de RAG ou logs de produção no Workbench v2 e verifique a economia exata em <code>o200k_base</code>.</p>
+    </div>
+    <button class="btn btn-primary btn-lg" onclick="navigate('app')">Abrir Workbench Agora</button>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="section-tag">Perguntas Técnicas</div>
+  <h2 class="section-title">Decisões de engenharia sem maquiagem.</h2>
+  <div class="faq-list">
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Por que o TokLang v2 eliminou abreviações consonantais? <span class="faq-icon">+</span></div>
+      <div class="faq-a">Strings fora do vocabulário como <code>vlcdd</code> estilhaçam em múltiplos sub-tokens nos tokenizadores BPE modernos (<code>o200k_base</code> e <code>cl100k_base</code>) e elevam a perplexidade do modelo. A v2 usa apenas transformações estruturais lossless, deduplicação e poda extrativa com guarda estrita de monotonicidade BPE.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">O TokLang v2 chama algum LLM externo para comprimir? <span class="faq-icon">+</span></div>
+      <div class="faq-a">Não. Todo o compilador roda localmente em JavaScript ou Python em poucos milissegundos (p95 de 6,35 ms), sem custo de API intermediária e sem enviar dados confidenciais para terceiros.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Como ele convive com o Prompt Caching da Anthropic e OpenAI? <span class="faq-icon">+</span></div>
+      <div class="faq-a">A função <code>compileMessages()</code> separa o prefixo estático (Tier 0) das mensagens dinâmicas (Tier 2). O Tier 0 recebe apenas compressão determinística independente da query, mantendo o mesmo hash SHA-256 entre turnos e injetando <code>cache_control</code> quando atinge o piso do provedor.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Tok<span>Lang</span></div>
+  <div class="footer-copy">TokLang v2.0 &middot; Open-Core BPE &amp; CAPC Compiler &middot; MIT License</div>
+  <ul class="footer-links">
+    <li><a onclick="navigate('app')">Workbench</a></li>
+    <li><a onclick="navigate('docs')">Docs</a></li>
+    <li><a onclick="navigate('pricing')">Planos</a></li>
+  </ul>
+</footer>

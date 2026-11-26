@@ -1,14 +1,19 @@
 {
   "name": "toklang",
-  "version": "1.0.0",
-  "description": "Semantic compression middleware for LLMs",
-  "main": "index.html",
+  "version": "2.0.0",
+  "description": "Deterministic, BPE-verified, negation-safe, and Cache-Aware (CAPC) prompt compiler for LLMs",
+  "main": "js/sdk-lib.js",
   "bin": {
     "toklang": "./cli.js"
   },
   "scripts": {
     "start": "node server.js",
-    "test": "NODE_ENV=test node tests/run.js && NODE_ENV=test npx playwright test",
+    "test:core": "node --test tests/v2_core.test.js",
+    "test:unit": "NODE_ENV=test node tests/run.js",
+    "test:py": "pytest python/tests/test_toklang_v2.py",
+    "test:e2e": "NODE_ENV=test npx playwright test --project=firefox",
+    "test": "npm run test:core && npm run test:unit && npm run test:e2e",
+    "benchmark": "node scripts/benchmark_v2.js",
     "compare": "node tests/compare_quality.js"
   },
   "dependencies": {

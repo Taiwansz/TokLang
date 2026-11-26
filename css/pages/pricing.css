@@ -1,17 +1,17 @@
 /* ===== PAGE: PRICING ===== */
-.pricing-page{min-height:100vh;padding:82px 0 80px}
-.pricing-hero{max-width:1100px;margin:0 auto;padding:60px 24px 48px;text-align:center}
-.compare-table{max-width:1100px;margin:0 auto;padding:0 24px 80px}
-.ct-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px}
-.ct-table th{text-align:left;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--border2)}
-.ct-table th:first-child{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.07em}
-.ct-table th:not(:first-child){text-align:center;font-weight:500;font-size:13px;color:var(--text)}
-.ct-table th.featured-col{color:var(--green)}
-.ct-table td{padding:11px 16px;border-bottom:1px solid var(--border);color:var(--muted)}
-.ct-table td:not(:first-child){text-align:center}
-.ct-table td:first-child{color:var(--text);font-size:12px}
-.ct-table td .check{color:var(--green);font-size:14px}
-.ct-table td .cross{color:var(--muted);font-size:14px}
-.ct-table .section-row td{background:var(--bg3);color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;padding:8px 16px}
-.ct-wrap{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-lg);overflow:hidden;margin-top:40px}
-.faq-pricing{max-width:1100px;margin:0 auto;padding:0 24px 80px}
+.pricing-page { min-height: 100vh; padding: 84px 0 80px; }
+.pricing-hero { max-width: 1180px; margin: 0 auto; padding: 48px 40px 44px; text-align: center; }
+.compare-table { max-width: 1180px; margin: 0 auto; padding: 0 40px 72px; }
+.ct-wrap { background: var(--bg2); border: 1px solid var(--border2); border-radius: var(--radius); overflow-x: auto; margin-top: 28px; box-shadow: var(--shadow-sm); }
+.ct-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; }
+.ct-table th { text-align: left; padding: 12px 16px; background: var(--bg3); border-bottom: 1px solid var(--border2); }
+.ct-table th:first-child { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+.ct-table th:not(:first-child) { text-align: center; font-weight: 700; font-size: 12.5px; color: var(--text); }
+.ct-table th.featured-col { color: var(--accent); }
+.ct-table td { padding: 11px 16px; border-bottom: 1px solid var(--border); color: var(--muted2); }
+.ct-table td:not(:first-child) { text-align: center; }
+.ct-table td:first-child { color: var(--text); font-weight: 500; }
+.ct-table td .check { color: var(--ok); font-weight: 700; }
+.ct-table td .cross { color: var(--muted); }
+.ct-table .section-row td { background: var(--bg3); color: var(--petrol); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.09em; padding: 9px 16px; }
+.faq-pricing { max-width: 1180px; margin: 0 auto; padding: 0 40px 80px; }

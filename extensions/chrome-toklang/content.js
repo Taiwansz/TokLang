@@ -1,7 +1,6 @@
-// TokLang Browser Extension - Content Script
+// TokLang v2.0 Browser Extension - Content Script (Offline-First, Zero Emojis, Industrial Pop Palette)
 
 function injectCompressButton() {
-  // Common textareas for ChatGPT, Claude, and Gemini
   const targets = [
     '#prompt-textarea',
     '#min-textarea',
@@ -9,37 +8,38 @@ function injectCompressButton() {
     'textarea[placeholder*="Claude"]',
     'textarea[placeholder*="Gemini"]',
     'div[contenteditable="true"]',
-    'textarea'
+    'textarea',
   ];
 
   for (const selector of targets) {
     const inputEl = document.querySelector(selector);
     if (!inputEl || inputEl.dataset.toklangInjected) continue;
 
-    // Mark as injected
-    inputEl.dataset.toklangInjected = "true";
+    inputEl.dataset.toklangInjected = 'true';
 
-    // Create TokLang compress button
     const btn = document.createElement('button');
-    btn.innerText = '⚡ Comprimir';
+    btn.type = 'button';
+    btn.innerText = 'TokLang v2';
     btn.style.position = 'absolute';
-    btn.style.right = '45px';
+    btn.style.right = '48px';
     btn.style.bottom = '8px';
     btn.style.zIndex = '9999';
-    btn.style.background = '#00ff88';
-    btn.style.color = '#0c0f16';
-    btn.style.border = 'none';
-    btn.style.borderRadius = '4px';
-    btn.style.padding = '5px 9px';
-    btn.style.fontFamily = 'monospace';
-    btn.style.fontSize = '10px';
-    btn.style.fontWeight = 'bold';
+    btn.style.background = '#C9341B';
+    btn.style.color = '#F5F2EA';
+    btn.style.border = '1px solid rgba(14, 17, 22, 0.2)';
+    btn.style.borderRadius = '6px';
+    btn.style.padding = '5px 10px';
+    btn.style.fontFamily = '"JetBrains Mono", monospace';
+    btn.style.fontSize = '11px';
+    btn.style.fontWeight = '600';
     btn.style.cursor = 'pointer';
-    btn.style.opacity = '0.75';
-    btn.style.transition = 'opacity 0.2s';
-    
-    btn.addEventListener('mouseover', () => btn.style.opacity = '1');
-    btn.addEventListener('mouseout', () => btn.style.opacity = '0.75');
+    btn.style.opacity = '0.9';
+    btn.style.transition = 'transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.16s ease';
+
+    btn.addEventListener('mouseover', () => { btn.style.opacity = '1'; });
+    btn.addEventListener('mouseout', () => { btn.style.opacity = '0.9'; });
+    btn.addEventListener('mousedown', () => { btn.style.transform = 'scale(0.96)'; });
+    btn.addEventListener('mouseup', () => { btn.style.transform = 'scale(1)'; });
 
     btn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -48,57 +48,24 @@ function injectCompressButton() {
       const text = inputEl.value || inputEl.innerText || '';
       if (!text.trim()) return;
 
-      // 1. Try local compression
-      const customVocab = null; // Can be fetched from chrome.storage.local
       const engine = window.TokLangEngine;
-      let result = null;
-      if (engine) {
-        result = engine.compressLocally(text, customVocab);
+      if (!engine || typeof engine.compile !== 'function') {
+        showTemporaryToast(btn, 'Engine v2 indisponivel');
+        return;
       }
 
-      if (result) {
-        updateInputValue(inputEl, result);
-        showTemporaryToast(btn, 'Comprimido!');
-      } else {
-        // Fallback to online API if key exists in storage
-        chrome.storage.local.get(['apiKey'], (data) => {
-          const key = data.apiKey;
-          if (!key) {
-            showTemporaryToast(btn, 'Faça Login na Extensão');
-            return;
-          }
-          btn.innerText = '⌛...';
-          fetch('https://toklang.dev/api/v1/compress', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'x-api-key': key
-            },
-            body: JSON.stringify({ prompt: text })
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.compressed) {
-              updateInputValue(inputEl, data.compressed);
-              showTemporaryToast(btn, 'Comprimido!');
-            } else {
-              showTemporaryToast(btn, 'Prompt longo');
-            }
-          })
-          .catch(() => {
-            showTemporaryToast(btn, 'Erro API');
-          })
-          .finally(() => {
-            btn.innerText = '⚡ Comprimir';
-          });
-        });
+      const report = engine.compile(text, { mode: 'balanced' });
+      if (report && report.text) {
+        updateInputValue(inputEl, report.text);
+        showTemporaryToast(btn, `-${Math.round(report.savingsPct)}% BPE`);
       }
     });
 
-    // Ingress inside parent container of input element
     const parent = inputEl.parentElement;
     if (parent) {
-      parent.style.position = 'relative';
+      if (getComputedStyle(parent).position === 'static') {
+        parent.style.position = 'relative';
+      }
       parent.appendChild(btn);
     }
   }
@@ -110,11 +77,8 @@ function updateInputValue(el, value) {
   } else if (el.getAttribute('contenteditable') === 'true') {
     el.innerText = value;
   }
-  // Dispatch input & change events for React/Vue frameworks to detect the value change
-  const event = new Event('input', { bubbles: true });
-  el.dispatchEvent(event);
-  const changeEvent = new Event('change', { bubbles: true });
-  el.dispatchEvent(changeEvent);
+  el.dispatchEvent(new Event('input', { bubbles: true }));
+  el.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 function showTemporaryToast(btn, message) {
@@ -122,8 +86,7 @@ function showTemporaryToast(btn, message) {
   btn.innerText = message;
   setTimeout(() => {
     btn.innerText = original;
-  }, 2000);
+  }, 2200);
 }
 
-// Poll periodically to inject on dynamically loaded prompt textareas
 setInterval(injectCompressButton, 1000);

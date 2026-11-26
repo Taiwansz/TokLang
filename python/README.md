@@ -1,77 +1,28 @@
-# TokLang Python SDK
+# TokLang Python SDK v2.0
 
-A semantic prompt compression middleware and utility library for LLMs. Reduce prompt size, optimize context windows, and save API cost.
+Deterministic, BPE-verified, negation-safe, and Cache-Aware (CAPC) prompt compiler for Python 3.10+.
 
-## Installation
-
-You can install the TokLang Python SDK locally:
+## Install
 
 ```bash
-pip install .
+pip install -e .
+# Optional exact BPE tokenization via tiktoken:
+pip install -e ".[bpe]"
 ```
 
-## Quick Start
-
-### 1. Local/Offline Shorthand Compression
-
-Compress prompts locally using fast regex heuristics and rules:
+## Quickstart
 
 ```python
-from toklang import compress_locally, expand
+from toklang import compile_prompt, compile_messages, encode_structured, decode_structured, TokLangMiddleware
 
-# Input prompt
-prompt = "Cria um script python usando streamlit para calcular velocidade de forma bonita"
+# 1. Lossless structural tabular compression (roundtrip bit-for-bit)
+encoded = encode_structured({"users": [{"id": 1, "name": "Alice", "active": True}, {"id": 2, "name": "Bob", "active": False}]})
+restored = decode_structured(encoded)
 
-# Compress prompt
-shorthand = compress_locally(prompt)
-print("Compressed:", shorthand)
-# Output: "cr $py @streamlit #scr; calc vel; ui+"
+# 2. Negation-safe & BM25 extractive compilation under hard token budget
+report = compile_prompt(long_rag_text, mode="balanced", query="quorum Raft", max_tokens=220)
 
-# Expand shorthand back to natural language
-expanded = expand(shorthand)
-print("Expanded:", expanded)
-# Output: "Crie em Python usando Streamlit: calcular velocidade. Requisitos: com interface visual bonita e estilizada."
+# 3. Cache-Aware Prompt Compression (CAPC) for multi-turn messages
+capc = compile_messages(messages, provider="anthropic", mode="balanced")
+print(capc["cache"]["prefix_hash"], capc["economics"])
 ```
-
-### 2. Connect to TokLang API (Online Mode)
-
-Use the full LLM-powered semantic compression for complex prompts:
-
-```python
-from toklang import TokLang
-
-client = TokLang(api_key="your_toklang_api_key")
-
-# Compress using cloud LLM parser
-shorthand = client.compress("Some very long prompt...")
-print("Shorthand:", shorthand)
-```
-
-### 3. OpenAI Client Middleware Integration
-
-Automatically intercept and compress system/user prompts sent to OpenAI:
-
-```python
-import openai
-from toklang import TokLangMiddleware
-
-openai_client = openai.OpenAI(api_key="your_openai_key")
-
-# Wrap client with TokLang middleware
-wrapped_client = TokLangMiddleware(
-    openai_client=openai_client,
-    toklang_api_key="your_toklang_key"
-)
-
-# Prompts are compressed automatically before transmission!
-response = wrapped_client.chat.completions.create(
-    model="gpt-4",
-    messages=[
-        {"role": "user", "content": "Cria um script python usando streamlit para calcular velocidade de forma bonita"}
-    ]
-)
-```
-
-## License
-
-MIT License.

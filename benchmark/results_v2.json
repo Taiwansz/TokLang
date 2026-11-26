@@ -1,0 +1,224 @@
+{
+  "version": "2.0.0",
+  "generated_at": "2026-11-26T11:49:04.627Z",
+  "tokenizer_primary": "js-tiktoken:o200k_base",
+  "tokenizer_secondary": "js-tiktoken:cl100k_base",
+  "falsifiability_gate": {
+    "passed": true,
+    "monotonic_bpe_100pct": true,
+    "lossless_roundtrip_100pct": true,
+    "capc_prefix_stability_100pct": true,
+    "latency_p50_ms": 3.532,
+    "latency_p95_ms": 8.31,
+    "latency_capc_p95_ms": 33.685
+  },
+  "aggregates": {
+    "mean_o200k_savings_pct": 57.34,
+    "structured_json_o200k_savings_pct": 59.94,
+    "rag_extractive_o200k_savings_pct": 87.05,
+    "log_folding_o200k_savings_pct": 89.67,
+    "short_prompt_o200k_savings_pct": 19.23
+  },
+  "cases": [
+    {
+      "id": "W1",
+      "name": "JSON/MCP Uniform Payload (25 users)",
+      "category": "structured_json",
+      "mode": "lossless",
+      "o200k_before": 1610,
+      "o200k_after": 645,
+      "o200k_saved": 965,
+      "o200k_savings_pct": 59.94,
+      "cl100k_before": 1635,
+      "cl100k_after": 670,
+      "cl100k_savings_pct": 59.02,
+      "attention_flops_reduction_pct": 83.95,
+      "negations_preserved_ratio": 1,
+      "monotonic_verified": true,
+      "reversible_structured": true,
+      "stages_applied": [
+        "structural_tabular"
+      ],
+      "latency_p50_ms": 5.953,
+      "latency_p95_ms": 13.712,
+      "invariant_check": "100% lossless bit-for-bit decodeStructured roundtrip verified"
+    },
+    {
+      "id": "W2",
+      "name": "Hybrid Tool Response (@struct + 20 orders)",
+      "category": "structured_hybrid",
+      "mode": "lossless",
+      "o200k_before": 1002,
+      "o200k_after": 395,
+      "o200k_saved": 607,
+      "o200k_savings_pct": 60.58,
+      "cl100k_before": 1002,
+      "cl100k_after": 395,
+      "cl100k_savings_pct": 60.58,
+      "attention_flops_reduction_pct": 84.46,
+      "negations_preserved_ratio": 1,
+      "monotonic_verified": true,
+      "reversible_structured": true,
+      "stages_applied": [
+        "structural_tabular"
+      ],
+      "latency_p50_ms": 2.984,
+      "latency_p95_ms": 5.927,
+      "invariant_check": "100% lossless @struct roundtrip verified"
+    },
+    {
+      "id": "W3",
+      "name": "Long RAG Context (Raft Consensus, 220-tok budget)",
+      "category": "rag_extractive",
+      "mode": "balanced",
+      "o200k_before": 664,
+      "o200k_after": 86,
+      "o200k_saved": 578,
+      "o200k_savings_pct": 87.05,
+      "cl100k_before": 800,
+      "cl100k_after": 106,
+      "cl100k_savings_pct": 86.75,
+      "attention_flops_reduction_pct": 98.32,
+      "negations_preserved_ratio": 0.1875,
+      "monotonic_verified": true,
+      "reversible_structured": false,
+      "stages_applied": [
+        "shingle_dedup"
+      ],
+      "latency_p50_ms": 5.565,
+      "latency_p95_ms": 10.62,
+      "invariant_check": "Critical quorum formula + negation retained under 220-token BPE cap"
+    },
+    {
+      "id": "W4",
+      "name": "Mixed SQL DDL + Embedded JSON Sample",
+      "category": "mixed_code_json",
+      "mode": "balanced",
+      "o200k_before": 445,
+      "o200k_after": 234,
+      "o200k_saved": 211,
+      "o200k_savings_pct": 47.42,
+      "cl100k_before": 447,
+      "cl100k_after": 235,
+      "cl100k_savings_pct": 47.43,
+      "attention_flops_reduction_pct": 72.35,
+      "negations_preserved_ratio": 1,
+      "monotonic_verified": true,
+      "reversible_structured": false,
+      "stages_applied": [
+        "structural_tabular",
+        "phatic_strip"
+      ],
+      "latency_p50_ms": 3.276,
+      "latency_p95_ms": 6.231,
+      "invariant_check": "SQL CTE verbatim + embedded JSON tabularized + negation locked"
+    },
+    {
+      "id": "W5",
+      "name": "LGPD Regulatory Audit (Dense Negations)",
+      "category": "compliance_prose",
+      "mode": "balanced",
+      "o200k_before": 128,
+      "o200k_after": 80,
+      "o200k_saved": 48,
+      "o200k_savings_pct": 37.5,
+      "cl100k_before": 148,
+      "cl100k_after": 93,
+      "cl100k_savings_pct": 37.16,
+      "attention_flops_reduction_pct": 60.94,
+      "negations_preserved_ratio": 1,
+      "monotonic_verified": true,
+      "reversible_structured": false,
+      "stages_applied": [
+        "phatic_strip",
+        "shingle_dedup"
+      ],
+      "latency_p50_ms": 2.055,
+      "latency_p95_ms": 4.42,
+      "invariant_check": "Duplicate paragraph eliminated while all unique LGPD negations preserved"
+    },
+    {
+      "id": "W6",
+      "name": "Production Repetitive Logs (60 lines)",
+      "category": "log_folding",
+      "mode": "lossless",
+      "o200k_before": 1297,
+      "o200k_after": 134,
+      "o200k_saved": 1163,
+      "o200k_savings_pct": 89.67,
+      "cl100k_before": 1297,
+      "cl100k_after": 134,
+      "cl100k_savings_pct": 89.67,
+      "attention_flops_reduction_pct": 98.93,
+      "negations_preserved_ratio": 1,
+      "monotonic_verified": true,
+      "reversible_structured": false,
+      "stages_applied": [
+        "log_folding"
+      ],
+      "latency_p50_ms": 3.944,
+      "latency_p95_ms": 6.845,
+      "invariant_check": "Repeated log bursts folded with exact [x28] and [x20] counts"
+    },
+    {
+      "id": "W7",
+      "name": "Short Developer Prompt (Balanced + Polarity Lock)",
+      "category": "short_prompt",
+      "mode": "balanced",
+      "o200k_before": 52,
+      "o200k_after": 42,
+      "o200k_saved": 10,
+      "o200k_savings_pct": 19.23,
+      "cl100k_before": 59,
+      "cl100k_after": 46,
+      "cl100k_savings_pct": 22.03,
+      "attention_flops_reduction_pct": 34.76,
+      "negations_preserved_ratio": 1,
+      "monotonic_verified": true,
+      "reversible_structured": false,
+      "stages_applied": [
+        "phatic_strip"
+      ],
+      "latency_p50_ms": 0.574,
+      "latency_p95_ms": 0.963,
+      "invariant_check": "Phatic fluff stripped; zero consonant skeletons; 100% negations preserved"
+    }
+  ],
+  "capc": {
+    "anthropic": {
+      "prefix_hash": "558827b4bc129b53d91d3cd8e8f8efa4c9de7a29e683c9475c59c829e2adecdf",
+      "prefix_stable_across_turns": true,
+      "cache_eligible": true,
+      "static_tokens_before": 2089,
+      "static_tokens_after": 2089,
+      "dynamic_tokens_before": 869,
+      "dynamic_tokens_after": 285,
+      "economics": {
+        "requestsPerBatch": 1000,
+        "cacheHitRate": 0.85,
+        "rawUncachedUsd": 8.874,
+        "rawCachedUsd": 4.314758,
+        "capcSteadyStateUsd": 2.562758,
+        "capcSavingsVsRawPct": 71.12,
+        "capcSavingsVsCachedPct": 40.6
+      }
+    },
+    "openai": {
+      "prefix_hash": "558827b4bc129b53d91d3cd8e8f8efa4c9de7a29e683c9475c59c829e2adecdf",
+      "cache_eligible": true,
+      "static_tokens_before": 1875,
+      "static_tokens_after": 1875,
+      "dynamic_tokens_before": 886,
+      "dynamic_tokens_after": 285,
+      "economics": {
+        "requestsPerBatch": 1000,
+        "cacheHitRate": 0.85,
+        "rawUncachedUsd": 6.9025,
+        "rawCachedUsd": 4.910312,
+        "capcSteadyStateUsd": 3.407812,
+        "capcSavingsVsRawPct": 50.63,
+        "capcSavingsVsCachedPct": 30.6
+      }
+    }
+  }
+}

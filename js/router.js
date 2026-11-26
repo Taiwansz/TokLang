@@ -88,7 +88,7 @@ function scrollToDoc(id, link) {
 
 /* ===== TOAST ===== */
 let toastTimer;
-function showToast(msg, icon = '✓') {
+function showToast(msg, icon = 'OK') {
   const t = document.getElementById('global-toast');
   document.getElementById('toast-msg').textContent = msg;
   document.getElementById('toast-icon').textContent = icon;

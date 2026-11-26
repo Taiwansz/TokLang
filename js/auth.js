@@ -193,7 +193,7 @@ async function doLogin() {
 
   updateNavAuth();
   btn.disabled = false; btn.textContent = 'Entrar';
-  showToast('Bem-vindo de volta!', '✓');
+  showToast('Bem-vindo de volta!', 'OK');
   navigate('dashboard');
 }
 
@@ -258,7 +258,7 @@ async function doSignup() {
     successStep.style.display = 'block';
   } else {
     // Fallback: redirect to login if HTML panel not found
-    showToast('Conta criada! Verifique seu e-mail.', '✓');
+    showToast('Conta criada! Verifique seu e-mail.', 'OK');
     navigate('login');
   }
 }
@@ -267,7 +267,7 @@ async function doLogout() {
   sessionStorage.removeItem('mock_user');
   if (window.supabase && !window.IS_DEMO) await window.supabase.auth.signOut();
   updateNavAuth();
-  showToast('Sessão encerrada.', '✓');
+  showToast('Sessão encerrada.', 'OK');
   navigate('home');
 }
 
@@ -311,7 +311,7 @@ function checkPasswordStrength(val) {
   if (/[A-Z]/.test(val)) score++;
   if (/[0-9]/.test(val)) score++;
   if (/[^A-Za-z0-9]/.test(val)) score++;
-  const colors = ['', '#ff5e5e', '#f5a623', '#4d9fff', '#00ff88'];
+  const colors = ['', '#B91C1C', '#996E12', '#124E66', '#1B6B46'];
   const labels = ['', 'Muito fraca', 'Fraca', 'Boa', 'Forte'];
   if (bar) { bar.style.width = (score * 25) + '%'; bar.style.background = colors[score] || ''; }
   if (hint) { hint.textContent = labels[score] || 'Crie uma senha forte'; }

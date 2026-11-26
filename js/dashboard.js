@@ -1,12 +1,10 @@
 /* ===== DASHBOARD ===== */
 const FAKE_HISTORY = [
-  { orig:'Bom dia! Faça um código python com streamlit para calcular velocidade', tok:'cr $py @streamlit; calc velocidade; ui+', before:34, after:8, saving:76, date:'Hoje, 14:32' },
-  { orig:'Preciso de uma API REST em Node com Express para usuários com CRUD', tok:'cr $js @express; #api CRUD users; prd', before:22, after:7, saving:68, date:'Hoje, 11:15' },
-  { orig:'Explique closures em JavaScript com exemplos práticos por favor', tok:'ex $js closures; dk', before:11, after:4, saving:63, date:'Ontem, 18:44' },
-  { orig:'Refatore essa função bagunçada pra ficar mais limpa e legível', tok:'rf $js; clean fn; cm', before:13, after:6, saving:54, date:'Ontem, 16:20' },
-  { orig:'Cria um dashboard com Plotly e Streamlit de vendas mensais', tok:'cr $py @streamlit @plt; dashboard vendas; ui+', before:15, after:9, saving:40, date:'25/01, 09:11' },
-  { orig:'Script python para web scraping e salvar em CSV', tok:'cr $py #scr; scraping; out[csv]', before:11, after:7, saving:36, date:'24/01, 20:05' },
-  { orig:'Escreva testes unitários para esse módulo em TypeScript', tok:'tst $ts; unit; cm', before:10, after:5, saving:50, date:'23/01, 15:30' },
+  { orig:'JSON/MCP Payload (25 usuarios, o200k_base)', tok:'@table users[25]{id,name,email,team,role,active,monthly_tokens}: ...', before:1610, after:645, saving:60, date:'Hoje, 14:32' },
+  { orig:'Hybrid Tool Response (@struct + 20 pedidos)', tok:'@struct{ @kv currency:"BRL" @table orders[20]{...} }', before:1002, after:395, saving:61, date:'Hoje, 11:15' },
+  { orig:'RAG Consenso Raft (budget 220 tokens, query BM25)', tok:'Especificacao de consenso Raft: quorum floor(N/2)+1; nunca escrita sem lider...', before:664, after:86, saving:87, date:'Ontem, 18:44' },
+  { orig:'SQL CTE + Amostra JSON Embutida', tok:'SQL verbatim + @table sample[8]{tenant_id,customer_id,total,rk}', before:445, after:234, saving:47, date:'Ontem, 16:20' },
+  { orig:'Production Repetitive Logs (60 linhas)', tok:'WARN redis_pool timeout [x28] | INFO healthcheck [x20]', before:1297, after:134, saving:90, date:'25/11, 09:11' },
 ];
 
 window.activeVocabulary = [];
@@ -134,7 +132,7 @@ async function handleSaveVocab(e) {
     }
     
     if (success) {
-      showToast(id ? 'Termo atualizado com sucesso!' : 'Termo adicionado com sucesso!', '✓');
+      showToast(id ? 'Termo atualizado com sucesso!' : 'Termo adicionado com sucesso!', 'OK');
       clearVocabForm();
       await renderVocabulary();
     } else {
@@ -205,7 +203,7 @@ async function deleteVocab(id) {
     }
     
     if (success) {
-      showToast('Termo excluído!', '✓');
+      showToast('Termo excluído!', 'OK');
       await renderVocabulary();
     } else {
       showToast('Erro ao excluir termo: ' + errorMsg, '!');
@@ -513,7 +511,7 @@ async function toggleApiKey() {
 async function copyApiKey() {
   const u = await getUser(); if (!u) return;
   navigator.clipboard.writeText(u.apiKey).catch(()=>{});
-  showToast('Chave de API copiada!', '✓');
+  showToast('Chave de API copiada!', 'OK');
 }
 
 async function rotateApiKey() {
@@ -552,7 +550,7 @@ async function rotateApiKey() {
   u.apiKey = newKey;
   apiRevealed = false;
   document.getElementById('api-key-display').textContent = newKey.substring(0,8) + '••••••••••••••••••••••';
-  showToast('Chave de API rotacionada!', '✓');
+  showToast('Chave de API rotacionada!', 'OK');
 }
 
 async function editName() {
@@ -577,7 +575,7 @@ async function editName() {
       return;
     }
     updateNavAuth();
-    showToast('Nome atualizado!', '✓');
+    showToast('Nome atualizado!', 'OK');
   }
 }
 
@@ -610,7 +608,7 @@ async function toggleIntegration(name, el) {
   }
   
   const enabled = el.checked;
-  showToast(`${name} ${enabled ? 'conectado' : 'desconectado'} com sucesso!`, '✓');
+  showToast(`${name} ${enabled ? 'conectado' : 'desconectado'} com sucesso!`, 'OK');
   
   if (window.supabase && !window.IS_DEMO) {
     const integrations = u.integrations || {};
@@ -643,7 +641,7 @@ async function saveWebhookUrl() {
     return;
   }
 
-  showToast('Webhook salvo com sucesso!', '✓');
+  showToast('Webhook salvo com sucesso!', 'OK');
 
   if (window.supabase && !window.IS_DEMO) {
     await window.supabase.from('profiles').update({

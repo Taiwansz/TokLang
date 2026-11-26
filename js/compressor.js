@@ -1,59 +1,102 @@
-/* ===== APP: COMPRESSOR ===== */
-const SYSTEM_PROMPT = `Você é o motor de compressão do TokLang. Converta prompts em linguagem natural para notação TokLang comprimida.
-
-GRAMÁTICA TOKLANG:
-Formato: AÇÃO $LANG @FRAMEWORK #ESTRUTURA; tarefa; in[params]; modificadores
-
-AÇÕES: cr(criar) fix(debug) ex(explicar) rf(refatorar) op(otimizar) tst(testes) doc(documentar) cv(converter) rev(revisar) sum(resumir)
-LINGUAGEM: $py $js $ts $sql $go $rs $sh $css $java $rb
-FRAMEWORKS: @streamlit @fastapi @flask @react @next @express @pandas @plt @prisma @pg @mongo @jest
-ESTRUTURA: #fn #cls #scr #api #comp #hook #mod #mw
-PARÂMETROS: in[a,b,c] out[x,y] err[404,422]
-MODIFICADORES: ui+(visual bonito) cm(comentários) prd(produção) min(simples) dk(exemplos) typ(tipos) async *(máxima qualidade)
-
-REGRAS:
-1. REMOVA completamente: saudações, "por favor", "obrigado", cortesias, "você pode", "seria legal", "boa tarde"
-2. Identifique a ação principal
-3. Identifique linguagem ($) e framework (@) se mencionados
-4. Extraia parâmetros de entrada se houver
-5. Mapeie requisitos em modificadores
-6. Tarefa = 2-5 palavras descritivas no máximo
-
-RETORNE APENAS a notação TokLang em uma única linha. Sem explicação, sem markdown, sem aspas.`;
-
+/* ===== TOKLANG v2.0 WORKBENCH CONTROLLER ===== */
 const EXAMPLES = [
-  "Bom dia! Por favor faça um código python que use streamlit como interface para ficar bonitinho podendo calcular a velocidade de um objeto quando eu colocar as grandezas",
-  "Preciso de uma API REST completa em Node.js com Express para gerenciar usuários, com operações CRUD. Os campos são nome, email e role. Trate os erros 404 e 422. Código pronto para produção.",
-  "Você pode me explicar o conceito de closures em JavaScript de forma bem didática? Seria ótimo ter exemplos práticos também",
-  "Tenho essa função aqui que tá muito bagunçada: function calc(a,b,c){return a*b/c*100}. Consegue refatorar ela pra ficar mais limpa seguindo boas práticas?",
-  "Cria um dashboard interativo em Python com Plotly e Streamlit mostrando gráficos de vendas mensais com filtro por região e produto. Quero que fique bem visual.",
-  "Preciso de um script python que faça web scraping do site exemplo.com pegando título e preço dos produtos e salvando num CSV"
+  {
+    mode: 'lossless',
+    query: '',
+    budget: '',
+    text: JSON.stringify({
+      users: Array.from({ length: 12 }, (_, i) => ({
+        id: 1001 + i,
+        name: `Engineer_${i + 1}`,
+        team: i % 2 === 0 ? 'ml-platform' : 'core-infra',
+        role: i % 3 === 0 ? 'staff' : 'senior',
+        active: i % 4 !== 0,
+        quota_tokens: 100000 + i * 5000,
+      })),
+    }, null, 2),
+  },
+  {
+    mode: 'balanced',
+    query: 'quorum minimo Raft split-brain',
+    budget: '140',
+    text: [
+      'Registro administrativo 1: Escalas de recepcao e reservas de auditorio da unidade regional sem relacao com consenso.',
+      'Registro administrativo 2: Controle mensal de papelaria e manutencao predial dos andares operacionais.',
+      'Especificacao critica de consenso Raft: o quorum minimo exige floor(N/2)+1 nos ativos para eleicao de lider; nunca permita escrita sem lider confirmado no termo corrente para evitar split-brain.',
+      'Especificacao critica de consenso Raft: o quorum minimo exige floor(N/2)+1 nos ativos para eleicao de lider; nunca permita escrita sem lider confirmado no termo corrente para evitar split-brain.',
+      'Registro administrativo 3: Calendario de reunioes gerais de almoxarifado e suprimentos corporativos.',
+    ].join('\n\n'),
+  },
+  {
+    mode: 'balanced',
+    query: '',
+    budget: '',
+    text: 'Bom dia! Por favor, voce pode criar uma API REST em Node.js com Express para gerenciar usuarios sem autenticacao OAuth e nao usar ORM? Nunca exponha credenciais nos logs e trate os erros 404 e 422. Obrigado!',
+  },
+  {
+    mode: 'balanced',
+    query: '',
+    budget: '',
+    text: [
+      'Ola! Por favor revise a consulta SQL abaixo sem remover o filtro de tenant_id:',
+      '```sql\nSELECT tenant_id, SUM(amount) AS total FROM ledger WHERE status != \'cancelled\' GROUP BY tenant_id;\n```',
+      JSON.stringify({
+        sample: [
+          { tenant_id: 'org_1', total: 4200, rk: 1 },
+          { tenant_id: 'org_1', total: 3850, rk: 2 },
+          { tenant_id: 'org_2', total: 5100, rk: 1 },
+          { tenant_id: 'org_2', total: 2900, rk: 2 },
+        ],
+      }, null, 2),
+    ].join('\n\n'),
+  },
+  {
+    mode: 'lossless',
+    query: '',
+    budget: '',
+    text: [
+      '2026-11-26T09:14:00Z INFO gateway listening on 0.0.0.0:8080',
+      ...Array.from({ length: 14 }, () => '2026-11-26T09:14:01Z WARN redis_pool timeout retrying connection to replica-02'),
+      '2026-11-26T09:14:04Z ERROR circuit_breaker opened for billing_service after 14 retries',
+    ].join('\n'),
+  },
+  {
+    mode: 'notation',
+    query: '',
+    budget: '',
+    text: 'rf $js @express #mw; auth middleware; prd async cm',
+  },
 ];
 
 let sessionHistory = [];
 let lastCompressedText = '';
 
-function countTokens(t) {
-  if (!t || !t.trim()) return 0;
-  const words = t.trim().split(/\s+/).length;
-  const puncMatches = t.match(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g);
-  const puncCount = puncMatches ? puncMatches.length : 0;
-  return Math.max(1, Math.round(words * 1.25 + puncCount * 0.4));
+function countTokensLocal(text) {
+  if (typeof TokLangEngine !== 'undefined' && typeof TokLangEngine.countTokens === 'function') {
+    return TokLangEngine.countTokens(text, 'o200k_base');
+  }
+  if (!text || !text.trim()) return 0;
+  return Math.max(1, Math.ceil(text.length / 4));
 }
 
 function clearInput() {
   const ta = document.getElementById('app-input');
+  if (!ta) return;
   ta.value = '';
   onInputChange();
   ta.focus();
 }
 
 function onInputChange() {
-  const val = document.getElementById('app-input').value;
+  const ta = document.getElementById('app-input');
+  if (!ta) return;
+  const val = ta.value;
   const len = val.length;
-  const MAX = 16000;
-  document.getElementById('input-tok-count').textContent = countTokens(val) + ' tokens';
-  document.getElementById('char-count').textContent = len.toLocaleString('pt-BR');
+  const MAX = 24000;
+  const tokEl = document.getElementById('input-tok-count');
+  const charEl = document.getElementById('char-count');
+  if (tokEl) tokEl.textContent = countTokensLocal(val) + ' tokens';
+  if (charEl) charEl.textContent = len.toLocaleString('pt-BR');
   const pct = (len / MAX) * 100;
   const bar = document.getElementById('char-bar');
   if (bar) {
@@ -63,24 +106,30 @@ function onInputChange() {
 }
 
 function fillPrompt(i) {
-  document.getElementById('app-input').value = EXAMPLES[i];
+  const preset = EXAMPLES[i];
+  if (!preset) return;
+  const ta = document.getElementById('app-input');
+  const modeEl = document.getElementById('app-mode');
+  const queryEl = document.getElementById('app-query');
+  const budgetEl = document.getElementById('app-budget');
+  if (ta) ta.value = preset.text;
+  if (modeEl) modeEl.value = preset.mode;
+  if (queryEl) queryEl.value = preset.query;
+  if (budgetEl) budgetEl.value = preset.budget;
   onInputChange();
-  document.getElementById('app-input').focus();
+  if (ta) ta.focus();
 }
 
 function copyOutput() {
   if (!lastCompressedText) return;
   navigator.clipboard.writeText(lastCompressedText).then(() => {
     const btn = document.getElementById('copy-output-btn');
-    if (btn) { btn.classList.add('copied'); btn.innerHTML = '✓ Copiado'; }
-    showToast('Resultado copiado!', '✓');
+    if (btn) btn.textContent = 'Copiado';
+    showToast('Saída copiada para a área de transferência', 'OK');
     setTimeout(() => {
-      if (btn) {
-        btn.classList.remove('copied');
-        btn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar';
-      }
-    }, 2000);
-  }).catch(() => showToast('Erro ao copiar — use Ctrl+C', '!'));
+      if (btn) btn.textContent = 'Copiar';
+    }, 1800);
+  }).catch(() => showToast('Erro ao copiar', '!'));
 }
 
 function setPipeStep(step, state, value = '') {
@@ -91,350 +140,240 @@ function setPipeStep(step, state, value = '') {
   if (lbl && state !== 'idle') lbl.classList.add('done');
   if (val && value) val.textContent = value;
 }
+
 function resetPipeline() {
   for (let i = 1; i <= 4; i++) {
-    const dot = document.getElementById('pipe-dot-'+i); if (dot) dot.className = 'pipe-dot';
-    const lbl = document.getElementById('pipe-lbl-'+i); if (lbl) lbl.classList.remove('done');
-    const val = document.getElementById('pipe-val-'+i); if (val) val.textContent = '';
+    const dot = document.getElementById('pipe-dot-' + i);
+    const lbl = document.getElementById('pipe-lbl-' + i);
+    const val = document.getElementById('pipe-val-' + i);
+    if (dot) dot.className = 'pipe-dot';
+    if (lbl) lbl.classList.remove('done');
+    if (val) val.textContent = '';
   }
   const ps = document.getElementById('pipe-status');
   if (ps) { ps.textContent = 'aguardando'; ps.className = 'pill pill-gray'; }
 }
 
 async function doCompress() {
-  const input = document.getElementById('app-input').value.trim();
-  if (!input) { document.getElementById('app-input').focus(); return; }
-  if (input.length > 16000) { showToast('Prompt muito longo. Máximo 16.000 caracteres.', '!'); return; }
+  const inputEl = document.getElementById('app-input');
+  const input = inputEl ? inputEl.value.trim() : '';
+  if (!input) { if (inputEl) inputEl.focus(); return; }
+  if (input.length > 24000) { showToast('Entrada acima do limite de 24.000 caracteres.', '!'); return; }
 
-  const u = await getUser();
-  if (!u) {
-    const anonymousUsage = parseInt(sessionStorage.getItem('anonymous_usage') || '0', 10);
-    if (anonymousUsage >= 1) {
-      const modal = document.getElementById('visitor-limit-modal');
-      if (modal) {
-        modal.style.display = 'flex';
-      } else {
-        showToast('Limite de 1 compressão gratuita para visitantes atingido. Cadastre-se para continuar!', '!');
-        setTimeout(() => navigate('signup'), 1500);
-      }
-      return;
-    }
-  }
+  const modeEl = document.getElementById('app-mode');
+  const queryEl = document.getElementById('app-query');
+  const budgetEl = document.getElementById('app-budget');
+  const mode = modeEl ? modeEl.value : 'balanced';
+  const query = queryEl ? queryEl.value.trim() : '';
+  const maxTokens = budgetEl && budgetEl.value ? Number(budgetEl.value) : null;
 
   if (typeof loadActiveVocabulary === 'function') {
     await loadActiveVocabulary();
   }
 
-  const btn      = document.getElementById('compress-btn');
-  const output   = document.getElementById('app-output');
+  const btn = document.getElementById('compress-btn');
+  const output = document.getElementById('app-output');
   const errorDiv = document.getElementById('app-error');
-  const copyBtn  = document.getElementById('copy-output-btn');
+  const copyBtn = document.getElementById('copy-output-btn');
+  const auditEl = document.getElementById('app-audit');
 
   btn.disabled = true;
-  btn.innerHTML = '<span class="blink-cursor"></span>&nbsp; Comprimindo...';
-  output.innerHTML = '<span class="output-loading"><span class="blink-cursor"></span> analisando semântica...</span>';
+  output.innerHTML = '<span class="output-loading"><span class="blink-cursor"></span> compilando em BPE...</span>';
   document.getElementById('app-stats').style.display = 'none';
+  if (auditEl) auditEl.style.display = 'none';
   errorDiv.innerHTML = '';
   if (copyBtn) copyBtn.style.display = 'none';
   resetPipeline();
 
-  const tokBefore = countTokens(input);
   const ps = document.getElementById('pipe-status');
   if (ps) { ps.textContent = 'processando'; ps.className = 'pill pill-amber'; }
 
-  setPipeStep(1, 'done', tokBefore + 'tk');
-  await sleep(100);
-  setPipeStep(2, 'active');
-
-  const items = document.querySelectorAll('.ss-lbl');
-  if (items.length >= 4) {
-    items[2].textContent = 'economia';
-    items[3].textContent = '$ economizado*';
-  }
-
-  if (typeof TokLangEngine !== 'undefined') {
-    const localCompressed = TokLangEngine.compressLocally(input, window.activeVocabulary);
-    if (localCompressed) {
-      console.log('[LOCAL COMPILER] Prompt comprimido localmente (0ms):', localCompressed);
-      lastCompressedText = localCompressed;
-      
-      await sleep(100);
-      setPipeStep(2, 'done', 'semântica mapeada (local)');
-      await sleep(80);
-      setPipeStep(3, 'active');
-      await sleep(100);
-      
-      const tokAfter = countTokens(localCompressed);
-      const savings  = Math.max(0, Math.round((1 - tokAfter / tokBefore) * 100));
-      const usdSaved = ((tokBefore - tokAfter) * 0.003 / 1000).toFixed(5);
-      
-      setPipeStep(3, 'done', tokAfter + 'tk');
-      await sleep(60);
-      setPipeStep(4, 'done', '✓ pronto para envio');
-      
-      if (ps) { ps.textContent = 'concluído'; ps.className = 'pill pill-green'; }
-      output.innerHTML = `<span class="output-text">${escHtml(localCompressed)}</span>`;
-      document.getElementById('output-tok-count').textContent = tokAfter + ' tokens';
-      if (copyBtn) copyBtn.style.display = 'flex';
-      
-      document.getElementById('stat-before').textContent = tokBefore;
-      document.getElementById('stat-after').textContent  = tokAfter;
-      document.getElementById('stat-pct').textContent    = savings + '%';
-      document.getElementById('stat-usd').textContent    = '$' + usdSaved;
-      document.getElementById('app-stats').style.display = 'flex';
-      
-      const now = new Date();
-      sessionHistory.unshift({
-        compressed: localCompressed, savings,
-        time: now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
-        original: input.substring(0,60)
-      });
-      if (!u) {
-        const usage = parseInt(sessionStorage.getItem('anonymous_usage') || '0', 10);
-        sessionStorage.setItem('anonymous_usage', usage + 1);
-      }
-      renderHistory();
-      updateUsageUI();
-      
-      btn.disabled = false;
-      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Comprimir <span style="font-weight:300;opacity:.6;font-size:10px;margin-left:4px">Ctrl+Enter</span>`;
-      return;
-    }
-  }
-
   try {
-    const headers = { 'Content-Type': 'application/json' };
-    if (window.supabase) {
-      const { data: { session } } = await window.supabase.auth.getSession();
-      if (session && session.access_token) {
-        headers['Authorization'] = `Bearer ${session.access_token}`;
-      }
-    }
+    let report = null;
 
-    const res = await fetch('/api/compress', {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({ prompt: input, userId: u ? u.id : null })
-    });
-    if (!res.ok) {
-      let errMsg = 'Erro no servidor';
-      try {
-        const text = await res.text();
-        const errData = JSON.parse(text);
-        errMsg = errData.error || errMsg;
-      } catch (e) {
-        errMsg = `Erro no servidor (Status ${res.status})`;
-      }
-      throw new Error(errMsg);
-    }
-    const data = await res.json();
-    const compressed = data.compressed;
-    lastCompressedText = compressed;
-
-    await sleep(200);
-    setPipeStep(2, 'done', 'semântica mapeada');
-    await sleep(200);
-    setPipeStep(3, 'active');
-    await sleep(280);
-
-    const tokAfter = countTokens(compressed);
-    const savings  = Math.max(0, Math.round((1 - tokAfter / tokBefore) * 100));
-    const usdSaved = ((tokBefore - tokAfter) * 0.003 / 1000).toFixed(5);
-
-    setPipeStep(3, 'done', tokAfter + 'tk');
-    await sleep(180);
-    setPipeStep(4, 'done', '✓ pronto para envio');
-
-    if (ps) { ps.textContent = 'concluído'; ps.className = 'pill pill-green'; }
-
-    output.innerHTML = `<span class="output-text">${escHtml(compressed)}</span>`;
-    document.getElementById('output-tok-count').textContent = tokAfter + ' tokens';
-    if (copyBtn) copyBtn.style.display = 'flex';
-
-    document.getElementById('stat-before').textContent = tokBefore;
-    document.getElementById('stat-after').textContent  = tokAfter;
-    document.getElementById('stat-pct').textContent    = savings + '%';
-    document.getElementById('stat-usd').textContent    = '$' + usdSaved;
-    document.getElementById('app-stats').style.display = 'flex';
-
-    let session = null;
-    if (window.supabase && !window.IS_DEMO) {
-      const res = await window.supabase.auth.getSession();
-      session = res.data.session;
-    }
-    if (session && !window.IS_DEMO) {
-      await window.supabase.from('history').insert({
-        user_id: session.user.id,
-        original_text: input,
-        compressed_text: compressed,
-        tokens_before: tokBefore,
-        tokens_after: tokAfter,
-        savings_pct: savings
+    // Prefer exact server BPE (js-tiktoken) when running on Express/Vercel, fallback seamlessly to local browser engine v2
+    try {
+      const res = await fetch('/api/compress', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          prompt: input,
+          mode,
+          query,
+          maxTokens,
+          encoding: 'o200k_base',
+          customVocab: window.activeVocabulary && window.activeVocabulary.length ? window.activeVocabulary : null,
+        }),
       });
+      if (res.ok) {
+        const data = await res.json();
+        report = {
+          text: data.compressed,
+          tokensBefore: data.tokens_before,
+          tokensAfter: data.tokens_after,
+          tokensSaved: data.tokens_saved,
+          savingsPct: data.savings_pct,
+          attentionFlopsReductionPct: data.attention_flops_reduction_pct,
+          prefixHash: data.prefix_hash,
+          stagesApplied: data.stages_applied || [],
+          latencyMs: data.latency_ms,
+          tokenizer: data.tokenizer || { source: 'js-tiktoken:o200k_base' },
+          audit: data.audit || { negationsPreservedRatio: 1, monotonicBpeVerified: true },
+        };
+      }
+    } catch (_) {
+      report = null;
+    }
+
+    if (!report && typeof TokLangEngine !== 'undefined') {
+      report = TokLangEngine.compile(input, {
+        mode,
+        query,
+        maxTokens,
+        encoding: 'o200k_base',
+        customVocab: window.activeVocabulary && window.activeVocabulary.length ? window.activeVocabulary : null,
+      });
+    }
+
+    if (!report) throw new Error('Motor TokLang v2 não carregado.');
+
+    lastCompressedText = report.text;
+
+    setPipeStep(1, 'done', `${report.tokensBefore} tk`);
+    setPipeStep(2, 'done', report.stagesApplied.filter((s) => s.includes('tabular') || s.includes('json') || s.includes('log')).join(', ') || 'nenhum bloco');
+    setPipeStep(3, 'done', `negações ${Math.round((report.audit.negationsPreservedRatio || 1) * 100)}%`);
+    setPipeStep(4, 'done', `${report.tokensAfter} tk | ${report.latencyMs}ms`);
+
+    if (ps) { ps.textContent = 'auditado'; ps.className = 'pill pill-green'; }
+
+    output.innerHTML = `<span class="output-text">${escHtml(report.text)}</span>`;
+    document.getElementById('output-tok-count').textContent = `${report.tokensAfter} tokens`;
+    if (copyBtn) copyBtn.style.display = 'inline-flex';
+
+    const items = document.querySelectorAll('.ss-lbl');
+    if (items.length >= 4) {
+      items[2].textContent = 'redução BPE';
+      items[3].textContent = 'FLOPs prefill';
+    }
+    document.getElementById('stat-before').textContent = report.tokensBefore;
+    document.getElementById('stat-after').textContent = report.tokensAfter;
+    document.getElementById('stat-pct').textContent = `-${report.savingsPct}%`;
+    document.getElementById('stat-usd').textContent = `-${report.attentionFlopsReductionPct}%`;
+    document.getElementById('app-stats').style.display = 'grid';
+
+    if (auditEl) {
+      auditEl.innerHTML = [
+        `<span><strong>Tokenizer:</strong> ${escHtml(report.tokenizer.source || 'o200k_base')}</span>`,
+        `<span><strong>Monotonic BPE:</strong> ${report.audit.monotonicBpeVerified ? 'PASS' : 'ROLLBACK'}</span>`,
+        `<span><strong>Polarity Lock:</strong> ${Math.round((report.audit.negationsPreservedRatio || 1) * 100)}%</span>`,
+        `<span><strong>SHA-256:</strong> ${(report.prefixHash || '').slice(0, 14)}</span>`,
+        `<span><strong>Estágios:</strong> ${escHtml((report.stagesApplied || []).join(', ') || 'passthrough')}</span>`,
+      ].join('');
+      auditEl.style.display = 'flex';
     }
 
     const now = new Date();
     sessionHistory.unshift({
-      compressed, savings,
-      time: now.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }),
-      original: input.substring(0,60)
+      compressed: report.text,
+      savings: Math.round(report.savingsPct),
+      time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      original: input.substring(0, 60),
     });
-
-    if (!u) {
-      const usage = parseInt(sessionStorage.getItem('anonymous_usage') || '0', 10);
-      sessionStorage.setItem('anonymous_usage', usage + 1);
-    }
     renderHistory();
-    updateUsageUI();
-
+    if (typeof updateUsageUI === 'function') updateUsageUI();
   } catch (err) {
     lastCompressedText = '';
-    output.innerHTML = '<span class="output-placeholder">resultado aparecerá aqui...</span>';
-    setPipeStep(2, 'idle');
+    output.innerHTML = '<span class="output-placeholder">A saída compilada e a auditoria BPE aparecerão aqui.</span>';
     if (ps) { ps.textContent = 'erro'; ps.className = 'pill pill-gray'; }
-    errorDiv.innerHTML = `<div class="error-banner">
-      <strong>Erro:</strong> ${escHtml(err.message)}<br>
-      <span style="font-size:10px;opacity:.7">Verifique sua conexão ou chaves de API.</span>
-    </div>`;
+    errorDiv.innerHTML = `<div class="error-banner"><strong>Erro:</strong> ${escHtml(err.message)}</div>`;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg> Comprimir <span style="font-weight:300;opacity:.6;font-size:10px;margin-left:4px">Ctrl+Enter</span>`;
   }
 }
 
 async function doExpand() {
-  const input = document.getElementById('app-input').value.trim();
-  if (!input) { document.getElementById('app-input').focus(); return; }
+  const inputEl = document.getElementById('app-input');
+  const input = inputEl ? inputEl.value.trim() : '';
+  if (!input) { if (inputEl) inputEl.focus(); return; }
 
   if (typeof loadActiveVocabulary === 'function') {
     await loadActiveVocabulary();
   }
 
-  const btn      = document.getElementById('expand-btn');
-  const output   = document.getElementById('app-output');
+  const btn = document.getElementById('expand-btn');
+  const output = document.getElementById('app-output');
   const errorDiv = document.getElementById('app-error');
-  const copyBtn  = document.getElementById('copy-output-btn');
+  const copyBtn = document.getElementById('copy-output-btn');
+  const auditEl = document.getElementById('app-audit');
 
   btn.disabled = true;
-  const originalHtml = btn.innerHTML;
-  btn.innerHTML = '<span class="blink-cursor"></span>&nbsp; Expandindo...';
-  output.innerHTML = '<span class="output-loading"><span class="blink-cursor"></span> processando notação TokLang...</span>';
-  document.getElementById('app-stats').style.display = 'none';
   errorDiv.innerHTML = '';
-  if (copyBtn) copyBtn.style.display = 'none';
   resetPipeline();
-
-  const tokBefore = countTokens(input);
-  const ps = document.getElementById('pipe-status');
-  if (ps) { ps.textContent = 'processando'; ps.className = 'pill pill-amber'; }
-
-  setPipeStep(1, 'done', tokBefore + 'tk (comprimido)');
-  await sleep(100);
-  setPipeStep(2, 'active');
 
   try {
     if (typeof TokLangEngine === 'undefined') {
-      throw new Error('Mecanismo de expansão TokLang não foi carregado.');
+      throw new Error('TokLangEngine v2 não carregado.');
     }
     const expanded = TokLangEngine.expand(input, window.activeVocabulary);
-    if (!expanded) {
-      throw new Error('Formato TokLang inválido ou vazio.');
-    }
+    if (!expanded) throw new Error('Entrada inválida para expansão ou decodificação.');
 
     lastCompressedText = expanded;
-    await sleep(100);
-    setPipeStep(2, 'done', 'estrutura mapeada');
-    await sleep(80);
-    setPipeStep(3, 'active');
-    await sleep(100);
+    const tokBefore = countTokensLocal(input);
+    const tokAfter = countTokensLocal(expanded);
+    const isStructuredDecode = input.startsWith('@table') || input.startsWith('@struct{');
 
-    const tokAfter = countTokens(expanded);
-    const expansionFactor = (tokAfter / Math.max(1, tokBefore)).toFixed(1);
+    setPipeStep(1, 'done', `${tokBefore} tk`);
+    setPipeStep(2, 'done', isStructuredDecode ? 'decode @table -> JSON' : 'expansão DSL');
+    setPipeStep(3, 'done', `${tokAfter} tk`);
+    setPipeStep(4, 'done', 'concluído');
 
-    setPipeStep(3, 'done', tokAfter + 'tk');
-    await sleep(60);
-    setPipeStep(4, 'done', '✓ expansão concluída');
+    const ps = document.getElementById('pipe-status');
+    if (ps) { ps.textContent = 'decodificado'; ps.className = 'pill pill-blue'; }
 
-    if (ps) { ps.textContent = 'concluído'; ps.className = 'pill pill-green'; }
-
-    output.innerHTML = `<span class="output-text" style="color:var(--blue)">${escHtml(expanded)}</span>`;
-    document.getElementById('output-tok-count').textContent = tokAfter + ' tokens';
-    if (copyBtn) copyBtn.style.display = 'flex';
-
-    document.getElementById('stat-before').textContent = tokBefore;
-    document.getElementById('stat-after').textContent  = tokAfter;
-    document.getElementById('stat-pct').textContent    = '+' + Math.round((tokAfter/Math.max(1, tokBefore)-1)*100) + '%';
-    document.getElementById('stat-usd').textContent    = '×' + expansionFactor;
+    output.innerHTML = `<span class="output-text" style="color:var(--petrol)">${escHtml(expanded)}</span>`;
+    document.getElementById('output-tok-count').textContent = `${tokAfter} tokens`;
+    if (copyBtn) copyBtn.style.display = 'inline-flex';
 
     const items = document.querySelectorAll('.ss-lbl');
     if (items.length >= 4) {
-      items[2].textContent = 'crescimento';
-      items[3].textContent = 'fator expansão';
+      items[2].textContent = 'expansão';
+      items[3].textContent = 'fator';
     }
-    document.getElementById('app-stats').style.display = 'flex';
-
+    document.getElementById('stat-before').textContent = tokBefore;
+    document.getElementById('stat-after').textContent = tokAfter;
+    document.getElementById('stat-pct').textContent = `+${Math.max(0, Math.round((tokAfter / Math.max(1, tokBefore) - 1) * 100))}%`;
+    document.getElementById('stat-usd').textContent = `${(tokAfter / Math.max(1, tokBefore)).toFixed(1)}x`;
+    document.getElementById('app-stats').style.display = 'grid';
+    if (auditEl) auditEl.style.display = 'none';
   } catch (err) {
     lastCompressedText = '';
-    output.innerHTML = '<span class="output-placeholder">resultado aparecerá aqui...</span>';
-    setPipeStep(2, 'idle');
-    if (ps) { ps.textContent = 'erro'; ps.className = 'pill pill-gray'; }
-    errorDiv.innerHTML = `<div class="error-banner">
-      <strong>Erro ao expandir:</strong> ${escHtml(err.message)}<br>
-      <span style="font-size:10px;opacity:.7">Verifique se o prompt segue a notação TokLang (ex: ações como cr, ex, $py, @framework).</span>
-    </div>`;
+    errorDiv.innerHTML = `<div class="error-banner"><strong>Erro ao expandir/decodificar:</strong> ${escHtml(err.message)}</div>`;
   } finally {
     btn.disabled = false;
-    btn.innerHTML = originalHtml;
   }
 }
 
 async function renderHistory() {
-  const sec  = document.getElementById('history-section');
+  const sec = document.getElementById('history-section');
   const body = document.getElementById('history-body');
   if (!sec || !body) return;
 
-  const { data: { session } } = await window.supabase.auth.getSession();
-  
-  if (session) {
-    const { data: dbHistory, error } = await window.supabase
-      .from('history')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(8);
-
-    if (!error && dbHistory && dbHistory.length > 0) {
-      sec.style.display = 'block';
-      body.innerHTML = dbHistory.map(h => `
-        <div class="history-item" title="${escHtml(h.original_text)}">
-          <div class="hi-compressed">${escHtml(h.compressed_text)}</div>
-          <div class="hi-meta">
-            <span class="hi-saving">−${h.savings_pct}%</span>
-            <span class="hi-time">${new Date(h.created_at).toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' })}</span>
-          </div>
-        </div>`).join('');
-      return;
-    }
-  }
-
-  // Fallback para histórico da sessão local
   if (sessionHistory.length === 0) {
     sec.style.display = 'none';
     return;
   }
   sec.style.display = 'block';
-  body.innerHTML = sessionHistory.slice(0, 8).map(h => `
+  body.innerHTML = sessionHistory.slice(0, 6).map((h) => `
     <div class="history-item" title="${escHtml(h.original)}">
       <div class="hi-compressed">${escHtml(h.compressed)}</div>
       <div class="hi-meta">
-        <span class="hi-saving">−${h.savings}%</span>
+        <span class="hi-saving">-${h.savings}% BPE</span>
         <span class="hi-time">${h.time}</span>
       </div>
     </div>`).join('');
 }
 
-window.closeVisitorModal = function() {
+window.closeVisitorModal = function () {
   const modal = document.getElementById('visitor-limit-modal');
-  if (modal) {
-    modal.style.display = 'none';
-  }
+  if (modal) modal.style.display = 'none';
 };

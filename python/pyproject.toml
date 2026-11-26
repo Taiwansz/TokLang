@@ -1,23 +1,20 @@
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "toklang"
-version = "0.1.0"
-description = "Semantic compression middleware for LLMs (Python SDK)"
+version = "2.0.0"
+description = "Deterministic, BPE-verified, negation-safe, and Cache-Aware (CAPC) prompt compiler for LLMs"
 readme = "README.md"
-authors = [
-    { name = "Matheus Sousa", email = "matheus.sousa@agi.com.br" }
-]
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
-]
-requires-python = ">=3.7"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Matheus Sousa (Taiwansz)" }]
 dependencies = []
 
-[project.urls]
-"Homepage" = "https://github.com/Taiwansz/TokLang"
-"Bug Tracker" = "https://github.com/Taiwansz/TokLang/issues"
+[project.optional-dependencies]
+bpe = ["tiktoken>=0.7.0"]
+dev = ["pytest>=8.0.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

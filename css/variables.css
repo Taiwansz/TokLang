@@ -1,67 +1,131 @@
-/* ===== RESET & ROOT ===== */
+/* ===== TOKLANG v2.0 — INDUSTRIAL POP SWISS LAB DESIGN TOKENS ===== */
 :root {
-  --bg:   #07090d;
-  --bg2:  #0c1018;
-  --bg3:  #101620;
-  --bg4:  #141d28;
-  --nav-bg: rgba(7, 9, 13, 0.82);
-  --border:  rgba(255,255,255,0.06);
-  --border2: rgba(255,255,255,0.12);
-  --border3: rgba(255,255,255,0.20);
-  --green:   #00ff88;
-  --green2:  #00d970;
-  --green3:  #00b559;
-  --gdim:    rgba(0,255,136,0.08);
-  --gglow:   rgba(0,255,136,0.18);
-  --amber:   #f5a623;
-  --amber2:  #e8940f;
-  --blue:    #4d9fff;
-  --red:     #ff5e5e;
-  --text:    #dde3ec;
-  --muted:   #6b7685;
-  --muted2:  #8fa0b5;
-  --mono: 'JetBrains Mono', monospace;
-  --sans: 'Syne', sans-serif;
-  --radius: 10px;
-  --radius-sm: 6px;
-  --radius-lg: 16px;
+  /* Light Editorial Default (Technical Paper + Carbon Ink + Vermelho-Tomate + Petrol + Gold) */
+  --bg:         #F5F2EA;
+  --bg2:        #FFFFFF;
+  --bg3:        #ECE7DC;
+  --bg4:        #E2DCD0;
+  --nav-bg:     rgba(245, 242, 234, 0.88);
+  --border:     rgba(16, 19, 24, 0.10);
+  --border2:    rgba(16, 19, 24, 0.17);
+  --border3:    rgba(16, 19, 24, 0.30);
+
+  /* Brand Accents (Industrial Pop — Zero Neon Green, Zero Purple) */
+  --accent:     #C9341B;
+  --accent2:    #A62813;
+  --accent-dim: rgba(201, 52, 27, 0.08);
+  --accent-bd:  rgba(201, 52, 27, 0.24);
+  --petrol:     #124E66;
+  --petrol-dim: rgba(18, 78, 102, 0.08);
+  --petrol-bd:  rgba(18, 78, 102, 0.24);
+  --gold:       #996E12;
+  --gold-dim:   rgba(153, 110, 18, 0.10);
+  --gold-bd:    rgba(153, 110, 18, 0.26);
+  --ok:         #1B6B46;
+  --ok-dim:     rgba(27, 107, 70, 0.09);
+  --ok-bd:      rgba(27, 107, 70, 0.24);
+  --red:        #B91C1C;
+
+  /* Compatibility aliases mapped to Industrial Pop palette */
+  --green:      var(--accent);
+  --green2:     var(--accent2);
+  --green3:     #881F0E;
+  --gdim:       var(--accent-dim);
+  --gglow:      rgba(201, 52, 27, 0.16);
+  --amber:      var(--gold);
+  --amber2:     #7C580D;
+  --blue:       var(--petrol);
+
+  /* Ink & Neutrals */
+  --text:       #101318;
+  --muted:      #4E5663;
+  --muted2:     #2D333E;
+  --on-accent:  #FAF8F4;
+
+  /* Typography & Geometry */
+  --sans:       'Schibsted Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono:       'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  --radius-sm:  8px;
+  --radius:     14px;
+  --radius-lg:  22px;
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-sm:  0 2px 8px rgba(16, 19, 24, 0.04);
+  --shadow-md:  0 14px 36px rgba(16, 19, 24, 0.07);
 }
 
-html.light-theme {
-  --bg:      #f5f7fa;
-  --bg2:     #ffffff;
-  --bg3:     #edf1f7;
-  --bg4:     #e4e9f2;
-  --nav-bg:  rgba(255, 255, 255, 0.88);
-  --border:  rgba(0,0,0,0.08);
-  --border2: rgba(0,0,0,0.14);
-  --border3: rgba(0,0,0,0.22);
-  --green:   #008f51;
-  --green2:  #007340;
-  --green3:  #00572f;
-  --gdim:    rgba(0,143,81,0.06);
-  --gglow:   rgba(0,143,81,0.12);
-  --amber:   #d97706;
-  --amber2:  #b45309;
-  --blue:    #2563eb;
-  --red:     #dc2626;
-  --text:    #0f172a;
-  --muted:   #475569;
-  --muted2:  #334155;
+/* Optional ThLoop Charcoal Dark Theme (Zero Neon Green, Zero Purple) */
+html.dark-theme {
+  --bg:         #0B0C0F;
+  --bg2:        #13151B;
+  --bg3:        #1A1D25;
+  --bg4:        #222631;
+  --nav-bg:     rgba(11, 12, 15, 0.88);
+  --border:     rgba(240, 237, 230, 0.09);
+  --border2:    rgba(240, 237, 230, 0.16);
+  --border3:    rgba(240, 237, 230, 0.28);
+
+  --accent:     #E24A2E;
+  --accent2:    #C9341B;
+  --accent-dim: rgba(226, 74, 46, 0.12);
+  --accent-bd:  rgba(226, 74, 46, 0.32);
+  --petrol:     #5AA6C2;
+  --petrol-dim: rgba(90, 166, 194, 0.12);
+  --petrol-bd:  rgba(90, 166, 194, 0.30);
+  --gold:       #C8B560;
+  --gold-dim:   rgba(200, 181, 96, 0.12);
+  --gold-bd:    rgba(200, 181, 96, 0.30);
+  --ok:         #4DA97F;
+  --ok-dim:     rgba(77, 169, 127, 0.12);
+  --ok-bd:      rgba(77, 169, 127, 0.30);
+  --red:        #F06A6A;
+
+  --text:       #F0EDE6;
+  --muted:      #9CA3AF;
+  --muted2:     #D1D5DB;
+  --on-accent:  #0B0C0F;
+  --shadow-sm:  0 2px 10px rgba(0, 0, 0, 0.25);
+  --shadow-md:  0 18px 48px rgba(0, 0, 0, 0.45);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
-body{
-  background:var(--bg);
-  color:var(--text);
-  font-family:var(--sans);
-  line-height:1.6;
-  overflow-x:hidden;
-  min-height:100vh;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-button,input,textarea,select{font-family:inherit}
-a{color:inherit;text-decoration:none}
-img{display:block;max-width:100%}
-::-webkit-scrollbar{width:5px}
-::-webkit-scrollbar-track{background:var(--bg)}
-::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+button, input, textarea, select {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }

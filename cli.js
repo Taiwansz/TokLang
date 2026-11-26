@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+/**
+ * TokLang v2.0 CLI — Deterministic BPE-Verified & Cache-Aware Prompt Compiler
+ */
 
 const fs = require('fs');
 const path = require('path');
@@ -8,25 +11,35 @@ const args = process.argv.slice(2);
 
 function showHelp() {
   console.log(`
-[TokLang CLI - Semantic Compression Engine]
+TokLang CLI v${TokLangEngine.VERSION} — Deterministic BPE & Cache-Aware Prompt Compiler
 
-Uso:
-  toklang-cli <action> [input] [options]
+Usage:
+  toklang <action> [input] [options]
 
-Ações:
-  compress "<prompt>"      Comprime o prompt informado localmente.
-  expand "<shorthand>"     Expande a notação TokLang de volta para linguagem natural.
-  file <path>              Lê um arquivo de texto, comprime seu conteúdo e exibe/salva.
+Actions:
+  compile "<text>"         Compile/compress text or JSON payload offline (alias: compress)
+  expand "<text>"          Decode @table/@struct back to JSON or expand TokLang notation (alias: decode)
+  file <path>              Read a file (.txt, .md, .json, .log) and compile it
+  messages <json-path>     Run Cache-Aware Prompt Compression (CAPC) over a messages[] JSON file
 
-Opções:
-  --vocab <path>           Carrega um arquivo JSON de vocabulário customizado.
-  --out <path>             Salva o resultado em um arquivo de saída (válido para a ação 'file').
+Options:
+  --mode <mode>            lossless | balanced (default) | aggressive | notation
+  --max-tokens <n>         Hard BPE token budget for extractive compilation
+  --query "<text>"         Focus query for query-aware BM25 extraction
+  --encoding <name>        o200k_base (default) | cl100k_base
+  --provider <name>        openai | anthropic | gemini | deepseek (for messages action)
+  --vocab <path>           Load custom JSON vocabulary file
+  --out <path>             Write compiled output to file
+  --json                   Emit full machine-readable telemetry JSON
+`);
+}
 
-Exemplos:
-  node cli.js compress "Cria um script python usando streamlit para calcular velocidade de forma bonita"
-  node cli.js expand "cr $py @streamlit #scr; calcular velocidade; ui+"
-  node cli.js file meu_prompt.txt --out meu_prompt_comprimido.txt
-  `);
+function getFlagValue(flag) {
+  const idx = args.indexOf(flag);
+  if (idx !== -1 && args[idx + 1] && !args[idx + 1].startsWith('--')) {
+    return args[idx + 1];
+  }
+  return null;
 }
 
 if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
@@ -36,88 +49,94 @@ if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
 
 const action = args[0];
 const inputArg = args[1];
+const mode = getFlagValue('--mode') || 'balanced';
+const maxTokensRaw = getFlagValue('--max-tokens');
+const maxTokens = maxTokensRaw ? Number(maxTokensRaw) : null;
+const query = getFlagValue('--query') || '';
+const encoding = getFlagValue('--encoding') || 'o200k_base';
+const provider = getFlagValue('--provider') || 'openai';
+const vocabPath = getFlagValue('--vocab');
+const outputPath = getFlagValue('--out');
+const asJson = args.includes('--json');
 
-if (!['compress', 'expand', 'file'].includes(action)) {
-  console.error(`[Erro] Ação "${action}" desconhecida.`);
+let customVocab = null;
+if (vocabPath) {
+  try {
+    customVocab = JSON.parse(fs.readFileSync(path.resolve(vocabPath), 'utf8'));
+  } catch (err) {
+    console.error(`[ERROR] Failed reading vocab file: ${err.message}`);
+    process.exit(1);
+  }
+}
+
+if (!['compile', 'compress', 'expand', 'decode', 'file', 'messages'].includes(action)) {
+  console.error(`[ERROR] Unknown action "${action}".`);
   showHelp();
   process.exit(1);
 }
 
 if (!inputArg) {
-  console.error('[Erro] Entrada (texto ou caminho do arquivo) é obrigatória.');
+  console.error('[ERROR] Input text or file path is required.');
   process.exit(1);
 }
 
-// Parse options
-let customVocab = null;
-const vocabIndex = args.indexOf('--vocab');
-if (vocabIndex !== -1 && args[vocabIndex + 1]) {
-  const vocabPath = path.resolve(args[vocabIndex + 1]);
-  try {
-    const rawVocab = fs.readFileSync(vocabPath, 'utf8');
-    customVocab = JSON.parse(rawVocab);
-    console.log(`[Info] Vocabulário customizado carregado de: ${vocabPath}`);
-  } catch (err) {
-    console.error(`[Erro] Erro ao ler o arquivo de vocabulário customizado: ${err.message}`);
-    process.exit(1);
+if (action === 'compile' || action === 'compress' || action === 'file') {
+  const source = action === 'file' ? fs.readFileSync(path.resolve(inputArg), 'utf8') : inputArg;
+  const report = TokLangEngine.compile(source, {
+    mode,
+    maxTokens,
+    query,
+    encoding,
+    customVocab,
+  });
+
+  if (outputPath) {
+    fs.writeFileSync(path.resolve(outputPath), report.text, 'utf8');
   }
-}
 
-let outputPath = null;
-const outIndex = args.indexOf('--out');
-if (outIndex !== -1 && args[outIndex + 1]) {
-  outputPath = path.resolve(args[outIndex + 1]);
-}
-
-// Execute actions
-if (action === 'compress') {
-  const start = Date.now();
-  const res = TokLangEngine.compressLocally(inputArg, customVocab);
-  const duration = Date.now() - start;
-  
-  if (res) {
-    console.log(`\n[OK] Comprimido em ${duration}ms:`);
-    console.log(res);
+  if (asJson) {
+    console.log(JSON.stringify(report, null, 2));
   } else {
-    console.log('\n[Aviso] A Engine local não pôde comprimir este prompt (tamanho ou falta de ação clara).');
+    console.log(`[OK] TokLang v${report.version} | mode=${report.mode} | ${report.tokenizer.source}`);
+    console.log(
+      `Tokens: ${report.tokensBefore} -> ${report.tokensAfter} (-${report.tokensSaved} / -${report.savingsPct}%) | ` +
+      `Prefill FLOPs: -${report.attentionFlopsReductionPct}% | Negations: ${Math.round(report.audit.negationsPreservedRatio * 100)}% | ` +
+      `Latency: ${report.latencyMs}ms`
+    );
+    console.log(`Stages: ${report.stagesApplied.join(', ') || 'none'} | SHA-256: ${report.prefixHash.slice(0, 16)}`);
+    console.log('---');
+    console.log(report.text);
   }
-} 
-else if (action === 'expand') {
-  const start = Date.now();
+} else if (action === 'expand' || action === 'decode') {
   const res = TokLangEngine.expand(inputArg, customVocab);
-  const duration = Date.now() - start;
-  
-  console.log(`\n[OK] Expandido em ${duration}ms:`);
-  console.log(res);
-} 
-else if (action === 'file') {
-  const filePath = path.resolve(inputArg);
-  if (!fs.existsSync(filePath)) {
-    console.error(`[Erro] Arquivo não encontrado em: ${filePath}`);
-    process.exit(1);
+  if (outputPath) {
+    fs.writeFileSync(path.resolve(outputPath), res, 'utf8');
   }
-  
-  try {
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    console.log(`[Lendo] Lendo arquivo: ${filePath} (${fileContent.length} caracteres)`);
-    
-    const start = Date.now();
-    const res = TokLangEngine.compressLocally(fileContent, customVocab);
-    const duration = Date.now() - start;
-    
-    if (res) {
-      if (outputPath) {
-        fs.writeFileSync(outputPath, res, 'utf8');
-        console.log(`[OK] Salvo em: ${outputPath}`);
-      } else {
-        console.log(`\n[OK] Comprimido em ${duration}ms:`);
-        console.log(res);
-      }
-    } else {
-      console.log('\n[Aviso] A Engine local não pôde comprimir o conteúdo deste arquivo.');
-    }
-  } catch (err) {
-    console.error(`[Erro] Erro ao processar o arquivo: ${err.message}`);
-    process.exit(1);
+  console.log(res);
+} else if (action === 'messages') {
+  const payload = JSON.parse(fs.readFileSync(path.resolve(inputArg), 'utf8'));
+  const messages = Array.isArray(payload) ? payload : payload.messages;
+  const report = TokLangEngine.compileMessages(messages, {
+    provider,
+    mode,
+    encoding,
+    customVocab,
+  });
+  if (outputPath) {
+    fs.writeFileSync(path.resolve(outputPath), JSON.stringify(report.messages, null, 2), 'utf8');
+  }
+  if (asJson) {
+    console.log(JSON.stringify(report, null, 2));
+  } else {
+    console.log(`[OK] TokLang CAPC v${report.version} | provider=${report.provider}`);
+    console.log(
+      `Tokens: ${report.metrics.totalTokensBefore} -> ${report.metrics.totalTokensAfter} (-${report.metrics.savingsPct}%) | ` +
+      `Cache eligible: ${report.cache.eligible} | Prefix SHA-256: ${report.cache.prefixHash.slice(0, 16)}`
+    );
+    console.log(
+      `Cost per ${report.economics.requestsPerBatch} reqs: Raw $${report.economics.rawUncachedUsd} | ` +
+      `Raw+Cache $${report.economics.rawCachedUsd} | CAPC $${report.economics.capcSteadyStateUsd} ` +
+      `(-${report.economics.capcSavingsVsRawPct}% vs raw, -${report.economics.capcSavingsVsCachedPct}% vs cached)`
+    );
   }
 }

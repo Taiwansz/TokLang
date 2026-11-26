@@ -1,159 +1,146 @@
 import { createClient } from '@supabase/supabase-js';
+import TokLangEngine from '../../js/toklang-engine.js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
-const SYSTEM_PROMPT = `Você é o motor de compressão do TokLang. Converta prompts em linguagem natural para notação TokLang comprimida.
-
-GRAMÁTICA TOKLANG:
-Formato: AÇÃO $LANG @FRAMEWORK #ESTRUTURA; tarefa; in[params]; modificadores
-
-AÇÕES: cr(criar) fix(debug) ex(explicar) rf(refatorar) op(otimizar) tst(testes) doc(documentar) cv(converter) rev(revisar) sum(resumir)
-LINGUAGEM: $py $js $ts $sql $go $rs $sh $css $java $rb
-FRAMEWORKS: @streamlit @fastapi @flask @react @next @express @pandas @plt @prisma @pg @mongo @jest
-ESTRUTURA: #fn #cls #scr #api #comp #hook #mod #mw
-PARÂMETROS: in[a,b,c] out[x,y] err[404,422]
-MODIFICADORES: ui+(visual bonito) cm(comentários) prd(produção) min(simples) dk(exemplos) typ(tipos) async *(máxima qualidade)
-
-REGRAS:
-1. REMOVA completamente: saudações, "por favor", "obrigado", cortesias, "você pode", "seria legal", "boa tarde"
-2. Identifique a ação principal
-3. Identifique linguagem ($) e framework (@) se mencionados
-4. Extraia parâmetros de entrada se houver
-5. Mapeie requisitos em modificadores
-6. Tarefa = 2-5 palavras descritivas no máximo
-
-RETORNE APENAS a notação TokLang em uma única linha. Sem explicação, sem markdown, sem aspas.`;
+const supabase = (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY)
+  ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
+  : null;
 
 export default async function handler(req, res) {
-  // O SDK sempre usa POST
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const apiKey = req.headers['x-api-key'];
-  const { prompt } = req.body;
+  const { prompt, messages, mode = 'balanced', maxTokens = null, query = '', encoding = 'o200k_base', provider = 'openai', customVocab = null } = req.body || {};
 
   if (!apiKey) return res.status(401).json({ error: 'API Key missing' });
-  if (!prompt) return res.status(400).json({ error: 'Prompt missing' });
+  if (!prompt && !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Either prompt or messages[] is required' });
+  }
 
   try {
-    // 1. Validar a API Key na tabela de profiles
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('api_key', apiKey)
-      .single();
+    let profile = null;
+    let mergedVocab = customVocab;
 
-    if (profileError || !profile) {
-      return res.status(403).json({ error: 'Invalid API Key' });
-    }
+    if (supabase) {
+      const { data: dbProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('api_key', apiKey)
+        .single();
 
-    // 2. Verificar Quota (Free/Starter têm limite)
-    const plan = (profile.plan || 'free').toLowerCase();
-    if (plan === 'free') {
-      const startOfToday = new Date();
-      startOfToday.setUTCHours(0, 0, 0, 0);
-      const { count } = await supabase
-        .from('history')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', profile.id)
-        .gte('created_at', startOfToday.toISOString());
-      
-      if (count >= 5) {
-        return res.status(402).json({ error: 'Daily quota of 5 compressions exceeded for Free plan. Please upgrade.' });
+      if (profileError || !dbProfile) {
+        return res.status(403).json({ error: 'Invalid API Key' });
       }
-    } else if (plan === 'starter') {
-      const { count } = await supabase
-        .from('history')
-        .select('*', { count: 'exact', head: true })
+      profile = dbProfile;
+
+      const plan = (profile.plan || 'free').toLowerCase();
+      if (plan === 'free') {
+        const startOfToday = new Date();
+        startOfToday.setUTCHours(0, 0, 0, 0);
+        const { count } = await supabase
+          .from('history')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', profile.id)
+          .gte('created_at', startOfToday.toISOString());
+
+        if (count >= 5) {
+          return res.status(402).json({ error: 'Daily quota of 5 compressions exceeded for Free plan.' });
+        }
+      } else if (plan === 'starter') {
+        const { count } = await supabase
+          .from('history')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', profile.id);
+
+        if (count >= 500) {
+          return res.status(402).json({ error: 'Monthly quota exceeded for Starter plan.' });
+        }
+      }
+
+      const { data: vocabList } = await supabase
+        .from('vocabulary')
+        .select('term, definition')
         .eq('user_id', profile.id);
-      
-      if (count >= 500) {
-        return res.status(402).json({ error: 'Monthly quota exceeded for Starter plan. Please upgrade to Pro.' });
+
+      if (vocabList && vocabList.length > 0 && !mergedVocab) {
+        mergedVocab = vocabList;
       }
     }
 
-    // 2.5 Buscar Vocabulário Customizado do usuário
-    const { data: vocabList } = await supabase
-      .from('vocabulary')
-      .select('term, definition')
-      .eq('user_id', profile.id);
+    // CAPC Multi-turn Messages compilation (100% deterministic, zero external LLM roundtrip)
+    if (Array.isArray(messages)) {
+      const capcReport = TokLangEngine.compileMessages(messages, {
+        provider,
+        mode,
+        encoding,
+        customVocab: mergedVocab,
+      });
 
-    let systemPrompt = SYSTEM_PROMPT;
-    if (vocabList && vocabList.length > 0) {
-      const vocabString = vocabList.map(v => `- ${v.term}: ${v.definition}`).join('\n');
-      systemPrompt += `\n\nVocê também tem acesso ao seguinte VOCABULÁRIO CUSTOMIZADO do usuário. Sempre que o prompt se referir a uma destas definições, substitua-a pelo respectivo termo comprimido correspondente:\n${vocabString}`;
+      return res.status(200).json({
+        version: capcReport.version,
+        provider: capcReport.provider,
+        messages: capcReport.messages,
+        cache: capcReport.cache,
+        metrics: capcReport.metrics,
+        economics: capcReport.economics,
+        audit: capcReport.audit,
+      });
     }
 
-    // 3. Chamar a IA (NVIDIA DeepSeek)
-    const aiResponse = await fetch('https://integrate.api.nvidia.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type':  'application/json',
-        'Authorization': `Bearer ${process.env.NVIDIA_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model:       'deepseek-ai/deepseek-v4-flash',
-        max_tokens:  150,
-        temperature: 0.1,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user',   content: prompt }
-        ]
-      })
+    // Single prompt/payload compilation (100% deterministic, BPE-verified, zero external LLM call)
+    const report = TokLangEngine.compile(prompt, {
+      mode,
+      maxTokens,
+      query,
+      encoding,
+      customVocab: mergedVocab,
     });
 
-    const aiData = await aiResponse.json();
-    const compressed = ((aiData.choices?.[0]?.message?.content) || '').trim()
-      .replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+    if (supabase && profile) {
+      await supabase.from('history').insert({
+        user_id: profile.id,
+        original_text: prompt,
+        compressed_text: report.text,
+        tokens_before: report.tokensBefore,
+        tokens_after: report.tokensAfter,
+        savings_pct: Math.round(report.savingsPct),
+      });
 
-    const countTokens = (t) => {
-      if (!t || !t.trim()) return 0;
-      const words = t.trim().split(/\s+/).length;
-      const puncMatches = t.match(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g);
-      const puncCount = puncMatches ? puncMatches.length : 0;
-      return Math.max(1, Math.round(words * 1.25 + puncCount * 0.4));
-    };
-
-    const tokBefore = countTokens(prompt);
-    const tokAfter = countTokens(compressed);
-    const savingsPct = Math.round((1 - tokAfter / tokBefore) * 100);
-
-    // 4. Logar uso no histórico
-    await supabase.from('history').insert({
-      user_id: profile.id,
-      original_text: prompt,
-      compressed_text: compressed,
-      tokens_before: tokBefore,
-      tokens_after: tokAfter,
-      savings_pct: savingsPct
-    });
-
-    // 4.5 Se o usuário tiver cadastrado uma URL de Webhook, disparar o evento de forma assíncrona
-    if (profile.webhook_url) {
-      fetch(profile.webhook_url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event: 'prompt.compressed',
-          user_id: profile.id,
-          original_text: prompt,
-          compressed_text: compressed,
-          tokens_before: tokBefore,
-          tokens_after: tokAfter,
-          savings_pct: savingsPct
-        })
-      }).catch(e => console.error('Erro ao disparar webhook do usuário:', e.message));
+      if (profile.webhook_url) {
+        fetch(profile.webhook_url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event: 'prompt.compressed',
+            version: report.version,
+            user_id: profile.id,
+            original_text: prompt,
+            compressed_text: report.text,
+            tokens_before: report.tokensBefore,
+            tokens_after: report.tokensAfter,
+            savings_pct: report.savingsPct,
+            prefix_hash: report.prefixHash,
+          }),
+        }).catch((e) => console.error('Webhook delivery failed:', e.message));
+      }
     }
 
     return res.status(200).json({
-      compressed,
-      savings: savingsPct + '%'
+      version: report.version,
+      compressed: report.text,
+      savings: `${Math.round(report.savingsPct)}%`,
+      savings_pct: report.savingsPct,
+      tokens_before: report.tokensBefore,
+      tokens_after: report.tokensAfter,
+      tokens_saved: report.tokensSaved,
+      attention_flops_reduction_pct: report.attentionFlopsReductionPct,
+      prefix_hash: report.prefixHash,
+      stages_applied: report.stagesApplied,
+      tokenizer: report.tokenizer,
+      latency_ms: report.latencyMs,
+      audit: report.audit,
     });
-
   } catch (error) {
-    console.error('SDK API Error:', error);
+    console.error('TokLang v2 API Error:', error);
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 }

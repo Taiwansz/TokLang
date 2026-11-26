@@ -19,7 +19,7 @@ async function subscribe(planName) {
   const priceId = STRIPE_PRICES[planName];
   if (!priceId) return;
 
-  showToast('Iniciando checkout seguro...', '✓');
+  showToast('Iniciando checkout seguro...', 'OK');
 
   try {
     const res = await fetch('/api/create-checkout-session', {

@@ -19,6 +19,12 @@ playwright-report/
 blob-report/
 playwright/.local-browsers/
 
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
 # Environments & private configurations
 .env
 .env.local

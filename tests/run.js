@@ -2,172 +2,117 @@ const assert = require('assert');
 const TokLangEngine = require('../js/toklang-engine.js');
 const { TokLang, TokLangMiddleware } = require('../js/sdk-lib.js');
 
-console.log('[START] Iniciando testes do TokLang...\n');
+async function main() {
+  console.log(`[START] TokLang v${TokLangEngine.VERSION} — Suite Unitaria & CAPC\n`);
 
-// 1. Testar Compilação Local (compressLocally)
-console.log('[TEST] Testando Compilação Local...');
-try {
-  // Teste 1: Prompt simples de criação em python com streamlit e visual bonito
-  const p1 = "Cria um script python usando streamlit para calcular velocidade de forma bonita";
-  const c1 = TokLangEngine.compressLocally(p1);
-  console.log('   Input: ', p1);
-  console.log('   Output:', c1);
-  assert.ok(c1.includes('cr'), 'Deve conter ação de criação (cr)');
-  assert.ok(c1.includes('$py'), 'Deve detectar python ($py)');
-  assert.ok(c1.includes('@streamlit'), 'Deve detectar streamlit (@streamlit)');
-  assert.ok(c1.includes('#scr'), 'Deve detectar script (#scr)');
-  assert.ok(c1.includes('ui+'), 'Deve conter modificador visual (ui+)');
-  console.log('   [OK] Teste 1 OK.');
+  // 1. Clean balanced & notation compilation without consonant skeletons or negation loss
+  const p1 = 'Bom dia! Por favor cria um script python usando streamlit para calcular velocidade sem ORM de forma bonita';
+  const r1 = TokLangEngine.compile(p1, { mode: 'balanced' });
+  assert.ok(r1.tokensAfter <= r1.tokensBefore, 'Monotonicidade BPE falhou');
+  assert.ok(r1.text.toLowerCase().includes('velocidade'), 'Palavra velocidade mutilada');
+  assert.ok(r1.text.toLowerCase().includes('sem'), 'Negacao sem perdida');
+  assert.strictEqual(r1.audit.negationsPreservedRatio, 1, 'Ratio de negacao deve ser 1.0');
 
-  // Teste 2: Prompt simples de refatoração
-  const p2 = "por favor consegue refatorar esse hook javascript?";
-  const c2 = TokLangEngine.compressLocally(p2);
-  console.log('   Input: ', p2);
-  console.log('   Output:', c2);
-  assert.ok(c2.includes('rf'), 'Deve conter ação de refatoração (rf)');
-  assert.ok(c2.includes('$js'), 'Deve detectar javascript ($js)');
-  assert.ok(c2.includes('#hook'), 'Deve detectar hook (#hook)');
-  console.log('   [OK] Teste 2 OK.');
+  const r1Not = TokLangEngine.compile(p1, { mode: 'notation' });
+  assert.ok(r1Not.text.includes('cr') && r1Not.text.includes('$py') && r1Not.text.includes('@streamlit'));
+  assert.ok(r1Not.text.includes('velocidade'), 'Modo notation nao deve gerar esqueleto consonantal');
+  assert.ok(r1Not.text.toLowerCase().includes('sem'), 'Modo notation deve preservar negacoes');
+  console.log('[OK] 1. Compilacao balanceada & notation sem esqueleto consonantal e com Polarity Lock');
 
-  // Teste 3: Prompt com parâmetros de entrada
-  const p3 = "Gere uma classe em TypeScript para gerenciar usuários. Parâmetros: nome, email, senha.";
-  const c3 = TokLangEngine.compressLocally(p3);
-  console.log('   Input: ', p3);
-  console.log('   Output:', c3);
-  assert.ok(c3.includes('cr'), 'Deve conter ação (cr)');
-  assert.ok(c3.includes('$ts'), 'Deve detectar ts ($ts)');
-  assert.ok(c3.includes('#cls'), 'Deve detectar classe (#cls)');
-  assert.ok(c3.includes('in[nome,email,senha]'), 'Deve extrair os parâmetros de entrada');
-  console.log('   [OK] Teste 3 OK.');
-
-  // Teste 4: Fallback para prompts muito longos / complexos
-  const p4 = "A".repeat(300);
-  const c4 = TokLangEngine.compressLocally(p4);
-  assert.strictEqual(c4, null, 'Prompts longos devem retornar null (fallback para IA)');
-  console.log('   [OK] Teste 4 OK (fallback de prompts longos).');
-
-  // Teste 4b: Preservação de blocos de código, JSON e strings
-  const p4b = 'Cria uma função em python:\n```python\ndef add(x, y):\n    return x + y\n```\ncom o JSON {"status": "ok"} e a string "minha_tag".';
-  const c4b = TokLangEngine.compressLocally(p4b);
-  console.log('   Input: ', p4b);
-  console.log('   Output:', c4b);
-  assert.ok(c4b.includes('def add(x, y):'), 'Deve preservar o bloco de código python intacto');
-  assert.ok(c4b.includes('{"status": "ok"}'), 'Deve preservar o JSON intacto');
-  assert.ok(c4b.includes('"minha_tag"'), 'Deve preservar a string intacta');
-  console.log('   [OK] Teste 4b OK (preservação de blocos).');
-} catch (e) {
-  console.error('[FAIL] Falha nos testes de Compilação Local:', e);
-  process.exit(1);
-}
-
-// 2. Testar Expansão Local (expand)
-console.log('\n[TEST] Testando Expansão Local...');
-try {
-  // Teste 5: Expansão simples
-  const t5 = "cr $py @streamlit; calcular velocidade; in[distancia, tempo]; ui+";
-  const e5 = TokLangEngine.expand(t5);
-  console.log('   Input: ', t5);
-  console.log('   Output:', e5);
-  assert.ok(e5.startsWith('Crie'), 'Deve iniciar com a ação correta');
-  assert.ok(e5.includes('Python'), 'Deve conter a linguagem expandida');
-  assert.ok(e5.includes('Streamlit'), 'Deve conter o framework expandido');
-  assert.ok(e5.includes('calcular velocidade'), 'Deve reter a tarefa descritiva');
-  assert.ok(e5.includes('Entradas: [distancia, tempo]'), 'Deve estruturar os parâmetros');
-  assert.ok(e5.includes('com interface visual bonita e estilizada'), 'Deve expandir modificadores');
-  console.log('   [OK] Teste 5 OK.');
-
-  // Teste 6: Expansão de refatoração e produção
-  const t6 = "rf $js @express #mw; auth middleware; prd async cm";
-  const e6 = TokLangEngine.expand(t6);
-  console.log('   Input: ', t6);
-  console.log('   Output:', e6);
-  assert.ok(e6.startsWith('Refatore'), 'Deve iniciar com Refatore');
-  assert.ok(e6.includes('JavaScript'), 'Deve conter JavaScript');
-  assert.ok(e6.includes('Express.js'), 'Deve conter Express.js');
-  assert.ok(e6.includes('middleware'), 'Deve conter middleware');
-  assert.ok(e6.includes('pronto para produção'), 'Deve conter produção');
-  assert.ok(e6.includes('com comentários explicativos'), 'Deve conter comentários');
-  assert.ok(e6.includes('usando implementação assíncrona'), 'Deve conter async');
-  console.log('   [OK] Teste 6 OK.');
-
-  // Teste 7: Expansão com customVocab (objeto)
-  const t7 = "cr $myLang @myFW; task details; myTerm";
-  const vocab7 = {
-    "$myLang": "Minha Linguagem Especial",
-    "@myFW": "Meu Framework Top",
-    "myTerm": "definição customizada do termo"
+  // 2. Lossless Structural Tabular Codec roundtrip
+  const payload = {
+    items: Array.from({ length: 12 }, (_, i) => ({
+      sku: `SKU-${100 + i}`,
+      price: 49.9 + i * 5,
+      in_stock: i % 2 === 0,
+    })),
   };
-  const e7 = TokLangEngine.expand(t7, vocab7);
-  console.log('   Input: ', t7);
-  console.log('   Output:', e7);
-  assert.ok(e7.includes('Minha Linguagem Especial'), 'Deve expandir linguagem customizada');
-  assert.ok(e7.includes('Meu Framework Top'), 'Deve expandir framework customizado');
-  assert.ok(e7.includes('definição customizada do termo'), 'Deve expandir termo customizado');
-  console.log('   [OK] Teste 7 OK.');
+  const encoded = TokLangEngine.encodeStructured(payload);
+  assert.ok(encoded.startsWith('@table items[12]{'));
+  assert.deepStrictEqual(TokLangEngine.decodeStructured(encoded), payload);
+  assert.deepStrictEqual(JSON.parse(TokLangEngine.expand(encoded)), payload);
+  console.log('[OK] 2. Codec estrutural tabular lossless + decode/expand bit-a-bit');
 
-  // Teste 8: Compressão local com customVocab (objeto)
-  const t8 = "Cria um script em Minha Linguagem Especial usando Meu Framework Top.";
-  const c8 = TokLangEngine.compressLocally(t8, vocab7);
-  console.log('   Input: ', t8);
-  console.log('   Output:', c8);
-  assert.ok(c8.includes('cr'), 'Deve conter cr');
-  assert.ok(c8.includes('$myLang'), 'Deve conter $myLang');
-  assert.ok(c8.includes('@myFW'), 'Deve conter @myFW');
-  console.log('   [OK] Teste 8 OK.');
-} catch (e) {
-  console.error('[FAIL] Falha nos testes de Expansão Local:', e);
-  process.exit(1);
-}
+  // 3. Long prompts handled offline under hard BPE budget
+  const longDoc = Array.from({ length: 15 }, (_, i) =>
+    `Secao ${i + 1}: Registro administrativo padrao sobre inventario geral sem relacao com banco.`
+  ).concat([
+    'Regra critica de banco PostgreSQL: nunca desabilite RLS na tabela tenant_orders e valide organization_id.',
+  ]).join('\n\n');
+  const rLong = TokLangEngine.compile(longDoc, {
+    mode: 'balanced',
+    query: 'PostgreSQL RLS tenant_orders',
+    maxTokens: 90,
+  });
+  assert.ok(rLong.tokensAfter <= 90, `Budget excedido: ${rLong.tokensAfter}`);
+  assert.ok(rLong.text.includes('tenant_orders') && rLong.text.toLowerCase().includes('nunca'));
+  console.log('[OK] 3. Compressao extrativa offline de contexto longo sob budget BPE estrito');
 
-// 3. Testar Middleware SDK
-console.log('\n[TEST] Testando SDK Middleware (OpenAI)...');
-try {
+  // 4. Preserva codigo, JSON e strings
+  const pCode = 'Crie uma funcao Python:\n```python\ndef add(x, y):\n    return x + y\n```\ncom payload {"status": "ok"} e tag "minha_tag".';
+  const rCode = TokLangEngine.compile(pCode, { mode: 'balanced' });
+  assert.ok(rCode.text.includes('def add(x, y):'));
+  assert.ok(rCode.text.includes('{"status":"ok"}') || rCode.text.includes('{"status": "ok"}'));
+  assert.ok(rCode.text.includes('"minha_tag"'));
+  console.log('[OK] 4. Preservacao atomica de blocos de codigo, JSON e strings');
+
+  // 5. Expansao de notacao + customVocab
+  const vocab = {
+    $myLang: 'Minha Linguagem Especial',
+    '@myFW': 'Meu Framework Top',
+    myTerm: 'definicao customizada do termo',
+  };
+  const expanded = TokLangEngine.expand('cr $myLang @myFW; task details; myTerm', vocab);
+  assert.ok(expanded.includes('Minha Linguagem Especial'));
+  assert.ok(expanded.includes('Meu Framework Top'));
+  assert.ok(expanded.includes('definicao customizada do termo'));
+  console.log('[OK] 5. Expansao de notacao e vocabulario customizado');
+
+  // 6. SDK client & CAPC Middleware
+  const sdk = new TokLang('mock-key');
+  const sdkRes = await sdk.compress(p1);
+  assert.ok(sdkRes.tokensAfter <= sdkRes.tokensBefore);
+
   const middleware = new TokLangMiddleware({
     target: 'openai',
     apiKey: 'mock-key',
-    tokLangKey: 'mock-tok-key'
+    mode: 'balanced',
   });
 
-  // Mock OpenAI completion payload
-  const payload = {
-    model: 'gpt-4o',
-    messages: [
-      { role: 'system', content: 'Você é um assistente.' },
-      { role: 'user', content: 'Cria uma função em python de forma bonita.' }
-    ]
-  };
-
-  // Mock global fetch to intercept OpenAI and avoid calling external network
   const originalFetch = global.fetch;
+  let capturedBody = null;
   global.fetch = async (url, options) => {
     if (url === 'https://api.openai.com/v1/chat/completions') {
-      const body = JSON.parse(options.body);
-      const userMessage = body.messages.find(m => m.role === 'user').content;
-      console.log('   Mensagem interceptada enviada ao OpenAI:', userMessage);
-      assert.ok(userMessage.includes('cr'), 'O prompt do usuário deve estar em formato TokLang');
-      assert.ok(userMessage.includes('$py'), 'Deve conter token do Python');
-      assert.ok(userMessage.includes('ui+'), 'Deve conter token ui+');
+      capturedBody = JSON.parse(options.body);
       return {
         ok: true,
-        json: async () => ({ choices: [{ message: { role: 'assistant', content: 'Mock response success' } }] })
+        json: async () => ({ choices: [{ message: { role: 'assistant', content: 'Mock response success' } }] }),
       };
     }
     return { ok: false };
   };
 
-  middleware.chat.completions.create(payload).then(response => {
+  try {
+    const response = await middleware.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: 'Voce e um engenheiro especialista em Python. Nunca gere codigo sem testes.' },
+        { role: 'user', content: 'Bom dia! Por favor crie uma funcao Python sem dependencias externas.' },
+      ],
+    });
     assert.strictEqual(response.choices[0].message.content, 'Mock response success');
-    global.fetch = originalFetch; // restore
-    console.log('   [OK] Teste Middleware SDK OK.');
-    console.log('\n[SUCCESS] TODOS OS TESTES PASSARAM COM SUCESSO!');
-    process.exit(0);
-  }).catch(e => {
+    assert.ok(capturedBody.messages[0].content.toLowerCase().includes('nunca'));
+    assert.ok(capturedBody.messages[1].content.toLowerCase().includes('sem'));
+    assert.ok(middleware.lastReport && middleware.lastReport.cache.prefixHash.length === 64);
+    console.log('[OK] 6. SDK TokLang e TokLangMiddleware CAPC (OpenAI)');
+  } finally {
     global.fetch = originalFetch;
-    console.error('[FAIL] Falha no fluxo assíncrono do middleware:', e);
-    process.exit(1);
-  });
+  }
 
-} catch (e) {
-  console.error('[FAIL] Falha no teste do SDK Middleware:', e);
-  process.exit(1);
+  console.log('\n[SUCCESS] Suite unitaria v2.0 100% verde.');
 }
+
+main().catch((err) => {
+  console.error('[FAIL]', err);
+  process.exit(1);
+});
