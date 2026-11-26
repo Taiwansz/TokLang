@@ -15,21 +15,22 @@
     }
   })();
 </script>
+<link rel="preload" as="image" href="assets/hero-prism.webp" type="image/webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600;700&family=Schibsted+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="css/variables.css">
-<link rel="stylesheet" href="css/animations.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
-<link rel="stylesheet" href="css/pages/home.css">
-<link rel="stylesheet" href="css/pages/app.css">
-<link rel="stylesheet" href="css/pages/docs.css">
-<link rel="stylesheet" href="css/pages/pricing.css">
-<link rel="stylesheet" href="css/pages/auth.css">
-<link rel="stylesheet" href="css/pages/dashboard.css">
-<link rel="stylesheet" href="css/responsive.css">
+<link rel="stylesheet" href="css/variables.css?v=20261126c">
+<link rel="stylesheet" href="css/animations.css?v=20261126c">
+<link rel="stylesheet" href="css/layout.css?v=20261126c">
+<link rel="stylesheet" href="css/components.css?v=20261126c">
+<link rel="stylesheet" href="css/pages/home.css?v=20261126c">
+<link rel="stylesheet" href="css/pages/app.css?v=20261126c">
+<link rel="stylesheet" href="css/pages/docs.css?v=20261126c">
+<link rel="stylesheet" href="css/pages/pricing.css?v=20261126c">
+<link rel="stylesheet" href="css/pages/auth.css?v=20261126c">
+<link rel="stylesheet" href="css/pages/dashboard.css?v=20261126c">
+<link rel="stylesheet" href="css/responsive.css?v=20261126c">
 </head>
 <body data-hdr-theme="dark">
 
@@ -109,16 +110,17 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/billing.js"></script>
-<script src="js/motion-stage.js"></script>
-<script src="js/router.js"></script>
-<script src="js/dashboard.js"></script>
-<script src="js/toklang-engine.js"></script>
-<script src="js/compressor.js"></script>
+<script src="js/supabase.js?v=20261126c"></script>
+<script src="js/auth.js?v=20261126c"></script>
+<script src="js/billing.js?v=20261126c"></script>
+<script src="js/motion-stage.js?v=20261126c"></script>
+<script src="js/router.js?v=20261126c"></script>
+<script src="js/dashboard.js?v=20261126c"></script>
+<script src="js/toklang-engine.js?v=20261126c"></script>
+<script src="js/compressor.js?v=20261126c"></script>
 
 <script>
+const ASSET_V = '20261126c';
 function toggleMobileNav() {
   const drawer = document.getElementById('mobile-nav-drawer');
   const overlay = document.getElementById('mobile-nav-overlay');
@@ -160,7 +162,7 @@ async function loadPages() {
       try {
         const container = document.getElementById('page-' + p);
         if (container && container.innerHTML.trim() === '') {
-          const res = await fetch('pages/' + p + '.html');
+          const res = await fetch('pages/' + p + '.html?v=' + ASSET_V);
           if (res.ok) container.innerHTML = await res.text();
         }
       } catch (e) {

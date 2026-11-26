@@ -1,13 +1,20 @@
 /* ===== RESPONSIVE — ZERO HORIZONTAL OVERFLOW ON 390px MOBILE ===== */
 @media (max-width: 1024px) {
+  .arch-act {
+    min-height: auto;
+    display: block;
+  }
   .arch-split {
     grid-template-columns: 1fr;
   }
-  .arch-console-wrap {
-    position: static;
-  }
-  .app-layout {
+  .bench-split {
     grid-template-columns: 1fr;
+  }
+  .bench-telemetry-row {
+    grid-template-columns: 1fr;
+  }
+  .pipeline-steps-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .docs-layout {
     grid-template-columns: 1fr;
@@ -35,67 +42,81 @@
   .nav-actions .nav-auth-logged-in { display: none !important; }
   .nav-mobile-btn { display: inline-flex; }
 
-  /* Hero-Poster clean vertical stack on narrow mobile viewports */
+  /* Hero-Poster clean editorial stack on 390px mobile — ZERO overlap! */
   .hero-poster {
     min-height: 100svh;
-    padding: 84px 20px 28px;
+    padding: 82px 20px 28px;
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-  }
-  .hero-poster-bg-type {
-    font-size: 21vw;
-    top: 44%;
   }
   .hero-hud-tl {
     order: 1;
     position: relative;
     top: auto;
     left: auto;
-    margin-bottom: 10px;
+    margin-bottom: 18px;
   }
   .hero-hud-tr { display: none; }
-  .hero-foreground-title {
-    order: 2;
-    width: 100%;
-    text-align: left;
-    padding: 0;
-    margin: 0 0 210px;
+
+  /* Centerpiece Z-Occlusion Stage on mobile */
+  .hero-poster-bg-type {
+    top: 36%;
+    font-size: 21.5vw;
   }
-  .hero-h1 {
-    font-size: clamp(2.8rem, 13vw, 3.8rem);
+  .hero-sculpture-stage {
+    top: 36%;
+    width: 218px;
   }
+
   .hero-hud-bl {
-    order: 3;
+    order: 2;
     position: relative;
     bottom: auto;
     left: auto;
     max-width: 100%;
-    margin-top: auto;
+    margin-top: 315px;
     margin-bottom: 22px;
   }
+  .hero-h1 {
+    font-size: clamp(2.1rem, 9.5vw, 2.7rem);
+  }
   .hero-hud-br {
-    order: 4;
+    order: 3;
     position: relative;
     bottom: auto;
     right: auto;
     width: 100%;
     justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
   }
-  .hud-kpi-val { font-size: 17px; }
+  .hud-kpi-val { font-size: 16.5px; }
 
   .workbench-controls {
     grid-template-columns: 1fr;
   }
   .actions-btn-row {
-    grid-template-columns: 1fr;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
+  .btn-kbd { display: none; }
+  .compress-btn,
+  .expand-btn {
+    padding: 12px 14px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+  .prompt-input { min-height: 200px; }
+  .output-body { min-height: 180px; }
   .stats-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .ss-item {
     border-bottom: 1px solid var(--border);
+  }
+  .pipeline-steps-grid {
+    grid-template-columns: 1fr;
   }
 
   .dash-layout {

@@ -1,25 +1,47 @@
-<!-- PAGE: HOME — TOKLANG v2.0 OBSIDIAN COMPILER ATELIER (7 LEIS HERO-POSTER + ARQUETIPO B/C + EDITORIAL CANVAS 3D) -->
+<!-- PAGE: HOME — TOKLANG v2.1 OBSIDIAN COMPILER ATELIER (PBR Z-OCCLUSION + CAD SVG + PINNED STATE MACHINE) -->
 
-<!-- ACT 0: HERO-POSTER (4-LAYER Z-AXIS DEPTH INTERLOCK, <=24 WORDS, 1 HEROIC 3D OBJECT) -->
-<section class="hero-poster" data-theme="dark">
-  <!-- L0: Atmospheric Cyclorama & Directional Copper Light -->
+<!-- VERTICAL CHAPTER RAIL (Ref. O Jeito Agi — Desktop >=1280px only, strict safe-zone) -->
+<aside class="chapter-rail" id="chapter-rail" aria-label="Navegação de capítulos">
+  <div class="rail-label">TOKLANG v2.0</div>
+  <nav class="rail-dots">
+    <button type="button" class="rail-item active" data-chapter="act-hero" onclick="scrollToAct('act-hero')" title="01 Hero">
+      <span class="rail-dash"></span><span class="rail-num">01</span>
+    </button>
+    <button type="button" class="rail-item" data-chapter="act-manifesto" onclick="scrollToAct('act-manifesto')" title="02 Manifesto">
+      <span class="rail-dash"></span><span class="rail-num">02</span>
+    </button>
+    <button type="button" class="rail-item" data-chapter="act-cad" onclick="scrollToAct('act-cad')" title="03 Pipeline CAD">
+      <span class="rail-dash"></span><span class="rail-num">03</span>
+    </button>
+    <button type="button" class="rail-item" data-chapter="act-arch" onclick="scrollToAct('act-arch')" title="04 Arquitetura">
+      <span class="rail-dash"></span><span class="rail-num">04</span>
+    </button>
+    <button type="button" class="rail-item" data-chapter="act-bench" onclick="scrollToAct('act-bench')" title="05 Benchmark">
+      <span class="rail-dash"></span><span class="rail-num">05</span>
+    </button>
+  </nav>
+</aside>
+
+<!-- ACT 0: HERO-POSTER (REAL PHYSICAL Z-AXIS OCCLUSION: SOLID TOKLANG BEHIND OPAQUE 3D PBR MONOLITH) -->
+<section id="act-hero" class="hero-poster" data-theme="dark" data-chapter="act-hero">
+  <!-- L0: Atmospheric Cyclorama & Volcanic Copper Studio Spotlight -->
   <div class="hero-cyclorama" aria-hidden="true"></div>
 
-  <!-- L1 (z: 10): Monumental Edge-to-Edge Poster Typography (Occluded by L2 3D Canvas) -->
+  <!-- L0.5 (z: 6): Precision Horological CAD Orbital Canvas (Thin Meridian Rings & Spatial Ticks) -->
+  <canvas id="toklang-hero-canvas" class="hero-canvas" aria-hidden="true"></canvas>
+
+  <!-- L1 (z: 10): SOLID MONUMENTAL EDGE-TO-EDGE WORDMARK (Physically Occluded by L2 3D Monolith!) -->
   <div class="hero-poster-bg-type" aria-hidden="true">TOKLANG</div>
 
-  <!-- L2 (z: 20): Native 2D-Projected 3D BPE Compression Manifold (Float32Array @ 60fps) -->
-  <canvas id="toklang-hero-canvas" class="hero-canvas" aria-label="Escultura 3D interativa de compressão de tokens BPE"></canvas>
-
-  <!-- L2.5 (z: 25): Foreground Editorial Voice (Sans + Instrument Serif Italic Tension) -->
-  <div class="hero-foreground-title">
-    <h1 class="hero-h1">
-      Menos tokens.<br>
-      <em>Zero perda.</em>
-    </h1>
+  <!-- L2 (z: 20): OPAQUE 3D PBR OBSIDIAN-COPPER COMPRESSION MONOLITH (Real Z-Axis Interlock) -->
+  <div class="hero-sculpture-stage" id="hero-sculpture-stage">
+    <picture class="hero-sculpture-pic">
+      <source srcset="assets/hero-prism.webp?v=20261126c" type="image/webp">
+      <img src="assets/hero-prism.png?v=20261126c" alt="Monólito 3D metálico em titânio obsidiana e cobre vulcânico representando compressão BPE" class="hero-sculpture-img" width="770" height="882" decoding="async" fetchpriority="high">
+    </picture>
   </div>
 
-  <!-- L3 (z: 30): 4-Corner Swiss Poster Micro-HUD -->
+  <!-- L3 (z: 30): 4-Corner Swiss Poster Micro-HUD (<= 22 words total on first fold) -->
   <div class="hero-hud-tl">
     <span class="hud-dot"></span>
     <span>TOKLANG v2.0 &middot; BPE o200k_base &middot; CAPC</span>
@@ -30,8 +52,9 @@
   </div>
 
   <div class="hero-hud-bl">
+    <h1 class="hero-h1">Menos tokens.<br><em>Zero&nbsp;perda.</em></h1>
     <p class="hero-thesis">
-      Compilador determinístico para LLMs. Codec <strong>@table lossless</strong>, trava de negações e estabilidade de Prompt Caching.
+      Compilador determinístico para LLMs com <strong>@table lossless</strong>, trava de negações e preservação de Prompt Caching.
     </p>
     <div class="hero-cta-row">
       <button class="btn btn-primary btn-lg" data-magnetic onclick="navigate('app')">Abrir Workbench</button>
@@ -56,9 +79,9 @@
 </section>
 
 <!-- ACT 1: MANIFESTO RISCADO (ANIMATED COPPER STRIKETHROUGH — REF. O JEITO AGI) -->
-<section class="manifesto-act" data-theme="dark">
+<section id="act-manifesto" class="manifesto-act" data-theme="dark" data-chapter="act-manifesto">
   <div class="manifesto-inner">
-    <div class="section-tag">O Fim da Compressão Ingênua</div>
+    <div class="section-tag">02 &middot; O Fim da Compressão Ingênua</div>
     <div class="manifesto-lines">
       <div class="manifesto-row"><span class="strike-line">Abreviações consonantais que estilhaçam o BPE.</span></div>
       <div class="manifesto-row"><span class="strike-line">Stopwords que apagam negações críticas.</span></div>
@@ -71,16 +94,90 @@
   </div>
 </section>
 
-<!-- ACT 2: ATMOSPHERIC INVERSION — EDITORIAL PAPER (#F0EDE6) + INTERACTIVE STAGE -->
-<section class="arch-act" data-theme="light">
+<!-- ACT 1.5: ARCHITECTURAL CAD SVG BLUEPRINT (pathLength="1" — REF. O JEITO AGI s-casa) -->
+<section id="act-cad" class="cad-act" data-theme="dark" data-chapter="act-cad">
+  <div class="cad-inner">
+    <div class="cad-head">
+      <div>
+        <div class="section-tag">03 &middot; Planta do Compilador (CAD Blueprint)</div>
+        <h2 class="section-title">Cinco estágios em <em>8,3 milissegundos</em>.</h2>
+      </div>
+      <span class="cad-spec tabular">ZERO LLM EXTERNO &middot; DETERMINÍSTICO &middot; SHA-256 ESTÁVEL</span>
+    </div>
+
+    <div class="cad-frame">
+      <svg id="cad-pipeline-svg" class="cad-svg" viewBox="0 0 1120 230" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama técnico CAD do pipeline determinístico TokLang v2">
+        <!-- Subtle Datum Axis -->
+        <line class="cad-axis" x1="24" y1="115" x2="1096" y2="115" stroke="rgba(240,237,230,0.12)" stroke-dasharray="6 6" pathLength="1"/>
+        <!-- Horizontal Conduits -->
+        <line class="cad-stroke cad-link" x1="186" y1="115" x2="244" y2="115" stroke="#E05A2B" stroke-width="1.5" pathLength="1"/>
+        <line class="cad-stroke cad-link" x1="414" y1="115" x2="472" y2="115" stroke="#E05A2B" stroke-width="1.5" pathLength="1"/>
+        <line class="cad-stroke cad-link" x1="652" y1="115" x2="710" y2="115" stroke="#C8B560" stroke-width="1.5" pathLength="1"/>
+        <line class="cad-stroke cad-link" x1="880" y1="115" x2="938" y2="115" stroke="#4CA771" stroke-width="1.5" pathLength="1"/>
+
+        <!-- Dimension Callout Line (Top) -->
+        <path class="cad-stroke cad-dim" d="M244 38 L244 26 L880 26 L880 38" stroke="rgba(200,181,96,0.45)" stroke-width="1" pathLength="1"/>
+        <text x="562" y="18" text-anchor="middle" fill="#C8B560" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="1.8">NÚCLEO OFFLINE DETERMINÍSTICO (p50 3,53 ms · p95 8,31 ms)</text>
+
+        <!-- Stage 0: RAW -->
+        <rect class="cad-stroke cad-box" x="24" y="64" width="162" height="102" rx="12" stroke="rgba(240,237,230,0.28)" stroke-width="1.2" fill="#0D0F13" pathLength="1"/>
+        <text x="40" y="90" fill="#66635D" font-family="JetBrains Mono, monospace" font-size="10">00 · INPUT</text>
+        <text x="40" y="116" fill="#F0EDE6" font-family="Schibsted Grotesk, sans-serif" font-size="15" font-weight="600">JSON / RAG</text>
+        <text x="40" y="142" fill="#9A968E" font-family="JetBrains Mono, monospace" font-size="10">Logs · SQL · MCP</text>
+
+        <!-- Stage 1: POLARITY LOCK -->
+        <rect class="cad-stroke cad-box" x="244" y="64" width="170" height="102" rx="12" stroke="#E05A2B" stroke-width="1.3" fill="#12141A" pathLength="1"/>
+        <text x="260" y="90" fill="#E05A2B" font-family="JetBrains Mono, monospace" font-size="10">01 · PROTEÇÃO</text>
+        <text x="260" y="116" fill="#F0EDE6" font-family="Schibsted Grotesk, sans-serif" font-size="15" font-weight="600">Polarity Lock</text>
+        <text x="260" y="142" fill="#9A968E" font-family="JetBrains Mono, monospace" font-size="10">Negações · Código</text>
+
+        <!-- Stage 2: CODEC + CAPC -->
+        <rect class="cad-stroke cad-box" x="472" y="64" width="180" height="102" rx="12" stroke="#C8B560" stroke-width="1.3" fill="#12141A" pathLength="1"/>
+        <text x="488" y="90" fill="#C8B560" font-family="JetBrains Mono, monospace" font-size="10">02 · CODEC + CAPC</text>
+        <text x="488" y="116" fill="#F0EDE6" font-family="Schibsted Grotesk, sans-serif" font-size="15" font-weight="600">@table + Tier 0</text>
+        <text x="488" y="142" fill="#9A968E" font-family="JetBrains Mono, monospace" font-size="10">Lossless · SHA-256</text>
+
+        <!-- Stage 3: BM25 KNAPSACK -->
+        <rect class="cad-stroke cad-box" x="710" y="64" width="170" height="102" rx="12" stroke="#3B8EA5" stroke-width="1.3" fill="#12141A" pathLength="1"/>
+        <text x="726" y="90" fill="#3B8EA5" font-family="JetBrains Mono, monospace" font-size="10">03 · EXTRATIVO</text>
+        <text x="726" y="116" fill="#F0EDE6" font-family="Schibsted Grotesk, sans-serif" font-size="15" font-weight="600">BM25 Knapsack</text>
+        <text x="726" y="142" fill="#9A968E" font-family="JetBrains Mono, monospace" font-size="10">Evicção BPE exata</text>
+
+        <!-- Stage 4: BPE GUARD -->
+        <rect class="cad-stroke cad-box" x="938" y="64" width="158" height="102" rx="12" stroke="#4CA771" stroke-width="1.4" fill="rgba(76,167,113,0.08)" pathLength="1"/>
+        <text x="954" y="90" fill="#4CA771" font-family="JetBrains Mono, monospace" font-size="10">04 · INVARIANTE</text>
+        <text x="954" y="116" fill="#F0EDE6" font-family="Schibsted Grotesk, sans-serif" font-size="15" font-weight="600">BPE Guard</text>
+        <text x="954" y="142" fill="#4CA771" font-family="JetBrains Mono, monospace" font-size="10">after &lt;= before</text>
+
+        <!-- Bottom Feedback / Rollback Dimension -->
+        <path class="cad-stroke cad-dim" d="M1017 166 L1017 204 L105 204 L105 166" stroke="rgba(76,167,113,0.36)" stroke-width="1" stroke-dasharray="4 4" pathLength="1"/>
+        <text x="562" y="197" text-anchor="middle" fill="#9A968E" font-family="JetBrains Mono, monospace" font-size="10" letter-spacing="1.2">ROLLBACK AUTOMÁTICO SE tokensAfter &gt; tokensBefore (MONOTONICIDADE 100%)</text>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ACT 2: ATMOSPHERIC INVERSION — EDITORIAL PAPER (#F0EDE6) + PINNED DISCRETE 4-STATE MACHINE -->
+<section id="act-arch" class="arch-act" data-theme="light" data-chapter="act-arch">
   <div class="arch-inner">
     <div class="arch-head">
-      <div class="section-tag">Arquitetura v2.0</div>
-      <h2 class="section-title arch-title">Quatro garantias formais.<br><em>Zero caixa-preta.</em></h2>
+      <div>
+        <div class="section-tag">04 &middot; Arquitetura v2.0</div>
+        <h2 class="section-title arch-title">Quatro garantias formais.<br><em>Zero caixa-preta.</em></h2>
+      </div>
+      <div class="arch-step-indicator" aria-label="Etapa ativa da arquitetura">
+        <span class="arch-step-label tabular" id="arch-step-counter">01 / 04</span>
+        <div class="arch-step-dashes">
+          <span class="step-dash active" data-step="0"></span>
+          <span class="step-dash" data-step="1"></span>
+          <span class="step-dash" data-step="2"></span>
+          <span class="step-dash" data-step="3"></span>
+        </div>
+      </div>
     </div>
 
     <div class="arch-split">
-      <!-- Left: Portfolio-V1 Interactive Expertise Hover/Click List -->
+      <!-- Left: Portfolio-V1 Interactive Expertise Hover/Click List (Driven by BOTH Scroll Pin & Click) -->
       <div class="arch-list" role="tablist" aria-label="Pilares da arquitetura TokLang v2">
         <button type="button" class="arch-row active" onclick="selectArchPillar(0)" onmouseenter="selectArchPillar(0)">
           <span class="arch-num tabular">01</span>
@@ -155,10 +252,10 @@
 </section>
 
 <!-- ACT 3: MONUMENTAL BIG NUMBER + REPRODUCIBLE REAL-BPE BENCHMARK -->
-<section class="bench-act" data-theme="dark">
+<section id="act-bench" class="bench-act" data-theme="dark" data-chapter="act-bench">
   <div class="bench-inner">
     <div class="bignum-band">
-      <div class="section-tag">Evidência Empírica &middot; js-tiktoken o200k_base</div>
+      <div class="section-tag">05 &middot; Evidência Empírica &middot; js-tiktoken o200k_base</div>
       <div class="bignum-row">
         <div id="big-num-counter" class="bignum-val">-59,9%</div>
         <div class="bignum-copy">
@@ -274,35 +371,36 @@
   </div>
 </section>
 
-<!-- ACT 4: PROGRESSIVE DISCLOSURE FAQ + CINEMATIC FINALE -->
-<section class="finale-act" data-theme="dark">
-  <div class="finale-inner">
-    <div class="faq-block">
-      <div class="section-tag">Decisões de Engenharia</div>
-      <div class="faq-list">
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">Por que o TokLang v2 baniu abreviações consonantais? <span class="faq-icon">+</span></div>
-          <div class="faq-a">Strings fora do vocabulário como <code>vlcdd</code> fragmentam em múltiplos sub-tokens nos tokenizadores BPE modernos (<code>o200k_base</code> e <code>cl100k_base</code>) e degradam o raciocínio do modelo. A v2 usa apenas transformações estruturais lossless, deduplicação e poda extrativa com guarda estrita de monotonicidade BPE.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">Existe alguma chamada a LLM externo para comprimir? <span class="faq-icon">+</span></div>
-          <div class="faq-a">Não. Todo o compilador roda localmente em JavaScript ou Python em poucos milissegundos (p50 de 3,5 ms, p95 de 8,3 ms), sem custo intermediário de API e sem enviar payloads sensíveis para terceiros.</div>
-        </div>
-        <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">Como ele convive com o Prompt Caching da Anthropic e OpenAI? <span class="faq-icon">+</span></div>
-          <div class="faq-a"><code>compileMessages()</code> isola o Tier 0 (prefixo estático) do Tier 2 (RAG e retornos de ferramentas). O Tier 0 recebe apenas normalização determinística independente da query, mantendo o mesmo hash SHA-256 entre turnos e injetando <code>cache_control</code> quando atinge o piso do provedor.</div>
-        </div>
+<!-- ACT 4: PROGRESSIVE DISCLOSURE FAQ + FULL-BLEED MONUMENTAL FINALE (ZERO BOXED CTA CARD) -->
+<section class="faq-act" data-theme="dark">
+  <div class="faq-inner">
+    <div class="section-tag">Decisões de Engenharia</div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Por que o TokLang v2 baniu abreviações consonantais? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Strings fora do vocabulário como <code>vlcdd</code> fragmentam em múltiplos sub-tokens nos tokenizadores BPE modernos (<code>o200k_base</code> e <code>cl100k_base</code>) e degradam o raciocínio do modelo. A v2 usa apenas transformações estruturais lossless, deduplicação e poda extrativa com guarda estrita de monotonicidade BPE.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Existe alguma chamada a LLM externo para comprimir? <span class="faq-icon">+</span></div>
+        <div class="faq-a">Não. Todo o compilador roda localmente em JavaScript ou Python em poucos milissegundos (p50 de 3,5 ms, p95 de 8,3 ms), sem custo intermediário de API e sem enviar payloads sensíveis para terceiros.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">Como ele convive com o Prompt Caching da Anthropic e OpenAI? <span class="faq-icon">+</span></div>
+        <div class="faq-a"><code>compileMessages()</code> isola o Tier 0 (prefixo estático) do Tier 2 (RAG e retornos de ferramentas). O Tier 0 recebe apenas normalização determinística independente da query, mantendo o mesmo hash SHA-256 entre turnos e injetando <code>cache_control</code> quando atinge o piso do provedor.</div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="finale-cta">
-      <div class="finale-glow" aria-hidden="true"></div>
-      <h2 class="finale-title">Audite seus payloads<br>em <em>BPE real</em>.</h2>
-      <p class="finale-sub">Cole um retorno JSON/MCP, um dump de RAG ou logs de produção no Workbench v2 e meça cada token em <code>o200k_base</code>.</p>
-      <div class="finale-actions">
-        <button class="btn btn-primary btn-lg" data-magnetic onclick="navigate('app')">Abrir Workbench v2</button>
-        <button class="btn btn-ghost btn-lg" onclick="navigate('pricing')">Open Core &amp; Planos</button>
-      </div>
+<section class="finale-stage" data-theme="dark">
+  <div class="finale-floor-glow" aria-hidden="true"></div>
+  <div class="finale-stage-inner">
+    <div class="section-tag" style="justify-content:center">Pronto para Produção</div>
+    <h2 class="finale-title">Audite seus payloads<br>em <em>BPE real</em>.</h2>
+    <p class="finale-sub">Cole um retorno JSON/MCP, um dump de RAG ou logs de produção no Workbench Split 50/50 e meça cada token em <code>o200k_base</code>.</p>
+    <div class="finale-actions">
+      <button class="btn btn-primary btn-lg" data-magnetic onclick="navigate('app')">Abrir Workbench v2</button>
+      <button class="btn btn-ghost btn-lg" onclick="navigate('pricing')">Open Core &amp; Planos</button>
     </div>
   </div>
 </section>

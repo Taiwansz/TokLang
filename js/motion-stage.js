@@ -1,9 +1,10 @@
 /* ============================================================================
-   TOKLANG v2.0 — MOTION & NATIVE 2D-PROJECTED 3D CANVAS ENGINE
-   - Zero Three.js / WebGL overhead (pure Float32Array 3D projection @ 60fps)
-   - BPE Compression Manifold: Outer raw lattice contracting into copper/gold core
-   - Vector edges + 3D spatial typography labels + inertial mouse parallax
-   - GSAP 3 + ScrollTrigger + Lenis + elementsFromPoint() header polarity
+   TOKLANG v2.1 — MOTION, 3D SCULPTURE INERTIA, CAD SVG & PINNED STATE MACHINE
+   - Precision Horological CAD Orbital Canvas (60fps, zero heavy WebGL)
+   - Inertial 3D mouse tilt & scroll parallax on the opaque PBR hero monolith
+   - Architectural CAD SVG pathLength="1" draw on scroll
+   - Desktop GSAP ScrollTrigger pin: true discrete 4-state machine on Act 2
+   - Vertical Chapter Rail + elementsFromPoint() header polarity sensing
    ============================================================================ */
 (function () {
   'use strict';
@@ -76,7 +77,7 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
     },
   ];
 
-  /* ===== 1. HEADER POLARITY SENSING (elementsFromPoint) ===== */
+  /* ===== 1. HEADER POLARITY & CHAPTER RAIL SYNC (elementsFromPoint) ===== */
   let polarityRaf = false;
   function syncHeaderTheme() {
     if (polarityRaf) return;
@@ -85,123 +86,50 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
       polarityRaf = false;
       if (document.documentElement.classList.contains('light-theme')) {
         document.body.dataset.hdrTheme = 'light';
-        return;
+      } else {
+        const hdr = document.querySelector('[data-hdr]');
+        if (hdr) {
+          const probeY = Math.min(window.innerHeight - 10, hdr.getBoundingClientRect().bottom + 4);
+          const hits = document.elementsFromPoint ? document.elementsFromPoint(window.innerWidth / 2, probeY) : [];
+          const match = hits.find((el) => !el.closest('[data-hdr]') && el.closest('[data-theme]'));
+          document.body.dataset.hdrTheme = (match && match.closest('[data-theme]').dataset.theme) || 'dark';
+        }
       }
-      const hdr = document.querySelector('[data-hdr]');
-      if (!hdr) return;
-      const probeY = Math.min(window.innerHeight - 10, hdr.getBoundingClientRect().bottom + 4);
-      const hits = document.elementsFromPoint ? document.elementsFromPoint(window.innerWidth / 2, probeY) : [];
-      const match = hits.find((el) => !el.closest('[data-hdr]') && el.closest('[data-theme]'));
-      const theme = match ? match.closest('[data-theme]').dataset.theme : 'dark';
-      document.body.dataset.hdrTheme = theme || 'dark';
+
+      // Sync active chapter on left vertical rail
+      const midHits = document.elementsFromPoint ? document.elementsFromPoint(window.innerWidth / 2, window.innerHeight * 0.45) : [];
+      const chapEl = midHits.find((el) => el.closest && el.closest('section[data-chapter]'));
+      if (chapEl) {
+        const id = chapEl.closest('section[data-chapter]').dataset.chapter;
+        document.querySelectorAll('.rail-item').forEach((btn) => {
+          btn.classList.toggle('active', btn.dataset.chapter === id);
+        });
+      }
     });
   }
 
-  /* ===== 2. NATIVE 2D-PROJECTED 3D COMPRESSION MANIFOLD (EDITORIAL CANVAS 3D) ===== */
-  function startHeroCanvas() {
+  /* ===== 2. PRECISION CAD ORBITAL CANVAS + 3D SCULPTURE INERTIA ===== */
+  function startHeroStage() {
     if (rafHeroId) {
       cancelAnimationFrame(rafHeroId);
       rafHeroId = null;
     }
 
     const canvas = document.getElementById('toklang-hero-canvas');
+    const sculpture = document.getElementById('hero-sculpture-stage');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const isMobile = window.innerWidth < 768;
-    const OUTER_COUNT = isMobile ? 320 : 680;
-    const CORE_COUNT = isMobile ? 220 : 480;
-    const TOTAL = OUTER_COUNT + CORE_COUNT;
-
-    // Contiguous Float32Arrays for zero GC pause at 60fps
-    const rawX = new Float32Array(TOTAL);
-    const rawY = new Float32Array(TOTAL);
-    const rawZ = new Float32Array(TOTAL);
-    const cmpX = new Float32Array(TOTAL);
-    const cmpY = new Float32Array(TOTAL);
-    const cmpZ = new Float32Array(TOTAL);
-    const pKind = new Uint8Array(TOTAL); // 0 = outer raw token, 1 = copper core, 2 = gold anchor
-
-    // Golden-angle Fibonacci distribution for sculptural dual-shell compression manifold
-    const goldenAngle = Math.PI * (3 - Math.sqrt(5));
-
-    // Outer shell: twisted hyperbolic lattice (Raw context) -> contracts onto structured grid planes
-    for (let i = 0; i < OUTER_COUNT; i++) {
-      const t = (i + 0.5) / OUTER_COUNT;
-      const yNorm = 1 - 2 * t;
-      const waist = 0.62 + 0.56 * yNorm * yNorm;
-      const theta = goldenAngle * i;
-      const r = 1.48 * waist;
-      rawX[i] = Math.cos(theta) * r;
-      rawY[i] = yNorm * 1.28;
-      rawZ[i] = Math.sin(theta) * r;
-
-      // Target compiled state: crisp stratified @table planes inside core radius
-      const layer = (i % 7) - 3;
-      const col = ((i / 7) | 0) % 10 - 4.5;
-      const row = (((i / 70) | 0) % 10) - 4.5;
-      cmpX[i] = col * 0.16;
-      cmpY[i] = layer * 0.17;
-      cmpZ[i] = row * 0.16;
-      pKind[i] = 0;
+    const EMBER_COUNT = isMobile ? 42 : 96;
+    const embers = new Float32Array(EMBER_COUNT * 4); // angle, radiusFactor, speed, size
+    for (let i = 0; i < EMBER_COUNT; i++) {
+      embers[i * 4 + 0] = Math.random() * Math.PI * 2;
+      embers[i * 4 + 1] = 0.72 + Math.random() * 0.72;
+      embers[i * 4 + 2] = (Math.random() * 0.14 + 0.04) * (i % 2 === 0 ? 1 : -1);
+      embers[i * 4 + 3] = 1.0 + Math.random() * 1.4;
     }
-
-    // Inner core: dense faceted octahedral/geodesic prism in Copper & Gold
-    for (let j = 0; j < CORE_COUNT; j++) {
-      const idx = OUTER_COUNT + j;
-      const t = (j + 0.5) / CORE_COUNT;
-      const y = 1 - 2 * t;
-      const rad = Math.sqrt(Math.max(0, 1 - y * y));
-      const theta = goldenAngle * j * 1.37;
-      // Facet shaping (octahedral crispness)
-      const ox = Math.cos(theta) * rad;
-      const oz = Math.sin(theta) * rad;
-      const l1 = Math.abs(ox) + Math.abs(y) + Math.abs(oz) || 1;
-      const facetMix = 0.42;
-      const scale = 0.72;
-      const fx = (ox * (1 - facetMix) + (ox / l1) * facetMix) * scale;
-      const fy = (y * (1 - facetMix) + (y / l1) * facetMix) * scale;
-      const fz = (oz * (1 - facetMix) + (oz / l1) * facetMix) * scale;
-
-      rawX[idx] = fx * 1.22;
-      rawY[idx] = fy * 1.22;
-      rawZ[idx] = fz * 1.22;
-      cmpX[idx] = fx * 0.88;
-      cmpY[idx] = fy * 0.88;
-      cmpZ[idx] = fz * 0.88;
-      pKind[idx] = j % 5 === 0 ? 2 : 1;
-    }
-
-    // Structural wireframe prism vertices (12-vertex icosahedral cage + inner octahedron)
-    const phi = (1 + Math.sqrt(5)) / 2;
-    const cageVerts = [
-      [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
-      [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
-      [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1],
-    ].map(([x, y, z]) => {
-      const len = Math.hypot(x, y, z);
-      return [x / len, y / len, z / len];
-    });
-
-    const cageEdges = [];
-    for (let a = 0; a < cageVerts.length; a++) {
-      for (let b = a + 1; b < cageVerts.length; b++) {
-        const d = Math.hypot(
-          cageVerts[a][0] - cageVerts[b][0],
-          cageVerts[a][1] - cageVerts[b][1],
-          cageVerts[a][2] - cageVerts[b][2]
-        );
-        if (d < 1.15) cageEdges.push([a, b]);
-      }
-    }
-
-    const spatialLabels = [
-      { vIdx: 1, text: 'o200k_base', accent: '#C8B560' },
-      { vIdx: 5, text: '@table -59.9%', accent: '#E05A2B' },
-      { vIdx: 8, text: 'CAPC SHA-256', accent: '#3B8EA5' },
-      { vIdx: 11, text: 'POLARITY LOCK', accent: '#F0EDE6' },
-    ];
 
     let width = 0;
     let height = 0;
@@ -218,43 +146,19 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
       canvas.style.height = height + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
-
     resize();
     window.addEventListener('resize', resize, { passive: true });
 
-    let targetRotX = 0.24;
-    let targetRotY = -0.32;
-    let curRotX = 0.24;
-    let curRotY = -0.32;
+    let targetNx = 0;
+    let targetNy = 0;
+    let curNx = 0;
+    let curNy = 0;
 
     const onPointerMove = (e) => {
-      const nx = (e.clientX / Math.max(1, window.innerWidth)) * 2 - 1;
-      const ny = (e.clientY / Math.max(1, window.innerHeight)) * 2 - 1;
-      targetRotY = nx * 0.55;
-      targetRotX = 0.22 + ny * 0.32;
+      targetNx = (e.clientX / Math.max(1, window.innerWidth)) * 2 - 1;
+      targetNy = (e.clientY / Math.max(1, window.innerHeight)) * 2 - 1;
     };
     window.addEventListener('pointermove', onPointerMove, { passive: true });
-
-    function project(x, y, z, rotX, rotY, scalePx, cx, cy) {
-      const cosY = Math.cos(rotY);
-      const sinY = Math.sin(rotY);
-      const x1 = x * cosY - z * sinY;
-      const z1 = x * sinY + z * cosY;
-
-      const cosX = Math.cos(rotX);
-      const sinX = Math.sin(rotX);
-      const y2 = y * cosX - z1 * sinX;
-      const z2 = y * sinX + z1 * cosX;
-
-      const fov = 4.2;
-      const depth = fov / (fov + z2 + 1.8);
-      return {
-        sx: cx + x1 * scalePx * depth,
-        sy: cy + y2 * scalePx * depth,
-        z: z2,
-        depth,
-      };
-    }
 
     function renderFrame(ts) {
       const homeActive = document.getElementById('page-home')?.classList.contains('active');
@@ -263,128 +167,114 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
         return;
       }
 
-      const tSec = ts * 0.001;
-      // Smooth compression breathing cycle + scroll compression boost
-      const scrollRatio = Math.min(1, Math.max(0, window.scrollY / Math.max(1, window.innerHeight * 0.85)));
-      const breath = 0.5 - 0.5 * Math.cos(tSec * 0.65);
-      const compressMix = Math.min(1, breath * 0.42 + scrollRatio * 0.58);
+      const t = ts * 0.001;
+      const scrollRatio = Math.min(1, Math.max(0, window.scrollY / Math.max(1, window.innerHeight * 0.9)));
 
-      curRotX += (targetRotX - curRotX) * 0.05;
-      curRotY += (targetRotY + tSec * 0.16 - curRotY) * 0.05;
+      curNx += (targetNx - curNx) * 0.06;
+      curNy += (targetNy - curNy) * 0.06;
+
+      // Inertial 3D parallax tilt + breathing hover on the opaque PBR monolith
+      if (sculpture && !reduceMotion) {
+        const floatY = Math.sin(t * 1.15) * 6;
+        const rotY = curNx * 11;
+        const rotX = -curNy * 8;
+        const tx = curNx * 12;
+        const ty = curNy * 8 + floatY - scrollRatio * 28;
+        const sc = 1 - scrollRatio * 0.07;
+        sculpture.style.transform = `translate(-50%, -50%) translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0) perspective(1100px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
+      }
 
       ctx.clearRect(0, 0, width, height);
 
       const cx = width * 0.5;
-      const cy = height * (isMobile ? 0.44 : 0.49);
-      const scalePx = Math.min(width, height) * (isMobile ? 0.36 : 0.36);
-
+      const cy = height * (isMobile ? 0.36 : 0.43);
+      const baseR = Math.min(width, height) * (isMobile ? 0.34 : 0.31);
       const isLight = document.documentElement.classList.contains('light-theme');
 
-      // Subtle copper core aura directly behind the sculpture
-      const aura = ctx.createRadialGradient(cx, cy, scalePx * 0.04, cx, cy, scalePx * 1.2);
-      aura.addColorStop(0, isLight ? 'rgba(201, 70, 27, 0.16)' : 'rgba(224, 90, 43, 0.30)');
-      aura.addColorStop(0.45, isLight ? 'rgba(138, 116, 36, 0.06)' : 'rgba(200, 181, 96, 0.09)');
-      aura.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = aura;
+      // 1. Precision Outer Degree Meridian Ring (Horological Instrument Aesthetic)
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(t * 0.045 + curNx * 0.08);
+      ctx.strokeStyle = isLight ? 'rgba(11, 12, 15, 0.14)' : 'rgba(200, 181, 96, 0.18)';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.arc(cx, cy, scalePx * 1.2, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.arc(0, 0, baseR * 1.12, 0, Math.PI * 2);
+      ctx.stroke();
 
-      // 1. Project & draw outer structural cage edges (vector pen lines)
-      const cageScale = 1.40 - compressMix * 0.40;
-      const projCage = cageVerts.map(([x, y, z]) =>
-        project(x * cageScale, y * cageScale, z * cageScale, curRotX, curRotY, scalePx, cx, cy)
-      );
+      // 72 Precision Degree Ticks around perimeter
+      const ticks = 72;
+      for (let i = 0; i < ticks; i++) {
+        const a = (i / ticks) * Math.PI * 2;
+        const major = i % 6 === 0;
+        const r0 = baseR * (major ? 1.07 : 1.10);
+        const r1 = baseR * 1.14;
+        ctx.strokeStyle = major
+          ? (isLight ? 'rgba(201, 70, 27, 0.45)' : 'rgba(224, 90, 43, 0.55)')
+          : (isLight ? 'rgba(11, 12, 15, 0.14)' : 'rgba(240, 237, 230, 0.16)');
+        ctx.lineWidth = major ? 1.2 : 0.8;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * r0, Math.sin(a) * r0);
+        ctx.lineTo(Math.cos(a) * r1, Math.sin(a) * r1);
+        ctx.stroke();
+      }
+      ctx.restore();
 
+      // 2. Counter-rotating Dashed Copper Inner Arc
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(-t * 0.09);
+      ctx.setLineDash([28, 18, 6, 18]);
+      ctx.strokeStyle = isLight ? 'rgba(201, 70, 27, 0.28)' : 'rgba(224, 90, 43, 0.34)';
       ctx.lineWidth = 1.1;
-      for (let e = 0; e < cageEdges.length; e++) {
-        const a = projCage[cageEdges[e][0]];
-        const b = projCage[cageEdges[e][1]];
-        const avgDepth = (a.depth + b.depth) * 0.5;
-        const alpha = Math.max(0.12, Math.min(0.58, (avgDepth - 0.42) * 0.85));
-        ctx.strokeStyle = isLight
-          ? `rgba(11, 12, 15, ${alpha * 0.65})`
-          : `rgba(200, 181, 96, ${alpha})`;
-        ctx.beginPath();
-        ctx.moveTo(a.sx, a.sy);
-        ctx.lineTo(b.sx, b.sy);
-        ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 0, baseR * 0.92, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+
+      // 3. Subtle Volumetric Copper/Gold Orbiting Embers
+      for (let i = 0; i < EMBER_COUNT; i++) {
+        const a = embers[i * 4 + 0] + t * embers[i * 4 + 2];
+        const rf = embers[i * 4 + 1];
+        const sz = embers[i * 4 + 3];
+        const ex = cx + Math.cos(a) * baseR * rf * 1.25;
+        const ey = cy + Math.sin(a) * baseR * rf * 0.92;
+        const alpha = 0.16 + 0.34 * (0.5 + 0.5 * Math.sin(t * 1.4 + i));
+        ctx.fillStyle = i % 3 === 0
+          ? `rgba(224, 90, 43, ${alpha})`
+          : (isLight ? `rgba(11, 12, 15, ${alpha * 0.45})` : `rgba(200, 181, 96, ${alpha * 0.8})`);
+        ctx.fillRect(ex, ey, sz, sz);
       }
 
-      // 2. Project & draw inner copper-gold core wireframe
-      const innerScale = 0.80 - compressMix * 0.14;
-      const projInner = cageVerts.map(([x, y, z]) =>
-        project(x * innerScale, y * innerScale, z * innerScale, -curRotX * 0.7, -curRotY * 1.35, scalePx, cx, cy)
-      );
-
-      ctx.lineWidth = 1.4;
-      for (let e = 0; e < cageEdges.length; e++) {
-        const a = projInner[cageEdges[e][0]];
-        const b = projInner[cageEdges[e][1]];
-        const alpha = Math.max(0.18, Math.min(0.82, ((a.depth + b.depth) * 0.5 - 0.38) * 1.05));
-        ctx.strokeStyle = `rgba(224, 90, 43, ${alpha})`;
-        ctx.beginPath();
-        ctx.moveTo(a.sx, a.sy);
-        ctx.lineTo(b.sx, b.sy);
-        ctx.stroke();
-      }
-
-      // 3. Project & render volumetric points (outer raw lattice + inner copper/gold core)
-      for (let i = 0; i < TOTAL; i++) {
-        const x = rawX[i] + (cmpX[i] - rawX[i]) * compressMix;
-        const y = rawY[i] + (cmpY[i] - rawY[i]) * compressMix;
-        const z = rawZ[i] + (cmpZ[i] - rawZ[i]) * compressMix;
-        const p = project(x, y, z, curRotX, curRotY, scalePx, cx, cy);
-        if (p.depth < 0.25) continue;
-
-        const kind = pKind[i];
-        const size = kind === 0 ? 1.2 * p.depth : (kind === 2 ? 2.25 * p.depth : 1.8 * p.depth);
-        const alpha = Math.max(0.15, Math.min(0.98, (p.depth - 0.34) * 1.35));
-
-        if (kind === 0) {
-          ctx.fillStyle = isLight
-            ? `rgba(11, 12, 15, ${alpha * 0.45})`
-            : `rgba(240, 237, 230, ${alpha * 0.50})`;
-        } else if (kind === 1) {
-          ctx.fillStyle = `rgba(224, 90, 43, ${alpha * 0.96})`;
-        } else {
-          ctx.fillStyle = `rgba(200, 181, 96, ${alpha})`;
-        }
-        ctx.fillRect(p.sx - size * 0.5, p.sy - size * 0.5, size, size);
-      }
-
-      // 4. Spatial 3D typography labels anchored strictly OUTSIDE central headline safe-zone
-      if (!isMobile) {
-        ctx.font = '600 10.5px "JetBrains Mono", monospace';
+      // 4. Peripheral Technical Coordinates (strictly outside center safe-zone, desktop only)
+      if (!isMobile && width >= 1024) {
+        const callouts = [
+          { angle: -0.58, text: 'o200k_base', color: '#C8B560' },
+          { angle: 0.55, text: '@table -59.9%', color: '#E05A2B' },
+          { angle: Math.PI - 0.58, text: 'CAPC SHA-256', color: '#3B8EA5' },
+        ];
+        ctx.font = '600 10px "JetBrains Mono", monospace';
         ctx.textBaseline = 'middle';
-        const safeHalfW = Math.min(340, width * 0.28);
-        const safeHalfH = 112;
-        for (let k = 0; k < spatialLabels.length; k++) {
-          const item = spatialLabels[k];
-          const v = projCage[item.vIdx];
-          const inHeadlineZone = Math.abs(v.sx - cx) < safeHalfW && Math.abs(v.sy - cy) < safeHalfH;
-          if (inHeadlineZone) continue;
-
-          const alpha = Math.max(0.32, Math.min(0.92, (v.depth - 0.38) * 1.45));
-          const dir = v.sx >= cx ? 1 : -1;
-          const lx = v.sx + dir * 28;
-          const ly = v.sy;
-
-          ctx.strokeStyle = isLight ? `rgba(11, 12, 15, ${alpha * 0.45})` : `rgba(240, 237, 230, ${alpha * 0.40})`;
+        for (const c of callouts) {
+          const px = cx + Math.cos(c.angle) * baseR * 1.14;
+          const py = cy + Math.sin(c.angle) * baseR * 1.14;
+          const dir = px >= cx ? 1 : -1;
+          const lx = px + dir * 32;
+          ctx.strokeStyle = isLight ? 'rgba(11, 12, 15, 0.28)' : 'rgba(240, 237, 230, 0.25)';
           ctx.lineWidth = 1;
           ctx.beginPath();
-          ctx.moveTo(v.sx, v.sy);
-          ctx.lineTo(lx, ly);
+          ctx.moveTo(px, py);
+          ctx.lineTo(lx, py);
           ctx.stroke();
 
-          ctx.fillStyle = item.accent;
+          ctx.fillStyle = c.color;
           ctx.beginPath();
-          ctx.arc(v.sx, v.sy, 2.8, 0, Math.PI * 2);
+          ctx.arc(px, py, 2.5, 0, Math.PI * 2);
           ctx.fill();
 
           ctx.textAlign = dir > 0 ? 'left' : 'right';
-          ctx.fillStyle = isLight ? `rgba(11, 12, 15, ${alpha})` : `rgba(240, 237, 230, ${alpha})`;
-          ctx.fillText(item.text, lx + dir * 7, ly);
+          ctx.fillStyle = isLight ? 'rgba(11, 12, 15, 0.72)' : 'rgba(240, 237, 230, 0.68)';
+          ctx.fillText(c.text, lx + dir * 7, py);
         }
       }
 
@@ -396,7 +286,7 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
     rafHeroId = requestAnimationFrame(renderFrame);
   }
 
-  /* ===== 3. INTERACTIVE ARCHITECTURE STAGE (PORTFOLIO-V1 HOVER LIST + DOUBLE BEZEL) ===== */
+  /* ===== 3. INTERACTIVE ARCHITECTURE STAGE (DISCRETE 4-STATE MACHINE) ===== */
   function selectPillar(idx) {
     const data = PILLAR_STAGES[idx];
     if (!data) return;
@@ -405,6 +295,11 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
     document.querySelectorAll('.arch-row').forEach((row, i) => {
       row.classList.toggle('active', i === idx);
     });
+    document.querySelectorAll('.step-dash').forEach((d, i) => {
+      d.classList.toggle('active', i === idx);
+    });
+    const counterEl = document.getElementById('arch-step-counter');
+    if (counterEl) counterEl.textContent = `0${idx + 1} / 04`;
 
     const elIndex = document.getElementById('stage-kicker');
     const elMetric = document.getElementById('stage-metric');
@@ -451,9 +346,8 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
     syncHeaderTheme();
     selectPillar(activePillarIndex);
     initMagneticButtons();
-    startHeroCanvas();
+    startHeroStage();
 
-    // Animate strikethrough manifesto & Big Number (works both with GSAP ScrollTrigger and IntersectionObserver fallback)
     const strikeItems = Array.from(document.querySelectorAll('.strike-line'));
     const bigNumEl = document.getElementById('big-num-counter');
 
@@ -468,7 +362,7 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
       gsap.registerPlugin(ScrollTrigger);
 
       if (typeof Lenis !== 'undefined' && !lenis) {
-        lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
+        lenis = new Lenis({ lerp: 0.088, smoothWheel: true });
         lenis.on('scroll', () => {
           ScrollTrigger.update();
           syncHeaderTheme();
@@ -477,17 +371,18 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
         gsap.ticker.lagSmoothing(0);
       }
 
+      // Act 1: Animated Copper Strikethrough Manifesto
       if (strikeItems.length) {
         ScrollTrigger.create({
           trigger: '.manifesto-act',
-          start: 'top 72%',
+          start: 'top 74%',
           once: true,
           onEnter: () => {
             strikeItems.forEach((el, i) => {
               gsap.to(el, {
                 '--strike': 1,
                 duration: 0.55,
-                delay: i * 0.14,
+                delay: i * 0.13,
                 ease: 'expo.out',
                 onStart: () => el.classList.add('struck'),
               });
@@ -496,16 +391,58 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
         });
       }
 
+      // Act 1.5: CAD SVG Blueprint pathLength="1" Structural Draw
+      const cadBoxes = document.querySelectorAll('#cad-pipeline-svg .cad-box');
+      const cadLinks = document.querySelectorAll('#cad-pipeline-svg .cad-link');
+      const cadDims = document.querySelectorAll('#cad-pipeline-svg .cad-dim');
+      if (cadBoxes.length) {
+        gsap.set([...cadBoxes, ...cadLinks, ...cadDims], { strokeDashoffset: 1 });
+        ScrollTrigger.create({
+          trigger: '.cad-act',
+          start: 'top 76%',
+          once: true,
+          onEnter: () => {
+            const tl = gsap.timeline({ defaults: { ease: 'power2.out' } });
+            tl.to(cadBoxes, { strokeDashoffset: 0, duration: 0.55, stagger: 0.09 })
+              .to(cadLinks, { strokeDashoffset: 0, duration: 0.35, stagger: 0.07 }, '-=0.32')
+              .to(cadDims, { strokeDashoffset: 0, duration: 0.5, stagger: 0.1 }, '-=0.25');
+          },
+        });
+      }
+
+      // Act 2: Desktop Pinned Discrete 4-State Machine (Math.floor(progress * 4))
+      const mm = gsap.matchMedia();
+      mm.add('(min-width: 1025px) and (prefers-reduced-motion: no-preference)', () => {
+        const archAct = document.querySelector('.arch-act');
+        if (!archAct) return;
+        let lastStep = -1;
+        ScrollTrigger.create({
+          trigger: archAct,
+          start: 'top top',
+          end: '+=145%',
+          pin: true,
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            const step = Math.min(3, Math.floor(self.progress * 4));
+            if (step !== lastStep) {
+              lastStep = step;
+              selectPillar(step);
+            }
+          },
+        });
+      });
+
+      // Act 3: Monumental Big Number Count-Up
       if (bigNumEl) {
         const counter = { val: 0 };
         ScrollTrigger.create({
           trigger: bigNumEl,
-          start: 'top 82%',
+          start: 'top 84%',
           once: true,
           onEnter: () => {
             gsap.to(counter, {
               val: 59.9,
-              duration: 1.5,
+              duration: 1.45,
               ease: 'power3.out',
               onUpdate: () => {
                 bigNumEl.textContent = `-${counter.val.toFixed(1).replace('.', ',')}%`;
@@ -515,7 +452,6 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
         });
       }
     } else if (strikeItems.length) {
-      // Zero-dependency IntersectionObserver fallback
       const io = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
@@ -529,7 +465,20 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
     }
   }
 
+  function scrollToAct(id) {
+    const target = document.getElementById(id);
+    if (!target) return;
+    if (lenis) {
+      lenis.scrollTo(target, { duration: 1.1 });
+    } else {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
   function onRouteChange(page) {
+    const rail = document.getElementById('chapter-rail');
+    if (rail) rail.style.display = page === 'home' ? '' : 'none';
+
     if (page === 'home') {
       setTimeout(() => {
         initHomeChoreography();
@@ -550,4 +499,5 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
     syncHeaderTheme,
   };
   window.selectArchPillar = selectPillar;
+  window.scrollToAct = scrollToAct;
 })();
