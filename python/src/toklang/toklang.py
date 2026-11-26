@@ -526,7 +526,7 @@ def _strip_phatic_noise(text: str, level: str) -> str:
         (r"^(?:bom dia|boa tarde|boa noite|good morning|good afternoon|good evening)[!,.:\s]+", ""),
         (r"^(?:tudo bem\??|como vai\??)[,.:\s]*", ""),
         (r"\b(?:por favor|por gentileza|se poss[ií]vel|please|kindly)\b[,!:\s]*", " "),
-        (r"\b(?:muito obrigad[oa]|obrigad[oa]|valeu|thank you|thanks)\b[!,.:\s]*", " "),
+        (r"\b(?:(?:muito\s+)?obrigad[oa](?:\s+desde\s+j[aá])?|valeu|thank you(?:\s+in\s+advance)?|thanks(?:\s+in\s+advance)?)[!,.:\s]*", " "),
         (r"\b(?:voc[eê]\s+poderia|voce\s+pode|voc[eê]\s+pode|vc\s+pode|poderia\s+me\s+ajudar\s+a|pode\s+me\s+ajudar\s+a|gostaria\s+que\s+voc[eê]|could\s+you\s+please|can\s+you\s+help\s+me\s+to)\b\s*", ""),
     ):
         out = re.sub(pat, rep, out, flags=re.IGNORECASE)
@@ -537,7 +537,7 @@ def _strip_phatic_noise(text: str, level: str) -> str:
             (r"\ba fim de\b", "para"),
             (r"\bno que diz respeito a\b", "sobre"),
             (r"\bem rela[cç][aã]o a\b", "sobre"),
-            (r"\b[eé] importante ressaltar que\b[,]?\s*", ""),
+            (r"(?:^|(?<=[\s.!?]))[eé]\s+importante\s+ressaltar\s+que[,]?\s*", ""),
             (r"\bvale destacar que\b[,]?\s*", ""),
             (r"\bin order to\b", "to"),
             (r"\bdue to the fact that\b", "because"),
@@ -551,6 +551,7 @@ def _strip_phatic_noise(text: str, level: str) -> str:
     out = re.sub(r"^\s*[,;:\-]+\s*", "", out).strip()
     if len(out) > 1 and out[0].islower():
         out = out[0].upper() + out[1:]
+    out = re.sub(r"([.!?]\s+)([a-záàâãéêíóôõúç])", lambda m: m.group(1) + m.group(2).upper(), out)
     return out
 
 
@@ -827,11 +828,29 @@ def _compile_notation(text: str, custom_vocab: Any, encoding: str) -> str | None
             struct = tok
             break
 
+    modifiers: list[str] = []
+    if re.search(r"\b(bonit[oa]|visual|estilizad[oa]|ui|lind[oa]|interativ[oa]|responsiv[oa]|styled)\b", lower):
+        modifiers.append("ui+")
+    if re.search(r"\b(produ[cç][aã]o|boas pr[aá]ticas|prd|robust[oa]|production)\b", lower):
+        modifiers.append("prd")
+    if re.search(r"\b(coment[aá]rios?|comentad[oa]|well.?commented)\b", lower):
+        modifiers.append("cm")
+    if re.search(r"\b(exemplos?|pr[aá]tic[oa]|did[aá]tic[oa])\b", lower):
+        modifiers.append("dk")
+    if re.search(r"\b(tipagem|tipad[oa]|typed|type hints)\b", lower):
+        modifiers.append("typ")
+    if re.search(r"\b(ass[ií]ncron[oa]|async)\b", lower):
+        modifiers.append("async")
+    if re.search(r"\b(minimalista|minimal|lightweight)\b", lower):
+        modifiers.append("min")
+
     captured = {
         "criar", "crie", "cria", "faça", "faca", "gerar", "gere", "create", "make", "build",
         "python", "py", "javascript", "js", "typescript", "ts", "sql", "streamlit", "fastapi",
         "flask", "react", "next", "express", "postgres", "postgresql", "script", "api", "rest",
         "função", "funcao", "classe", "middleware",
+        "bonito", "bonita", "visual", "estilizado", "pronto", "produção", "producao",
+        "comentários", "comentarios", "exemplos", "tipagem", "assíncrono", "minimalista",
     }
     task_words: list[str] = []
     for w in clean.split():
@@ -855,6 +874,8 @@ def _compile_notation(text: str, custom_vocab: Any, encoding: str) -> str | None
     parts = [" ".join(header_parts)]
     if task_words:
         parts.append(" ".join(task_words))
+    if modifiers:
+        parts.append(" ".join(dict.fromkeys(modifiers)))
     return _restore_segments("; ".join(parts), preserves)
 
 

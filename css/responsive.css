@@ -7,6 +7,19 @@
   .arch-split {
     grid-template-columns: 1fr;
   }
+  .ex-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ex-compare-grid {
+    grid-template-columns: 1fr;
+  }
+  .ex-pane-before {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .ex-quick-grid {
+    grid-template-columns: 1fr;
+  }
   .bench-split {
     grid-template-columns: 1fr;
   }
@@ -91,6 +104,29 @@
     gap: 10px;
   }
   .hud-kpi-val { font-size: 16.5px; }
+
+  .ex-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .ex-tabs::-webkit-scrollbar { display: none; }
+  .ex-tab {
+    flex: 0 0 auto;
+    width: auto;
+    white-space: nowrap;
+    padding: 9px 13px;
+  }
+  .ex-pane { padding: 16px; }
+  .ex-pane-head {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .ex-stage-bar { padding: 14px 16px; }
+  .ex-stage-foot { padding: 12px 16px; }
 
   .workbench-controls {
     grid-template-columns: 1fr;

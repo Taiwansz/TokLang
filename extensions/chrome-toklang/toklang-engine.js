@@ -571,7 +571,7 @@
       .replace(/^(?:bom dia|boa tarde|boa noite|good morning|good afternoon|good evening)[!,.:\s]+/i, '')
       .replace(/^(?:tudo bem\??|como vai\??|espero que esteja bem[.!]?|hope you are doing well[.!]?)[,.:\s]*/i, '')
       .replace(/\b(?:por favor|por gentileza|se poss[ií]vel|please|kindly)\b[,!:\s]*/gi, ' ')
-      .replace(/\b(?:muito obrigad[oa]|obrigad[oa](?:\s+desde\s+j[aá])?|valeu|thank you(?:\s+in\s+advance)?|thanks(?:\s+in\s+advance)?)\b[!,.:\s]*/gi, ' ')
+      .replace(/\b(?:(?:muito\s+)?obrigad[oa](?:\s+desde\s+j[aá])?|valeu|thank you(?:\s+in\s+advance)?|thanks(?:\s+in\s+advance)?)[!,.:\s]*/gi, ' ')
       .replace(/\b(?:voc[eê]\s+poderia|voce\s+pode|voc[eê]\s+pode|vc\s+pode|poderia\s+me\s+ajudar\s+a|pode\s+me\s+ajudar\s+a|gostaria\s+que\s+voc[eê]|could\s+you\s+please|would\s+you\s+mind|can\s+you\s+help\s+me\s+to)\b\s*/gi, '');
 
     if (level === 'balanced' || level === 'aggressive') {
@@ -581,7 +581,7 @@
         [/\ba fim de\b/gi, 'para'],
         [/\bno que diz respeito a\b/gi, 'sobre'],
         [/\bem rela[cç][aã]o a\b/gi, 'sobre'],
-        [/\b[eé] importante ressaltar que\b[,]?\s*/gi, ''],
+        [/(?:^|(?<=[\s.!?]))[eé]\s+importante\s+ressaltar\s+que[,]?\s*/gi, ''],
         [/\bvale destacar que\b[,]?\s*/gi, ''],
         [/\bcomo mencionado anteriormente\b[,]?\s*/gi, ''],
         [/\bseria (?:legal|bom|[oó]timo|interessante)\s+(?:se|ter)\b/gi, 'inclua'],
@@ -608,6 +608,7 @@
     if (out.length > 1 && /^[a-záàâãéêíóôõúç]/.test(out)) {
       out = out[0].toUpperCase() + out.slice(1);
     }
+    out = out.replace(/([.!?]\s+)([a-záàâãéêíóôõúç])/g, (_, sep, ch) => sep + ch.toUpperCase());
     return out;
   }
 
@@ -1144,7 +1145,7 @@
       'streamlit', 'fastapi', 'flask', 'django', 'pandas', 'plotly', 'matplotlib', 'react', 'next', 'express',
       'prisma', 'postgres', 'postgresql', 'mongo', 'mongodb', 'redis', 'supabase', 'docker', 'jest', 'vitest',
       'função', 'funcao', 'function', 'classe', 'class', 'script', 'api', 'rest', 'componente', 'hook', 'módulo', 'modulo', 'middleware',
-      'bonito', 'bonita', 'visual', 'estilizado', 'produção', 'producao', 'comentários', 'comentarios', 'exemplos', 'tipagem', 'assíncrono', 'minimalista',
+      'bonito', 'bonita', 'visual', 'estilizado', 'pronto', 'produção', 'producao', 'comentários', 'comentarios', 'exemplos', 'tipagem', 'assíncrono', 'minimalista',
     ]);
 
     let taskSource = cleanText.replace(/\b(?:campos?|par[aâ]metros?|entradas?|inputs?|fields?)(?:\s+s[aã]o|\s*:)\s*[a-zA-Z0-9áàãâéêíóôõúç_,\s]+?(?:\.|;|$)/gi, '');

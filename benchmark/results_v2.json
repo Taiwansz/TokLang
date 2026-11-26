@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "generated_at": "2026-11-26T11:49:04.627Z",
+  "generated_at": "2026-11-26T18:22:35.006Z",
   "tokenizer_primary": "js-tiktoken:o200k_base",
   "tokenizer_secondary": "js-tiktoken:cl100k_base",
   "falsifiability_gate": {
@@ -8,9 +8,9 @@
     "monotonic_bpe_100pct": true,
     "lossless_roundtrip_100pct": true,
     "capc_prefix_stability_100pct": true,
-    "latency_p50_ms": 3.532,
-    "latency_p95_ms": 8.31,
-    "latency_capc_p95_ms": 33.685
+    "latency_p50_ms": 0.995,
+    "latency_p95_ms": 3.501,
+    "latency_capc_p95_ms": 12.068
   },
   "aggregates": {
     "mean_o200k_savings_pct": 57.34,
@@ -39,8 +39,8 @@
       "stages_applied": [
         "structural_tabular"
       ],
-      "latency_p50_ms": 5.953,
-      "latency_p95_ms": 13.712,
+      "latency_p50_ms": 1.73,
+      "latency_p95_ms": 7.402,
       "invariant_check": "100% lossless bit-for-bit decodeStructured roundtrip verified"
     },
     {
@@ -62,8 +62,8 @@
       "stages_applied": [
         "structural_tabular"
       ],
-      "latency_p50_ms": 2.984,
-      "latency_p95_ms": 5.927,
+      "latency_p50_ms": 0.807,
+      "latency_p95_ms": 2.536,
       "invariant_check": "100% lossless @struct roundtrip verified"
     },
     {
@@ -85,8 +85,8 @@
       "stages_applied": [
         "shingle_dedup"
       ],
-      "latency_p50_ms": 5.565,
-      "latency_p95_ms": 10.62,
+      "latency_p50_ms": 1.461,
+      "latency_p95_ms": 3.579,
       "invariant_check": "Critical quorum formula + negation retained under 220-token BPE cap"
     },
     {
@@ -109,8 +109,8 @@
         "structural_tabular",
         "phatic_strip"
       ],
-      "latency_p50_ms": 3.276,
-      "latency_p95_ms": 6.231,
+      "latency_p50_ms": 0.888,
+      "latency_p95_ms": 2.975,
       "invariant_check": "SQL CTE verbatim + embedded JSON tabularized + negation locked"
     },
     {
@@ -133,8 +133,8 @@
         "phatic_strip",
         "shingle_dedup"
       ],
-      "latency_p50_ms": 2.055,
-      "latency_p95_ms": 4.42,
+      "latency_p50_ms": 0.692,
+      "latency_p95_ms": 2.216,
       "invariant_check": "Duplicate paragraph eliminated while all unique LGPD negations preserved"
     },
     {
@@ -156,8 +156,8 @@
       "stages_applied": [
         "log_folding"
       ],
-      "latency_p50_ms": 3.944,
-      "latency_p95_ms": 6.845,
+      "latency_p50_ms": 1.086,
+      "latency_p95_ms": 2.725,
       "invariant_check": "Repeated log bursts folded with exact [x28] and [x20] counts"
     },
     {
@@ -179,8 +179,8 @@
       "stages_applied": [
         "phatic_strip"
       ],
-      "latency_p50_ms": 0.574,
-      "latency_p95_ms": 0.963,
+      "latency_p50_ms": 0.148,
+      "latency_p95_ms": 0.256,
       "invariant_check": "Phatic fluff stripped; zero consonant skeletons; 100% negations preserved"
     }
   ],

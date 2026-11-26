@@ -19,6 +19,26 @@ test.describe('TokLang v2 Web Application - E2E Tests', () => {
     await expect(page.locator('.bench-table')).toContainText('-59,9%');
   });
 
+  test('Compressed prompt examples showcase switches scenarios and loads live into Workbench', async ({ page }) => {
+    const examplesSec = page.locator('#act-examples');
+    await examplesSec.scrollIntoViewIfNeeded();
+    await expect(examplesSec).toBeVisible();
+
+    await expect(page.locator('#ex-after-text')).toContainText('sem usar ORM? Você não deve expor credenciais');
+
+    // Switch to scenario 02 (JSON / MCP Lossless)
+    await page.locator('.ex-tab').nth(1).click();
+    await expect(page.locator('#ex-after-text')).toContainText('@table orders[6]{id,customer,plan,amount_brl,paid}:');
+    await expect(page.locator('#ex-after-toks')).toContainText('101 tokens BPE');
+
+    // Click "Testar no Workbench" and confirm live compilation on #app
+    await page.click('.ex-try-btn');
+    await expect(page).toHaveURL(/.*#app/);
+    const outputText = page.locator('#app-output .output-text');
+    await expect(outputText).toBeVisible();
+    await expect(outputText).toContainText('@table orders[6]{id,customer,plan,amount_brl,paid}:');
+  });
+
   test('Workbench v2 compiles JSON tabular lossless, preserves negations and expands/decodes', async ({ page }) => {
     await page.click('nav a[data-page="app"]');
     await expect(page).toHaveURL(/.*#app/);

@@ -16,8 +16,11 @@
     <button type="button" class="rail-item" data-chapter="act-arch" onclick="scrollToAct('act-arch')" title="04 Arquitetura">
       <span class="rail-dash"></span><span class="rail-num">04</span>
     </button>
-    <button type="button" class="rail-item" data-chapter="act-bench" onclick="scrollToAct('act-bench')" title="05 Benchmark">
+    <button type="button" class="rail-item" data-chapter="act-examples" onclick="scrollToAct('act-examples')" title="05 Exemplos">
       <span class="rail-dash"></span><span class="rail-num">05</span>
+    </button>
+    <button type="button" class="rail-item" data-chapter="act-bench" onclick="scrollToAct('act-bench')" title="06 Benchmark">
+      <span class="rail-dash"></span><span class="rail-num">06</span>
     </button>
   </nav>
 </aside>
@@ -251,11 +254,105 @@
   </div>
 </section>
 
+<!-- ACT 2.5: REAL COMPRESSED PROMPT EXAMPLES SHOWCASE (BEFORE / AFTER IN REAL BPE o200k_base) -->
+<section id="act-examples" class="examples-act" data-theme="dark" data-chapter="act-examples">
+  <div class="examples-inner">
+    <div class="examples-head">
+      <div>
+        <div class="section-tag">05 &middot; Exemplos Reais de Prompts Comprimidos</div>
+        <h2 class="section-title">Antes e depois em <em>BPE real</em>.</h2>
+      </div>
+      <p class="examples-lead">
+        Saídas literais geradas pelo motor <code>TokLang v2.0</code> com contagem exata em <code>js-tiktoken:o200k_base</code>. Clique em qualquer cenário ou teste ao vivo no Workbench.
+      </p>
+    </div>
+
+    <!-- Interactive 6-Scenario Tabs -->
+    <div class="ex-tabs" role="tablist" aria-label="Exemplos de prompts comprimidos">
+      <button type="button" class="ex-tab active" onclick="selectPromptExample(0)"><span class="ex-tab-idx">01</span> Prompt Dev + Negações <span class="ex-tab-cut tabular">-33,3%</span></button>
+      <button type="button" class="ex-tab" onclick="selectPromptExample(1)"><span class="ex-tab-idx">02</span> JSON / MCP Lossless <span class="ex-tab-cut tabular">-62,9%</span></button>
+      <button type="button" class="ex-tab" onclick="selectPromptExample(2)"><span class="ex-tab-idx">03</span> RAG + Budget BM25 <span class="ex-tab-cut tabular">-68,0%</span></button>
+      <button type="button" class="ex-tab" onclick="selectPromptExample(3)"><span class="ex-tab-idx">04</span> SQL + JSON Embutido <span class="ex-tab-cut tabular">-46,6%</span></button>
+      <button type="button" class="ex-tab" onclick="selectPromptExample(4)"><span class="ex-tab-idx">05</span> Logs Produção <span class="ex-tab-cut tabular">-80,0%</span></button>
+      <button type="button" class="ex-tab" onclick="selectPromptExample(5)"><span class="ex-tab-idx">06</span> Notação DSL <span class="ex-tab-cut tabular">-35,5%</span></button>
+    </div>
+
+    <!-- Split 50/50 Double-Bezel Live Comparison -->
+    <div class="bezel-outer ex-stage-outer">
+      <div class="bezel-inner ex-stage">
+        <div class="ex-stage-bar">
+          <div class="ex-stage-meta">
+            <span id="ex-stage-title" class="ex-stage-title">01 &middot; Prompt Dev + Negações Críticas</span>
+            <span id="ex-stage-mode" class="ex-stage-pill">balanced &middot; phatic_strip</span>
+          </div>
+          <button type="button" class="ex-try-btn" onclick="openActiveExampleInWorkbench()">Testar no Workbench</button>
+        </div>
+
+        <div class="ex-compare-grid">
+          <div class="ex-pane ex-pane-before">
+            <div class="ex-pane-head">
+              <span>Prompt Original</span>
+              <span id="ex-before-toks" class="ex-tok-badge tabular">60 tokens BPE</span>
+            </div>
+            <pre id="ex-before-text" class="ex-pre">Bom dia! Por favor, você poderia criar uma API REST em Node.js com Express com o objetivo de gerenciar pedidos de clientes sem usar ORM? É importante ressaltar que você não deve expor credenciais nos logs e nunca permita exclusão física no banco de dados. Muito obrigado desde já!</pre>
+          </div>
+
+          <div class="ex-pane ex-pane-after">
+            <div class="ex-pane-head">
+              <span>Saída TokLang v2</span>
+              <span id="ex-after-toks" class="ex-tok-badge win tabular">40 tokens BPE (-33,3%)</span>
+            </div>
+            <pre id="ex-after-text" class="ex-pre">Criar uma API REST em Node.js com Express para gerenciar pedidos de clientes sem usar ORM? Você não deve expor credenciais nos logs e nunca permita exclusão física no banco de dados.</pre>
+          </div>
+        </div>
+
+        <div class="ex-stage-foot">
+          <div class="ex-foot-metrics">
+            <span><strong id="ex-foot-flops" class="tabular">-55,6%</strong> FLOPs prefill</span>
+            <span><strong id="ex-foot-inv">Polarity Lock 100%</strong></span>
+            <span id="ex-foot-note" class="ex-foot-note">Ruído fático removido; negações (sem, não, nunca) e nomes técnicos intactos.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Instant Visual Scan Strip: 3 Distinct Compressed Prompts Visible Immediately -->
+    <div class="ex-quick-grid">
+      <button type="button" class="ex-quick-card" onclick="selectPromptExample(1)">
+        <div class="ex-qc-head">
+          <span class="ex-qc-tag">JSON / MCP LOSSLESS</span>
+          <span class="ex-qc-save tabular">272 &rarr; 101 tk (-62,9%)</span>
+        </div>
+        <div class="ex-qc-before">{ "orders": [{ "id": "ORD-101", "customer": "Ana Silva", "plan": "pro", "paid": true }, ...] }</div>
+        <div class="ex-qc-after">@table orders[6]{id,customer,plan,amount_brl,paid}:<br>ORD-101|Ana Silva|pro|35|true</div>
+      </button>
+
+      <button type="button" class="ex-quick-card" onclick="selectPromptExample(4)">
+        <div class="ex-qc-head">
+          <span class="ex-qc-tag">LOGS DE PRODUÇÃO</span>
+          <span class="ex-qc-save tabular">434 &rarr; 87 tk (-80,0%)</span>
+        </div>
+        <div class="ex-qc-before">14x linhas idênticas: WARN redis_pool timeout retrying replica-02 (1200ms)</div>
+        <div class="ex-qc-after">2026-11-26T14:00:02Z WARN redis_pool timeout retrying replica-02 (1200ms) [x14]</div>
+      </button>
+
+      <button type="button" class="ex-quick-card" onclick="selectPromptExample(5)">
+        <div class="ex-qc-head">
+          <span class="ex-qc-tag">NOTAÇÃO DSL REVERSÍVEL</span>
+          <span class="ex-qc-save tabular">31 &rarr; 20 tk (-35,5%)</span>
+        </div>
+        <div class="ex-qc-before">Cria um script Python usando FastAPI para validar webhooks Stripe sem ORM pronto para produção...</div>
+        <div class="ex-qc-after">cr $py @fastapi #scr; validar webhooks Stripe sem ORM; prd cm typ</div>
+      </button>
+    </div>
+  </div>
+</section>
+
 <!-- ACT 3: MONUMENTAL BIG NUMBER + REPRODUCIBLE REAL-BPE BENCHMARK -->
 <section id="act-bench" class="bench-act" data-theme="dark" data-chapter="act-bench">
   <div class="bench-inner">
     <div class="bignum-band">
-      <div class="section-tag">05 &middot; Evidência Empírica &middot; js-tiktoken o200k_base</div>
+      <div class="section-tag">06 &middot; Evidência Empírica &middot; js-tiktoken o200k_base</div>
       <div class="bignum-row">
         <div id="big-num-counter" class="bignum-val">-59,9%</div>
         <div class="bignum-copy">

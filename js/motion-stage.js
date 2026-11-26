@@ -15,6 +15,145 @@
   let polarityBound = false;
   let scrollTriggersBuilt = false;
   let activePillarIndex = 0;
+  let activeExampleIndex = 0;
+
+  // Empirically verified outputs from TokLangEngine.compile() (js-tiktoken:o200k_base)
+  const PROMPT_EXAMPLES = [
+    {
+      title: '01 · Prompt Dev + Negações Críticas',
+      modeBadge: 'balanced · phatic_strip',
+      mode: 'balanced',
+      query: '',
+      budget: '',
+      beforeToks: '60 tokens BPE',
+      afterToks: '40 tokens BPE (-33,3%)',
+      flops: '-55,6%',
+      invariant: 'Polarity Lock 100%',
+      note: 'Ruído fático removido; negações (sem, não, nunca) e nomes técnicos preservados intactos.',
+      before: 'Bom dia! Por favor, você poderia criar uma API REST em Node.js com Express com o objetivo de gerenciar pedidos de clientes sem usar ORM? É importante ressaltar que você não deve expor credenciais nos logs e nunca permita exclusão física no banco de dados. Muito obrigado desde já!',
+      after: 'Criar uma API REST em Node.js com Express para gerenciar pedidos de clientes sem usar ORM? Você não deve expor credenciais nos logs e nunca permita exclusão física no banco de dados.',
+    },
+    {
+      title: '02 · JSON / MCP Tool Output (Lossless)',
+      modeBadge: 'lossless · structural_tabular',
+      mode: 'lossless',
+      query: '',
+      budget: '',
+      beforeToks: '272 tokens BPE',
+      afterToks: '101 tokens BPE (-62,9%)',
+      flops: '-86,2%',
+      invariant: 'Roundtrip 100% Lossless',
+      note: 'Schema elevado uma única vez em @table. decodeStructured() restaura o JSON original bit-a-bit.',
+      before: JSON.stringify({
+        orders: [
+          { id: 'ORD-101', customer: 'Ana Silva', plan: 'pro', amount_brl: 35.0, paid: true },
+          { id: 'ORD-102', customer: 'Bruno Costa', plan: 'team', amount_brl: 80.0, paid: true },
+          { id: 'ORD-103', customer: 'Carla Dias', plan: 'starter', amount_brl: 10.0, paid: false },
+          { id: 'ORD-104', customer: 'Diego Lima', plan: 'pro', amount_brl: 35.0, paid: true },
+          { id: 'ORD-105', customer: 'Elena Souza', plan: 'team', amount_brl: 80.0, paid: true },
+          { id: 'ORD-106', customer: 'Felipe Rocha', plan: 'pro', amount_brl: 35.0, paid: true },
+        ],
+      }, null, 2),
+      after: `@table orders[6]{id,customer,plan,amount_brl,paid}:
+ORD-101|Ana Silva|pro|35|true
+ORD-102|Bruno Costa|team|80|true
+ORD-103|Carla Dias|starter|10|false
+ORD-104|Diego Lima|pro|35|true
+ORD-105|Elena Souza|team|80|true
+ORD-106|Felipe Rocha|pro|35|true`,
+    },
+    {
+      title: '03 · Contexto RAG + Query BM25 (teto 60 tokens)',
+      modeBadge: 'balanced · extractive_bm25',
+      mode: 'balanced',
+      query: 'quórum Raft split-brain líder',
+      budget: '60',
+      beforeToks: '150 tokens BPE',
+      afterToks: '48 tokens BPE (-68,0%)',
+      flops: '-89,8%',
+      invariant: 'Cláusula + Quórum preservados',
+      note: 'Evicção por menor prioridade em BPE exato elimina ruído administrativo e retém 100% da especificação Raft.',
+      before: [
+        'Seção 1 — Rotinas administrativas: o calendário mensal de reservas das salas de reunião do segundo andar é fechado toda sexta-feira às 17h pela recepção corporativa.',
+        'Seção 2 — Suprimentos e infraestrutura predial: a manutenção preventiva do ar-condicionado dos blocos operacionais ocorre no primeiro sábado de cada mês sem impacto nos sistemas.',
+        'Seção 3 — Especificação de Consenso Raft: o quórum mínimo exige floor(N/2)+1 nós ativos para eleição de líder; nunca permita escrita sem líder confirmado no termo corrente para evitar split-brain.',
+        'Seção 4 — Comunicação interna: comunicados de eventos institucionais e refeitório são publicados semanalmente na intranet de operações.',
+      ].join('\n\n'),
+      after: 'Seção 3 — Especificação de Consenso Raft: o quórum mínimo exige floor(N/2)+1 nós ativos para eleição de líder; nunca permita escrita sem líder confirmado no termo corrente para evitar split-brain.',
+    },
+    {
+      title: '04 · SQL Verbatim + Amostra JSON Embutida',
+      modeBadge: 'balanced · structural_tabular + phatic_strip',
+      mode: 'balanced',
+      query: '',
+      budget: '',
+      beforeToks: '189 tokens BPE',
+      afterToks: '101 tokens BPE (-46,6%)',
+      flops: '-71,4%',
+      invariant: 'SQL 100% Verbatim + @table',
+      note: 'Bloco ```sql``` protegido atomicamente enquanto o texto perde preenchimento fático e o JSON vira @table.',
+      before: [
+        'Olá! Por favor, vale destacar que você precisa revisar a consulta SQL abaixo com o objetivo de melhorar performance sem remover o filtro de tenant_id e não usar SELECT *:',
+        '```sql\nSELECT tenant_id, SUM(amount) AS total\nFROM ledger\nWHERE status != \'cancelled\'\nGROUP BY tenant_id;\n```',
+        JSON.stringify({
+          sample: [
+            { tenant_id: 'org_01', total: 4200, rows: 140 },
+            { tenant_id: 'org_02', total: 5100, rows: 195 },
+            { tenant_id: 'org_03', total: 2900, rows: 88 },
+            { tenant_id: 'org_04', total: 6450, rows: 230 },
+          ],
+        }, null, 2),
+      ].join('\n\n'),
+      after: `Você precisa revisar a consulta SQL abaixo para melhorar performance sem remover o filtro de tenant_id e não usar SELECT *:
+
+\`\`\`sql
+SELECT tenant_id, SUM(amount) AS total
+FROM ledger
+WHERE status != 'cancelled'
+GROUP BY tenant_id;
+\`\`\`
+
+@table sample[4]{tenant_id,total,rows}:
+org_01|4200|140
+org_02|5100|195
+org_03|2900|88
+org_04|6450|230`,
+    },
+    {
+      title: '05 · Logs Repetitivos de Produção (16 linhas)',
+      modeBadge: 'lossless · log_folding',
+      mode: 'lossless',
+      query: '',
+      budget: '',
+      beforeToks: '434 tokens BPE',
+      afterToks: '87 tokens BPE (-80,0%)',
+      flops: '-96,0%',
+      invariant: 'Dobramento exato [x14]',
+      note: 'Rajadas idênticas de erro são dobradas com marcador [x14], preservando timestamp inicial e erro final.',
+      before: [
+        '2026-11-26T14:00:01Z INFO api-gateway listening on 0.0.0.0:8080',
+        ...Array.from({ length: 14 }, () => '2026-11-26T14:00:02Z WARN redis_pool timeout retrying replica-02 (1200ms)'),
+        '2026-11-26T14:00:06Z ERROR circuit_breaker opened for billing_service after 14 retries',
+      ].join('\n'),
+      after: `2026-11-26T14:00:01Z INFO api-gateway listening on 0.0.0.0:8080
+2026-11-26T14:00:02Z WARN redis_pool timeout retrying replica-02 (1200ms) [x14]
+2026-11-26T14:00:06Z ERROR circuit_breaker opened for billing_service after 14 retries`,
+    },
+    {
+      title: '06 · Notação DSL Limpa (Modo Notation)',
+      modeBadge: 'notation · notation_dsl',
+      mode: 'notation',
+      query: '',
+      budget: '',
+      beforeToks: '31 tokens BPE',
+      afterToks: '20 tokens BPE (-35,5%)',
+      flops: '-58,4%',
+      invariant: 'Polarity Lock 100% · expand()',
+      note: 'Shorthand limpo sem esqueletos consonantais; preservou "sem ORM" e expande de volta em texto natural.',
+      before: 'Bom dia! Por favor cria um script Python usando FastAPI para validar webhooks Stripe sem ORM pronto para produção com tipagem e comentários. Obrigado!',
+      after: 'cr $py @fastapi #scr; validar webhooks Stripe sem ORM; prd cm typ',
+    },
+  ];
 
   const PILLAR_STAGES = [
     {
@@ -345,6 +484,7 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
     }
     syncHeaderTheme();
     selectPillar(activePillarIndex);
+    selectPromptExample(activeExampleIndex);
     initMagneticButtons();
     startHeroStage();
 
@@ -493,11 +633,56 @@ nunca permita escrita sem líder confirmado para evitar split-brain.`,
     }
   }
 
+  function selectPromptExample(idx) {
+    const ex = PROMPT_EXAMPLES[idx];
+    if (!ex) return;
+    activeExampleIndex = idx;
+
+    document.querySelectorAll('.ex-tab').forEach((btn, i) => {
+      btn.classList.toggle('active', i === idx);
+    });
+
+    const set = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    };
+    set('ex-stage-title', ex.title);
+    set('ex-stage-mode', ex.modeBadge);
+    set('ex-before-toks', ex.beforeToks);
+    set('ex-after-toks', ex.afterToks);
+    set('ex-before-text', ex.before);
+    set('ex-after-text', ex.after);
+    set('ex-foot-flops', ex.flops);
+    set('ex-foot-inv', ex.invariant);
+    set('ex-foot-note', ex.note);
+  }
+
+  function openActiveExampleInWorkbench() {
+    const ex = PROMPT_EXAMPLES[activeExampleIndex] || PROMPT_EXAMPLES[0];
+    if (!ex || typeof navigate !== 'function') return;
+    navigate('app');
+    setTimeout(() => {
+      const ta = document.getElementById('app-input');
+      const modeEl = document.getElementById('app-mode');
+      const queryEl = document.getElementById('app-query');
+      const budgetEl = document.getElementById('app-budget');
+      if (ta) ta.value = ex.before;
+      if (modeEl) modeEl.value = ex.mode;
+      if (queryEl) queryEl.value = ex.query;
+      if (budgetEl) budgetEl.value = ex.budget;
+      if (typeof onInputChange === 'function') onInputChange();
+      if (typeof doCompress === 'function') doCompress();
+    }, 120);
+  }
+
   window.TokLangMotion = {
     onRouteChange,
     selectPillar,
+    selectPromptExample,
     syncHeaderTheme,
   };
   window.selectArchPillar = selectPillar;
+  window.selectPromptExample = selectPromptExample;
+  window.openActiveExampleInWorkbench = openActiveExampleInWorkbench;
   window.scrollToAct = scrollToAct;
 })();
