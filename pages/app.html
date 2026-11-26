@@ -1,166 +1,150 @@
-<div class="app-page">
-  <div class="app-layout">
-    <div class="app-main">
-      <div class="app-header">
-        <div class="section-tag" style="margin-bottom:8px">Workbench v2.0</div>
-        <h1 class="app-title">Compilador de Contexto BPE</h1>
-        <p class="app-sub">Compile JSON/MCP, contextos RAG, logs e prompts técnicos com verificação BPE real, Polarity Lock e decodificação reversível.</p>
+<div class="app-page" data-theme="dark">
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <div class="section-tag" style="margin-bottom:10px">Workbench v2.0 &middot; BPE Real</div>
+        <h1 class="app-title">Compilador de <em>Contexto</em></h1>
       </div>
+      <p class="app-sub">Audite payloads JSON/MCP, contextos RAG e logs em <code>o200k_base</code> com Polarity Lock e decodificação lossless reversível.</p>
+    </header>
 
-      <div class="workbench-controls">
-        <label class="ctrl-field">
-          <span class="ctrl-label">Modo de Compilação</span>
-          <select id="app-mode" class="ctrl-select" onchange="onInputChange()">
-            <option value="balanced" selected>Balanced (Estrutural + Extrativo)</option>
-            <option value="lossless">Lossless (JSON Tabular + Logs + Fático)</option>
-            <option value="aggressive">Aggressive (Poda Extrativa + Knapsack)</option>
-            <option value="notation">Notation DSL (Shorthand Limpo)</option>
-          </select>
-        </label>
-        <label class="ctrl-field">
-          <span class="ctrl-label">Query de Foco (BM25 Opcional)</span>
-          <input id="app-query" class="ctrl-input" type="text" placeholder="ex: quórum Raft split-brain">
-        </label>
-        <label class="ctrl-field">
-          <span class="ctrl-label">Budget Max Tokens</span>
-          <input id="app-budget" class="ctrl-input tabular" type="number" min="20" max="16000" placeholder="sem teto">
-        </label>
-      </div>
-
-      <div class="app-panel">
-        <div class="panel-header">
-          <span class="panel-label">Entrada Bruta</span>
-          <span class="panel-label tabular" id="input-tok-count">0 tokens</span>
-        </div>
-        <div class="panel-body">
-          <textarea class="prompt-input" id="app-input" maxlength="24000" placeholder="Cole um payload JSON, contexto RAG, dump de logs ou prompt técnico..." oninput="onInputChange()" aria-label="Prompt ou payload de entrada"></textarea>
-        </div>
-        <div class="input-actions-row">
-          <button class="input-clear-btn" onclick="clearInput()" aria-label="Limpar campo de entrada">Limpar</button>
-        </div>
-        <div class="char-limit-row">
-          <span id="char-count">0</span>
-          <div class="char-limit-bar"><div class="char-limit-fill" id="char-bar" style="width:0%"></div></div>
-          <span>24.000 chars</span>
-        </div>
-      </div>
-
-      <div class="limit-banner" id="limit-banner">
-        Você atingiu 80% do limite mensal. <span class="uc-upgrade" onclick="navigate('pricing')">Ver planos</span>
-      </div>
-
-      <div class="usage-counter-bar" id="usage-counter-bar">
-        <span class="uc-label" id="uc-label">Uso:</span>
-        <div class="uc-bar"><div class="uc-fill" id="uc-fill" style="width:0%"></div></div>
-        <span class="uc-value" id="uc-value">0 / 500</span>
-        <span class="uc-upgrade" id="uc-upgrade" onclick="navigate('pricing')" title="Ver planos">Planos</span>
-      </div>
-
-      <div class="actions-btn-row">
-        <button class="compress-btn" id="compress-btn" onclick="doCompress()" aria-label="Compilar e comprimir entrada">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-          Compilar v2 <span style="font-weight:400;opacity:0.75;font-size:10px">Ctrl+Enter</span>
-        </button>
-        <button class="expand-btn" id="expand-btn" onclick="doExpand()" aria-label="Decodificar ou expandir saída">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-          Expandir / Decode <span style="font-weight:400;opacity:0.75;font-size:10px">Shift+Enter</span>
-        </button>
-      </div>
-
-      <div id="app-error"></div>
-
-      <div class="app-panel">
-        <div class="panel-header">
-          <div class="output-header-row">
-            <span class="panel-label">Saída Compilada</span>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span class="panel-label tabular" id="output-tok-count"></span>
-              <button class="copy-output-btn" id="copy-output-btn" onclick="copyOutput()" aria-label="Copiar resultado" style="display:none">Copiar</button>
-            </div>
-          </div>
-        </div>
-        <div class="panel-body">
-          <div class="output-body" id="app-output">
-            <span class="output-placeholder">A saída compilada e a auditoria BPE aparecerão aqui.</span>
-          </div>
-        </div>
-        <div class="stats-strip" id="app-stats" style="display:none">
-          <div class="ss-item"><div class="ss-num neutral" id="stat-before">-</div><div class="ss-lbl">tokens antes</div></div>
-          <div class="ss-item"><div class="ss-num neutral" id="stat-after">-</div><div class="ss-lbl">tokens depois</div></div>
-          <div class="ss-item"><div class="ss-num" id="stat-pct">-</div><div class="ss-lbl">redução BPE</div></div>
-          <div class="ss-item"><div class="ss-num ok" id="stat-usd">-</div><div class="ss-lbl">FLOPs prefill</div></div>
-        </div>
-        <div class="audit-strip" id="app-audit" style="display:none"></div>
-      </div>
-
-      <div class="pipeline">
-        <div class="pipeline-header">
-          <span class="panel-label">Telemetria do Pipeline</span>
-          <span class="pill pill-gray" id="pipe-status">aguardando</span>
-        </div>
-        <div class="pipeline-steps">
-          <div class="pipe-step" id="pipe1"><div class="pipe-dot" id="pipe-dot-1"></div><div class="pipe-label" id="pipe-lbl-1">1. Tokenização BPE &amp; Proteção Atômica</div><div class="pipe-value" id="pipe-val-1"></div></div>
-          <div class="pipe-step" id="pipe2"><div class="pipe-dot" id="pipe-dot-2"></div><div class="pipe-label" id="pipe-lbl-2">2. Codec Estrutural (@table) &amp; Log Folding</div><div class="pipe-value" id="pipe-val-2"></div></div>
-          <div class="pipe-step" id="pipe3"><div class="pipe-dot" id="pipe-dot-3"></div><div class="pipe-label" id="pipe-lbl-3">3. Poda Extrativa &amp; Polarity Lock</div><div class="pipe-value" id="pipe-val-3"></div></div>
-          <div class="pipe-step" id="pipe4"><div class="pipe-dot" id="pipe-dot-4"></div><div class="pipe-label" id="pipe-lbl-4">4. Guarda de Monotonicidade &amp; SHA-256</div><div class="pipe-value" id="pipe-val-4"></div></div>
-        </div>
-      </div>
+    <!-- Single Clean Command Strip -->
+    <div class="workbench-controls">
+      <label class="ctrl-field">
+        <span class="ctrl-label">Modo</span>
+        <select id="app-mode" class="ctrl-select" onchange="onInputChange()">
+          <option value="balanced" selected>Balanced (Estrutural + Extrativo)</option>
+          <option value="lossless">Lossless (JSON Tabular + Logs + Fático)</option>
+          <option value="aggressive">Aggressive (Poda Extrativa + Knapsack)</option>
+          <option value="notation">Notation DSL (Shorthand Limpo)</option>
+        </select>
+      </label>
+      <label class="ctrl-field">
+        <span class="ctrl-label">Query de Foco (BM25 Opcional)</span>
+        <input id="app-query" class="ctrl-input" type="text" placeholder="ex: quórum Raft split-brain">
+      </label>
+      <label class="ctrl-field">
+        <span class="ctrl-label">Budget Max Tokens</span>
+        <input id="app-budget" class="ctrl-input tabular" type="number" min="20" max="16000" placeholder="sem teto">
+      </label>
     </div>
 
-    <aside class="app-sidebar">
-      <div class="sidebar-section">
-        <div class="sidebar-header"><div class="sidebar-title">Presets Reais v2.0</div></div>
-        <div class="sidebar-body">
+    <div class="app-layout">
+      <div class="app-main">
+        <!-- Input Double-Bezel Panel -->
+        <div class="bezel-outer">
+          <div class="bezel-inner app-panel">
+            <div class="panel-header">
+              <span class="panel-label">Entrada Bruta</span>
+              <div class="panel-head-right">
+                <span class="panel-label tabular" id="input-tok-count">0 tokens</span>
+                <button class="input-clear-btn" onclick="clearInput()" aria-label="Limpar campo de entrada">Limpar</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <textarea class="prompt-input" id="app-input" maxlength="24000" placeholder="Cole um payload JSON, contexto RAG, dump de logs ou prompt técnico..." oninput="onInputChange()" aria-label="Prompt ou payload de entrada"></textarea>
+            </div>
+            <div class="char-limit-row">
+              <span id="char-count" class="tabular">0</span>
+              <div class="char-limit-bar"><div class="char-limit-fill" id="char-bar" style="width:0%"></div></div>
+              <span>24.000 chars</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="limit-banner" id="limit-banner">
+          Você atingiu 80% do limite mensal. <span class="uc-upgrade" onclick="navigate('pricing')">Ver planos</span>
+        </div>
+
+        <div class="usage-counter-bar" id="usage-counter-bar">
+          <span class="uc-label" id="uc-label">Uso:</span>
+          <div class="uc-bar"><div class="uc-fill" id="uc-fill" style="width:0%"></div></div>
+          <span class="uc-value tabular" id="uc-value">0 / 500</span>
+          <span class="uc-upgrade" id="uc-upgrade" onclick="navigate('pricing')" title="Ver planos">Planos</span>
+        </div>
+
+        <div class="actions-btn-row">
+          <button class="compress-btn" id="compress-btn" onclick="doCompress()" aria-label="Compilar e comprimir entrada">
+            Compilar v2 <span class="btn-kbd">Ctrl+Enter</span>
+          </button>
+          <button class="expand-btn" id="expand-btn" onclick="doExpand()" aria-label="Decodificar ou expandir saída">
+            Expandir / Decode <span class="btn-kbd">Shift+Enter</span>
+          </button>
+        </div>
+
+        <div id="app-error"></div>
+
+        <!-- Output Double-Bezel Panel -->
+        <div class="bezel-outer">
+          <div class="bezel-inner app-panel">
+            <div class="panel-header">
+              <span class="panel-label">Saída Compilada</span>
+              <div class="panel-head-right">
+                <span class="panel-label tabular" id="output-tok-count"></span>
+                <button class="copy-output-btn" id="copy-output-btn" onclick="copyOutput()" aria-label="Copiar resultado" style="display:none">Copiar</button>
+              </div>
+            </div>
+            <div class="panel-body">
+              <div class="output-body" id="app-output">
+                <span class="output-placeholder">A saída compilada e a auditoria BPE aparecerão aqui.</span>
+              </div>
+            </div>
+            <div class="stats-strip" id="app-stats" style="display:none">
+              <div class="ss-item"><div class="ss-num neutral tabular" id="stat-before">-</div><div class="ss-lbl">tokens antes</div></div>
+              <div class="ss-item"><div class="ss-num neutral tabular" id="stat-after">-</div><div class="ss-lbl">tokens depois</div></div>
+              <div class="ss-item"><div class="ss-num accent tabular" id="stat-pct">-</div><div class="ss-lbl">redução BPE</div></div>
+              <div class="ss-item"><div class="ss-num ok tabular" id="stat-usd">-</div><div class="ss-lbl">FLOPs prefill</div></div>
+            </div>
+            <div class="audit-strip" id="app-audit" style="display:none"></div>
+          </div>
+        </div>
+
+        <!-- Minimalist Live Pipeline Telemetry -->
+        <div class="pipeline">
+          <div class="pipeline-header">
+            <span class="panel-label">Telemetria do Pipeline</span>
+            <span class="pill pill-gray" id="pipe-status">aguardando</span>
+          </div>
+          <div class="pipeline-steps">
+            <div class="pipe-step" id="pipe1"><div class="pipe-dot" id="pipe-dot-1"></div><div class="pipe-label" id="pipe-lbl-1">1. Tokenização BPE &amp; Proteção Atômica</div><div class="pipe-value tabular" id="pipe-val-1"></div></div>
+            <div class="pipe-step" id="pipe2"><div class="pipe-dot" id="pipe-dot-2"></div><div class="pipe-label" id="pipe-lbl-2">2. Codec Estrutural (@table) &amp; Log Folding</div><div class="pipe-value tabular" id="pipe-val-2"></div></div>
+            <div class="pipe-step" id="pipe3"><div class="pipe-dot" id="pipe-dot-3"></div><div class="pipe-label" id="pipe-lbl-3">3. Poda Extrativa &amp; Polarity Lock</div><div class="pipe-value tabular" id="pipe-val-3"></div></div>
+            <div class="pipe-step" id="pipe4"><div class="pipe-dot" id="pipe-dot-4"></div><div class="pipe-label" id="pipe-lbl-4">4. Guarda de Monotonicidade &amp; SHA-256</div><div class="pipe-value tabular" id="pipe-val-4"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clean Minimalist Sidebar (Zero Badge Slop) -->
+      <aside class="app-sidebar">
+        <div class="sidebar-block">
+          <div class="sidebar-kicker">Presets de Auditoria</div>
           <ul class="examples-list">
-            <li class="example-item" onclick="fillPrompt(0)">JSON / MCP Tool Output (12 registros)</li>
-            <li class="example-item" onclick="fillPrompt(1)">RAG Consenso Raft (com budget BM25)</li>
-            <li class="example-item" onclick="fillPrompt(2)">Prompt Técnico com Negações Críticas</li>
-            <li class="example-item" onclick="fillPrompt(3)">SQL CTE + Amostra JSON Embutida</li>
-            <li class="example-item" onclick="fillPrompt(4)">Logs Repetitivos de Produção</li>
-            <li class="example-item" onclick="fillPrompt(5)">Notação DSL para Expandir (cr $py...)</li>
+            <li class="example-item" onclick="fillPrompt(0)"><span class="ex-idx">01</span><span>JSON / MCP Tool Output (12 registros)</span></li>
+            <li class="example-item" onclick="fillPrompt(1)"><span class="ex-idx">02</span><span>RAG Consenso Raft (budget BM25)</span></li>
+            <li class="example-item" onclick="fillPrompt(2)"><span class="ex-idx">03</span><span>Prompt Técnico com Negações Críticas</span></li>
+            <li class="example-item" onclick="fillPrompt(3)"><span class="ex-idx">04</span><span>SQL CTE + Amostra JSON Embutida</span></li>
+            <li class="example-item" onclick="fillPrompt(4)"><span class="ex-idx">05</span><span>Logs Repetitivos de Produção</span></li>
+            <li class="example-item" onclick="fillPrompt(5)"><span class="ex-idx">06</span><span>Notação DSL para Expandir (rf $js...)</span></li>
           </ul>
         </div>
-      </div>
 
-      <div class="sidebar-section">
-        <div class="sidebar-header"><div class="sidebar-title">Estágios &amp; Garantias</div></div>
-        <div class="sidebar-body">
-          <div class="qref-group">
-            <div class="qref-label">Codecs Estruturais</div>
-            <div class="qref-tokens">
-              <span class="qref-token qt-blue">@table</span>
-              <span class="qref-token qt-blue">@struct</span>
-              <span class="qref-token qt-blue">[xN] logs</span>
-            </div>
+        <div class="sidebar-block">
+          <div class="sidebar-kicker">Garantias do Motor</div>
+          <div class="invariants-clean">
+            <div class="inv-row"><span>Codec Lossless</span><code>@table / @struct</code></div>
+            <div class="inv-row"><span>Monotonicidade</span><code>after &lt;= before</code></div>
+            <div class="inv-row"><span>Polarity Lock</span><code>100% retido</code></div>
+            <div class="inv-row"><span>Prefixo CAPC</span><code>SHA-256 estável</code></div>
           </div>
-          <div class="qref-group">
-            <div class="qref-label">Invariantes de Segurança</div>
-            <div class="qref-tokens">
-              <span class="qref-token qt-green">BPE monotonic</span>
-              <span class="qref-token qt-green">Polarity Lock</span>
-              <span class="qref-token qt-amber">CAPC SHA-256</span>
-            </div>
-          </div>
-          <div class="qref-group">
-            <div class="qref-label">Notação DSL (Modo Notation)</div>
-            <div class="qref-tokens">
-              <span class="qref-token qt-gray">cr</span>
-              <span class="qref-token qt-gray">fix</span>
-              <span class="qref-token qt-gray">rf</span>
-              <span class="qref-token qt-gray">$py</span>
-              <span class="qref-token qt-gray">@streamlit</span>
-              <span class="qref-token qt-gray">prd</span>
-            </div>
-          </div>
-          <button class="btn btn-ghost" style="width:100%;font-size:11px;padding:9px;margin-top:6px" onclick="navigate('docs')">Ver Especificação Completa</button>
+          <button class="btn btn-ghost" style="width:100%;font-size:11px;padding:10px;margin-top:16px" onclick="navigate('docs')">Ler Especificação</button>
         </div>
-      </div>
 
-      <div class="sidebar-section" id="history-section" style="display:none">
-        <div class="sidebar-header"><div class="sidebar-title">Histórico da Sessão</div></div>
-        <div class="sidebar-body" id="history-body"></div>
-      </div>
-    </aside>
+        <div class="sidebar-block" id="history-section" style="display:none">
+          <div class="sidebar-kicker">Histórico da Sessão</div>
+          <div id="history-body"></div>
+        </div>
+      </aside>
+    </div>
   </div>
 </div>
 
@@ -168,7 +152,7 @@
   <div class="modal-card">
     <button class="modal-close" onclick="closeVisitorModal()" aria-label="Fechar modal">X</button>
     <div class="modal-header">
-      <span class="eyebrow-meta">Modo Visitante</span>
+      <span class="section-tag" style="margin-bottom:6px">Modo Visitante</span>
       <h3>Crie uma conta para continuar</h3>
     </div>
     <div class="modal-body">

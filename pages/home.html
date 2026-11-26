@@ -1,296 +1,308 @@
-<!-- PAGE: HOME — TOKLANG v2.0 INDUSTRIAL POP SWISS LAB -->
-<section class="hero">
-  <div class="hero-left">
-    <div class="eyebrow-meta hero-eyebrow">
-      <span class="eyebrow-dot"></span>
-      <span>TokLang v2.0 &middot; BPE-Verified &middot; CAPC Architecture</span>
-    </div>
-    <h1 class="hero-title">
-      Comprima contexto.<br>
-      Preserve <em>lógica e cache</em>.
+<!-- PAGE: HOME — TOKLANG v2.0 OBSIDIAN COMPILER ATELIER (7 LEIS HERO-POSTER + ARQUETIPO B/C + EDITORIAL CANVAS 3D) -->
+
+<!-- ACT 0: HERO-POSTER (4-LAYER Z-AXIS DEPTH INTERLOCK, <=24 WORDS, 1 HEROIC 3D OBJECT) -->
+<section class="hero-poster" data-theme="dark">
+  <!-- L0: Atmospheric Cyclorama & Directional Copper Light -->
+  <div class="hero-cyclorama" aria-hidden="true"></div>
+
+  <!-- L1 (z: 10): Monumental Edge-to-Edge Poster Typography (Occluded by L2 3D Canvas) -->
+  <div class="hero-poster-bg-type" aria-hidden="true">TOKLANG</div>
+
+  <!-- L2 (z: 20): Native 2D-Projected 3D BPE Compression Manifold (Float32Array @ 60fps) -->
+  <canvas id="toklang-hero-canvas" class="hero-canvas" aria-label="Escultura 3D interativa de compressão de tokens BPE"></canvas>
+
+  <!-- L2.5 (z: 25): Foreground Editorial Voice (Sans + Instrument Serif Italic Tension) -->
+  <div class="hero-foreground-title">
+    <h1 class="hero-h1">
+      Menos tokens.<br>
+      <em>Zero perda.</em>
     </h1>
-    <p class="hero-sub">
-      Compilador determinístico para pipelines de LLMs. Compacta payloads <strong>JSON/MCP em tabelas lossless reversíveis</strong>, poda contextos RAG por relevância BM25 e protege prefixos estáticos de <strong>Prompt Caching</strong> sem chamar modelos externos.
+  </div>
+
+  <!-- L3 (z: 30): 4-Corner Swiss Poster Micro-HUD -->
+  <div class="hero-hud-tl">
+    <span class="hud-dot"></span>
+    <span>TOKLANG v2.0 &middot; BPE o200k_base &middot; CAPC</span>
+  </div>
+
+  <div class="hero-hud-tr">
+    <span class="tabular">p95 8,31 ms &middot; 100% OFFLINE</span>
+  </div>
+
+  <div class="hero-hud-bl">
+    <p class="hero-thesis">
+      Compilador determinístico para LLMs. Codec <strong>@table lossless</strong>, trava de negações e estabilidade de Prompt Caching.
     </p>
-    <div class="hero-ctas">
-      <button class="btn btn-primary btn-lg" onclick="navigate('app')">Abrir Workbench v2</button>
-      <button class="btn btn-ghost btn-lg" onclick="navigate('docs')">Ler Especificação</button>
-    </div>
-    <div class="hero-invariants">
-      <span class="inv-item"><span class="inv-mark"></span>Monotonicidade BPE 100%</span>
-      <span class="inv-item"><span class="inv-mark"></span>Polarity &amp; Negation Lock</span>
-      <span class="inv-item"><span class="inv-mark"></span>Offline em p95 6,35 ms</span>
+    <div class="hero-cta-row">
+      <button class="btn btn-primary btn-lg" data-magnetic onclick="navigate('app')">Abrir Workbench</button>
+      <button class="btn btn-ghost btn-lg" onclick="navigate('docs')">Especificação</button>
     </div>
   </div>
 
-  <div class="hero-instrument">
-    <div class="inst-bar">
-      <span class="inst-title">toklang compile --mode lossless --encoding o200k_base</span>
-      <span class="inst-tag">Reversível 100%</span>
+  <div class="hero-hud-br">
+    <div class="hud-kpi">
+      <span class="hud-kpi-val accent tabular">-59,9%</span>
+      <span class="hud-kpi-lbl">JSON / MCP BPE</span>
     </div>
-    <div class="inst-body">
-      <div class="inst-block">
-        <div class="inst-block-head">
-          <span>Entrada bruta (JSON / Tool output, 25 registros)</span>
-          <span class="tabular">1.610 tokens BPE</span>
-        </div>
-        <div class="inst-code">{
+    <div class="hud-kpi">
+      <span class="hud-kpi-val gold tabular">-71,1%</span>
+      <span class="hud-kpi-lbl">CAPC Anthropic</span>
+    </div>
+    <div class="hud-kpi">
+      <span class="hud-kpi-val ok tabular">100%</span>
+      <span class="hud-kpi-lbl">Polarity Lock</span>
+    </div>
+  </div>
+</section>
+
+<!-- ACT 1: MANIFESTO RISCADO (ANIMATED COPPER STRIKETHROUGH — REF. O JEITO AGI) -->
+<section class="manifesto-act" data-theme="dark">
+  <div class="manifesto-inner">
+    <div class="section-tag">O Fim da Compressão Ingênua</div>
+    <div class="manifesto-lines">
+      <div class="manifesto-row"><span class="strike-line">Abreviações consonantais que estilhaçam o BPE.</span></div>
+      <div class="manifesto-row"><span class="strike-line">Stopwords que apagam negações críticas.</span></div>
+      <div class="manifesto-row"><span class="strike-line">LLMs externos pagos para comprimir prompts.</span></div>
+      <div class="manifesto-row"><span class="strike-line">Mutações que invalidam o Prompt Caching.</span></div>
+    </div>
+    <p class="manifesto-verdict">
+      Substituímos heurísticas frágeis por <em>engenharia determinística</em> verificada em tokenizador real.
+    </p>
+  </div>
+</section>
+
+<!-- ACT 2: ATMOSPHERIC INVERSION — EDITORIAL PAPER (#F0EDE6) + INTERACTIVE STAGE -->
+<section class="arch-act" data-theme="light">
+  <div class="arch-inner">
+    <div class="arch-head">
+      <div class="section-tag">Arquitetura v2.0</div>
+      <h2 class="section-title arch-title">Quatro garantias formais.<br><em>Zero caixa-preta.</em></h2>
+    </div>
+
+    <div class="arch-split">
+      <!-- Left: Portfolio-V1 Interactive Expertise Hover/Click List -->
+      <div class="arch-list" role="tablist" aria-label="Pilares da arquitetura TokLang v2">
+        <button type="button" class="arch-row active" onclick="selectArchPillar(0)" onmouseenter="selectArchPillar(0)">
+          <span class="arch-num tabular">01</span>
+          <div class="arch-row-copy">
+            <h3>Codec Tabular Lossless</h3>
+            <p>Schema hoisting <code>@table</code> e <code>@struct</code> para JSON e MCP com decodificação bit-a-bit exata.</p>
+          </div>
+          <span class="arch-row-stat tabular">-59,9%</span>
+        </button>
+
+        <button type="button" class="arch-row" onclick="selectArchPillar(1)" onmouseenter="selectArchPillar(1)">
+          <span class="arch-num tabular">02</span>
+          <div class="arch-row-copy">
+            <h3>CAPC — Prompt Caching</h3>
+            <p>Tier 0 estático com hash SHA-256 imutável + <code>cache_control</code>; Tier 2 dinâmico compactado por turno.</p>
+          </div>
+          <span class="arch-row-stat tabular">-40,6%</span>
+        </button>
+
+        <button type="button" class="arch-row" onclick="selectArchPillar(2)" onmouseenter="selectArchPillar(2)">
+          <span class="arch-num tabular">03</span>
+          <div class="arch-row-copy">
+            <h3>Polarity &amp; Negation Lock</h3>
+            <p>Trava inviolável sobre operadores lógicos, negações PT-BR/EN, código e SQL. Zero esqueletos consonantais.</p>
+          </div>
+          <span class="arch-row-stat tabular">100%</span>
+        </button>
+
+        <button type="button" class="arch-row" onclick="selectArchPillar(3)" onmouseenter="selectArchPillar(3)">
+          <span class="arch-num tabular">04</span>
+          <div class="arch-row-copy">
+            <h3>BM25 Extrativo &amp; Guarda BPE</h3>
+            <p>Evicção por menor prioridade sob orçamento exato <code>maxTokens</code> e rollback automático contra inflação.</p>
+          </div>
+          <span class="arch-row-stat tabular">8,3 ms</span>
+        </button>
+      </div>
+
+      <!-- Right: Double-Bezel Obsidian Instrumentation Stage -->
+      <div class="arch-console-wrap">
+        <div class="arch-bezel-outer">
+          <div class="arch-console">
+            <div class="arch-console-bar">
+              <span id="stage-kicker" class="arch-console-kicker">01 &middot; CODEC TABULAR LOSSLESS (@table / @struct)</span>
+              <span id="stage-metric" class="arch-console-metric tabular">-59,9% BPE &middot; 100% reversível</span>
+            </div>
+            <div class="arch-console-body">
+              <div class="arch-code-block">
+                <div id="stage-before-title" class="arch-code-lbl">JSON / MCP bruto (25 registros &middot; 1.610 tokens o200k_base)</div>
+                <pre id="stage-before-code" class="arch-pre">{
   "users": [
     { "id": 1001, "name": "Engineer_1", "team": "ml-platform", "role": "staff", "active": true },
-    { "id": 1002, "name": "Engineer_2", "team": "core-infra", "role": "senior", "active": true }
+    { "id": 1002, "name": "Engineer_2", "team": "core-infra",  "role": "senior", "active": true }
   ]
-}</div>
-      </div>
-      <div class="inst-block after">
-        <div class="inst-block-head">
-          <span>Saída TokLang v2 (@table schema-hoisted)</span>
-          <span class="tabular">645 tokens BPE (-59,9%)</span>
-        </div>
-        <div class="inst-code">@table users[25]{id,name,email,team,role,active,monthly_tokens}:
+}</pre>
+              </div>
+              <div class="arch-code-block compiled">
+                <div id="stage-after-title" class="arch-code-lbl">TokLang v2 @table (645 tokens o200k_base &middot; FLOPs -84,0%)</div>
+                <pre id="stage-after-code" class="arch-pre">@table users[25]{id,name,email,team,role,active,monthly_tokens}:
 1001|Engineer_1|eng1@acme.dev|ml-platform|staff|true|120000
-1002|Engineer_2|eng2@acme.dev|core-infra|senior|true|127500</div>
-      </div>
-    </div>
-    <div class="inst-footer">
-      <div class="inst-metric">
-        <div class="inst-m-val">-59,9%</div>
-        <div class="inst-m-lbl">Tokens o200k_base</div>
-      </div>
-      <div class="inst-metric">
-        <div class="inst-m-val petrol">-84,0%</div>
-        <div class="inst-m-lbl">FLOPs Prefill O(n2)</div>
-      </div>
-      <div class="inst-metric">
-        <div class="inst-m-val ok">100%</div>
-        <div class="inst-m-lbl">Roundtrip Lossless</div>
+1002|Engineer_2|eng2@acme.dev|core-infra|senior|true|127500</pre>
+              </div>
+            </div>
+            <div class="arch-console-foot">
+              <p id="stage-note">Schema elevado uma única vez. decodeStructured() restaura o JSON original bit-a-bit com escape automático de literais.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- MEASURED TELEMETRY STRIP -->
-<div class="stats-bar">
-  <div class="stats-bar-inner">
-    <div class="stat-block">
-      <div class="stat-num accent">-59,9%</div>
-      <div class="stat-lbl">Corte BPE real em payloads JSON/MCP uniformes</div>
+<!-- ACT 3: MONUMENTAL BIG NUMBER + REPRODUCIBLE REAL-BPE BENCHMARK -->
+<section class="bench-act" data-theme="dark">
+  <div class="bench-inner">
+    <div class="bignum-band">
+      <div class="section-tag">Evidência Empírica &middot; js-tiktoken o200k_base</div>
+      <div class="bignum-row">
+        <div id="big-num-counter" class="bignum-val">-59,9%</div>
+        <div class="bignum-copy">
+          <p class="bignum-lead">Corte BPE real em payloads JSON/MCP uniformes com <strong>100% de fidelidade lossless</strong> e queda de <strong>84,0% nos FLOPs de prefill</strong>.</p>
+          <span class="bignum-cmd">Reproduzível via <code>node scripts/benchmark_v2.js</code> &middot; Falsifiability Gate: PASS</span>
+        </div>
+      </div>
     </div>
-    <div class="stat-block">
-      <div class="stat-num petrol">-71,1%</div>
-      <div class="stat-lbl">Custo total CAPC (Anthropic, 85% cache hit)</div>
+
+    <div class="bench-table-wrap">
+      <table class="bench-table">
+        <thead>
+          <tr>
+            <th>Caso</th>
+            <th>Workload Real</th>
+            <th class="num">BPE Antes</th>
+            <th class="num">BPE Depois</th>
+            <th class="num">Corte BPE</th>
+            <th class="num">FLOPs Prefill</th>
+            <th>Invariante Auditada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="mono-dim">W1</td>
+            <td>JSON / MCP Uniforme (25 registros)</td>
+            <td class="num">1.610</td>
+            <td class="num">645</td>
+            <td class="save">-59,9%</td>
+            <td class="num">-84,0%</td>
+            <td class="ok-cell">Roundtrip lossless 100%</td>
+          </tr>
+          <tr>
+            <td class="mono-dim">W2</td>
+            <td>Payload Híbrido Tool Call (@struct + 20 pedidos)</td>
+            <td class="num">1.002</td>
+            <td class="num">395</td>
+            <td class="save">-60,6%</td>
+            <td class="num">-84,5%</td>
+            <td class="ok-cell">Roundtrip lossless 100%</td>
+          </tr>
+          <tr>
+            <td class="mono-dim">W3</td>
+            <td>RAG Longo (Consenso Raft, teto 220 tokens)</td>
+            <td class="num">664</td>
+            <td class="num">86</td>
+            <td class="save">-87,0%</td>
+            <td class="num">-98,3%</td>
+            <td class="ok-cell">Quórum + negação preservados</td>
+          </tr>
+          <tr>
+            <td class="mono-dim">W4</td>
+            <td>SQL DDL + Bloco de Código + JSON embutido</td>
+            <td class="num">445</td>
+            <td class="num">234</td>
+            <td class="save">-47,4%</td>
+            <td class="num">-72,3%</td>
+            <td class="ok-cell">SQL verbatim + @table</td>
+          </tr>
+          <tr>
+            <td class="mono-dim">W5</td>
+            <td>Auditoria Regulatória LGPD (negações densas)</td>
+            <td class="num">128</td>
+            <td class="num">80</td>
+            <td class="save">-37,5%</td>
+            <td class="num">-60,9%</td>
+            <td class="ok-cell">Negações únicas 100%</td>
+          </tr>
+          <tr>
+            <td class="mono-dim">W6</td>
+            <td>Logs Repetitivos de Produção (60 linhas)</td>
+            <td class="num">1.297</td>
+            <td class="num">134</td>
+            <td class="save">-89,7%</td>
+            <td class="num">-98,9%</td>
+            <td class="ok-cell">Dobramento [x28] e [x20]</td>
+          </tr>
+          <tr>
+            <td class="mono-dim">W7</td>
+            <td>Prompt Curto Técnico (com negações)</td>
+            <td class="num">52</td>
+            <td class="num">42</td>
+            <td class="save">-19,2%</td>
+            <td class="num">-34,8%</td>
+            <td class="ok-cell">Zero esqueleto consonantal</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div class="stat-block">
-      <div class="stat-num ok">100%</div>
-      <div class="stat-lbl">Retenção de negações e prefixo estático SHA-256</div>
-    </div>
-    <div class="stat-block">
-      <div class="stat-num">3,2 ms</div>
-      <div class="stat-lbl">Latência mediana offline (p95 6,35 ms, zero LLM)</div>
-    </div>
-  </div>
-</div>
 
-<!-- ASYMMETRIC ARCHITECTURE BENTO (7/5 + 4/8) -->
-<section class="hiw-section">
-  <div class="section-tag">Arquitetura v2.0</div>
-  <h2 class="section-title">Quatro garantias contra <em>compressão ingênua</em>.</h2>
-  <p class="section-sub">
-    Compressores v1 baseados em abreviações consonantais estilhaçam o BPE, apagam negações e quebram o Prompt Caching. O TokLang v2 substitui heurísticas frágeis por engenharia determinística auditável.
-  </p>
-
-  <div class="bento-arch">
-    <article class="bento-card col-span-7">
-      <div>
-        <div class="bento-kicker">01 &middot; Codec Estrutural Lossless</div>
-        <h3 class="bento-title">Schema Hoisting estilo TOON para JSON, APIs e MCP</h3>
-        <p class="bento-desc">
-          Retornos de ferramentas e consultas SQL repetem chaves, aspas e delimitadores centenas de vezes. O codec v2 declara o schema uma única vez em <code>@table</code> ou <code>@struct</code>, com decodificação <code>decodeStructured()</code> bit-a-bit exata e verificação automática em tokens BPE.
-        </p>
+    <!-- W8 CAPC Economic Strip -->
+    <div class="capc-strip">
+      <div class="capc-strip-copy">
+        <div class="capc-kicker">W8 &middot; SIMULAÇÃO ECONÔMICA CAPC (1.000 REQUISIÇÕES &middot; 85% CACHE HIT)</div>
+        <h3>Comprimir sem destruir o prefixo vence Prompt Caching isolado.</h3>
+        <p>System prompt multi-tenant (&gt;1.024 tokens) preservado em hash SHA-256 imutável enquanto payloads JSON dinâmicos entram compilados via <code>@table</code>.</p>
       </div>
-      <div class="step-code">@struct{
-@kv currency: "BRL"
-@table orders[20]{order_id,sku,qty,unit_price,status}:
-ORD-5000|SKU-200|1|89.9|shipped
-}</div>
-    </article>
-
-    <article class="bento-card col-span-5 petrol-surface">
-      <div>
-        <div class="bento-kicker">02 &middot; CAPC (Cache-Aware)</div>
-        <h3 class="bento-title">Estabilidade de Prefixo KV-Cache</h3>
-        <p class="bento-desc">
-          Separa o contexto em Tier 0 (sistema e schemas comprimidos de forma 100% query-agnostic com hash SHA-256 imutável e <code>cache_control</code>) e Tier 2 (RAG, logs e tool outputs comprimidos por turno). Economia acumulada sobre o Prompt Caching nativo.
-        </p>
-      </div>
-      <div class="step-code">Tier 0 SHA-256: idêntico entre turnos
-Anthropic: -40,6% além do cache nativo
-OpenAI:    -30,6% além do cache nativo</div>
-    </article>
-
-    <article class="bento-card col-span-4">
-      <div>
-        <div class="bento-kicker">03 &middot; Polarity Lock</div>
-        <h3 class="bento-title">Zero inversão semântica</h3>
-        <p class="bento-desc">
-          Operadores lógicos e negações (<code>não</code>, <code>sem</code>, <code>nunca</code>, <code>exceto</code>, <code>not</code>, <code>never</code>, <code>!=</code>), blocos de código e identificadores técnicos recebem trava inviolável. O motor jamais gera esqueletos consonantais fora do vocabulário BPE.
-        </p>
-      </div>
-    </article>
-
-    <article class="bento-card col-span-8">
-      <div>
-        <div class="bento-kicker">04 &middot; Guarda de Monotonicidade BPE + BM25 Extrativo</div>
-        <h3 class="bento-title">Se não economizar tokens BPE reais, faz rollback automático</h3>
-        <p class="bento-desc">
-          Em documentos RAG extensos, o motor deduplica shingles quase idênticos, dobra rajadas de logs repetitivos (<code>[x28]</code>) e ranqueia sentenças por BM25 + densidade informacional sob orçamento estrito <code>maxTokens</code>. Em entradas curtas, a guarda de monotonicidade impede qualquer inflação de sub-tokens.
-        </p>
-      </div>
-      <div class="step-code">Invariante formal: countTokens(output, "o200k_base") &lt;= countTokens(input, "o200k_base")</div>
-    </article>
-  </div>
-</section>
-
-<!-- REPRODUCIBLE BENCHMARK TABLE -->
-<section class="bench-section">
-  <div class="section-tag">Evidência Empírica</div>
-  <h2 class="section-title">Benchmark reproduzível em <em>o200k_base</em>.</h2>
-  <p class="section-sub">
-    Resultados gerados localmente por <code>node scripts/benchmark_v2.js</code> usando <code>js-tiktoken</code> real, sem estimativas heurísticas e com gate de falseabilidade automático.
-  </p>
-
-  <div class="bench-table-wrap">
-    <table class="bench-table">
-      <thead>
-        <tr>
-          <th>Caso</th>
-          <th>Workload Real</th>
-          <th style="text-align:right">BPE Antes</th>
-          <th style="text-align:right">BPE Depois</th>
-          <th style="text-align:right">Corte BPE</th>
-          <th style="text-align:right">FLOPs Prefill</th>
-          <th>Invariante Auditada</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>W1</td>
-          <td>JSON / MCP Uniforme (25 registros)</td>
-          <td class="num">1.610</td>
-          <td class="num">645</td>
-          <td class="save">-59,9%</td>
-          <td class="num">-84,0%</td>
-          <td class="ok-cell">Roundtrip lossless 100%</td>
-        </tr>
-        <tr>
-          <td>W2</td>
-          <td>Payload Híbrido Tool Call (@struct + 20 pedidos)</td>
-          <td class="num">1.002</td>
-          <td class="num">395</td>
-          <td class="save">-60,6%</td>
-          <td class="num">-84,5%</td>
-          <td class="ok-cell">Roundtrip lossless 100%</td>
-        </tr>
-        <tr>
-          <td>W3</td>
-          <td>RAG Longo (Consenso Raft, budget 220 tokens)</td>
-          <td class="num">664</td>
-          <td class="num">86</td>
-          <td class="save">-87,0%</td>
-          <td class="num">-98,3%</td>
-          <td class="ok-cell">Quórum + negação preservados</td>
-        </tr>
-        <tr>
-          <td>W4</td>
-          <td>SQL DDL + Bloco de Código + JSON embutido</td>
-          <td class="num">445</td>
-          <td class="num">234</td>
-          <td class="save">-47,4%</td>
-          <td class="num">-72,3%</td>
-          <td class="ok-cell">SQL verbatim + @table</td>
-        </tr>
-        <tr>
-          <td>W5</td>
-          <td>Auditoria Regulatória LGPD (negações densas)</td>
-          <td class="num">128</td>
-          <td class="num">80</td>
-          <td class="save">-37,5%</td>
-          <td class="num">-60,9%</td>
-          <td class="ok-cell">Negações únicas 100%</td>
-        </tr>
-        <tr>
-          <td>W6</td>
-          <td>Logs Repetitivos de Produção (60 linhas)</td>
-          <td class="num">1.297</td>
-          <td class="num">134</td>
-          <td class="save">-89,7%</td>
-          <td class="num">-98,9%</td>
-          <td class="ok-cell">Dobramento [x28] e [x20]</td>
-        </tr>
-        <tr>
-          <td>W7</td>
-          <td>Prompt Curto Técnico (com negações)</td>
-          <td class="num">52</td>
-          <td class="num">42</td>
-          <td class="save">-19,2%</td>
-          <td class="num">-34,8%</td>
-          <td class="ok-cell">Zero esqueleto consonantal</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="capc-callout">
-    <div>
-      <div class="bento-kicker" style="color:var(--petrol);margin-bottom:6px">W8 &middot; Simulação Econômica CAPC (1.000 requisições, 85% cache hit)</div>
-      <h3 style="font-size:20px;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px">Comprimir sem destruir o cache vence Prompt Caching isolado.</h3>
-      <p style="font-size:13.5px;color:var(--muted);line-height:1.6">
-        System prompt multi-tenant (&gt;1.024 tokens) mantido em prefixo SHA-256 estável entre turnos diferentes enquanto o payload JSON dinâmico é compilado para <code>@table</code>.
-      </p>
-    </div>
-    <div class="capc-nums">
-      <div class="capc-stat">
-        <div class="capc-stat-v">$8,87</div>
-        <div class="capc-stat-l">Anthropic Raw</div>
-      </div>
-      <div class="capc-stat">
-        <div class="capc-stat-v">$4,31</div>
-        <div class="capc-stat-l">Só Prompt Cache</div>
-      </div>
-      <div class="capc-stat">
-        <div class="capc-stat-v win">$2,56</div>
-        <div class="capc-stat-l">TokLang CAPC (-40,6%)</div>
+      <div class="capc-strip-metrics">
+        <div class="capc-col">
+          <span class="capc-val tabular">$8,87</span>
+          <span class="capc-lbl">Anthropic Raw</span>
+        </div>
+        <div class="capc-col">
+          <span class="capc-val tabular">$4,31</span>
+          <span class="capc-lbl">Só Prompt Cache</span>
+        </div>
+        <div class="capc-col win">
+          <span class="capc-val tabular">$2,56</span>
+          <span class="capc-lbl">TokLang CAPC (-40,6%)</span>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA FINAL -->
-<section class="cta-final">
-  <div class="cta-box">
-    <div>
-      <h2>Audite seus próprios prompts em BPE real.</h2>
-      <p>Cole um payload JSON, um dump de RAG ou logs de produção no Workbench v2 e verifique a economia exata em <code>o200k_base</code>.</p>
+<!-- ACT 4: PROGRESSIVE DISCLOSURE FAQ + CINEMATIC FINALE -->
+<section class="finale-act" data-theme="dark">
+  <div class="finale-inner">
+    <div class="faq-block">
+      <div class="section-tag">Decisões de Engenharia</div>
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Por que o TokLang v2 baniu abreviações consonantais? <span class="faq-icon">+</span></div>
+          <div class="faq-a">Strings fora do vocabulário como <code>vlcdd</code> fragmentam em múltiplos sub-tokens nos tokenizadores BPE modernos (<code>o200k_base</code> e <code>cl100k_base</code>) e degradam o raciocínio do modelo. A v2 usa apenas transformações estruturais lossless, deduplicação e poda extrativa com guarda estrita de monotonicidade BPE.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Existe alguma chamada a LLM externo para comprimir? <span class="faq-icon">+</span></div>
+          <div class="faq-a">Não. Todo o compilador roda localmente em JavaScript ou Python em poucos milissegundos (p50 de 3,5 ms, p95 de 8,3 ms), sem custo intermediário de API e sem enviar payloads sensíveis para terceiros.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Como ele convive com o Prompt Caching da Anthropic e OpenAI? <span class="faq-icon">+</span></div>
+          <div class="faq-a"><code>compileMessages()</code> isola o Tier 0 (prefixo estático) do Tier 2 (RAG e retornos de ferramentas). O Tier 0 recebe apenas normalização determinística independente da query, mantendo o mesmo hash SHA-256 entre turnos e injetando <code>cache_control</code> quando atinge o piso do provedor.</div>
+        </div>
+      </div>
     </div>
-    <button class="btn btn-primary btn-lg" onclick="navigate('app')">Abrir Workbench Agora</button>
-  </div>
-</section>
 
-<!-- FAQ -->
-<section class="faq-section">
-  <div class="section-tag">Perguntas Técnicas</div>
-  <h2 class="section-title">Decisões de engenharia sem maquiagem.</h2>
-  <div class="faq-list">
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Por que o TokLang v2 eliminou abreviações consonantais? <span class="faq-icon">+</span></div>
-      <div class="faq-a">Strings fora do vocabulário como <code>vlcdd</code> estilhaçam em múltiplos sub-tokens nos tokenizadores BPE modernos (<code>o200k_base</code> e <code>cl100k_base</code>) e elevam a perplexidade do modelo. A v2 usa apenas transformações estruturais lossless, deduplicação e poda extrativa com guarda estrita de monotonicidade BPE.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">O TokLang v2 chama algum LLM externo para comprimir? <span class="faq-icon">+</span></div>
-      <div class="faq-a">Não. Todo o compilador roda localmente em JavaScript ou Python em poucos milissegundos (p95 de 6,35 ms), sem custo de API intermediária e sem enviar dados confidenciais para terceiros.</div>
-    </div>
-    <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Como ele convive com o Prompt Caching da Anthropic e OpenAI? <span class="faq-icon">+</span></div>
-      <div class="faq-a">A função <code>compileMessages()</code> separa o prefixo estático (Tier 0) das mensagens dinâmicas (Tier 2). O Tier 0 recebe apenas compressão determinística independente da query, mantendo o mesmo hash SHA-256 entre turnos e injetando <code>cache_control</code> quando atinge o piso do provedor.</div>
+    <div class="finale-cta">
+      <div class="finale-glow" aria-hidden="true"></div>
+      <h2 class="finale-title">Audite seus payloads<br>em <em>BPE real</em>.</h2>
+      <p class="finale-sub">Cole um retorno JSON/MCP, um dump de RAG ou logs de produção no Workbench v2 e meça cada token em <code>o200k_base</code>.</p>
+      <div class="finale-actions">
+        <button class="btn btn-primary btn-lg" data-magnetic onclick="navigate('app')">Abrir Workbench v2</button>
+        <button class="btn btn-ghost btn-lg" onclick="navigate('pricing')">Open Core &amp; Planos</button>
+      </div>
     </div>
   </div>
 </section>

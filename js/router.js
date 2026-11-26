@@ -58,8 +58,11 @@ async function navigate(page) {
   const link = document.querySelector(`[data-page="${page}"]`);
   if (link) link.classList.add('active');
   window.location.hash = page;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: 'auto' });
   initReveal();
+  if (window.TokLangMotion && typeof window.TokLangMotion.onRouteChange === 'function') {
+    window.TokLangMotion.onRouteChange(page);
+  }
   if (page === 'dashboard') initDashboard();
   if (page === 'app') { updateUsageUI(); }
 }
